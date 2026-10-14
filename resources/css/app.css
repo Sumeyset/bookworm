@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes bookworm-cover-drift {
+    0%, 100% {
+        translate: 0 0;
+    }
+    50% {
+        translate: 0 -7px;
+    }
+}
+
+.bookworm-cover-drift {
+    animation: bookworm-cover-drift 5s ease-in-out infinite;
+}
+
+.bookworm-cover-drift-slow {
+    animation-delay: -1.7s;
+}
+
+.bookworm-cover-drift-slower {
+    animation-delay: -3.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bookworm-cover-drift {
+        animation: none;
+    }
+}
