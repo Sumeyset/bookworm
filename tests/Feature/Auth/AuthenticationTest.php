@@ -19,7 +19,12 @@ test('users can authenticate using the login screen', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('home', absolute: false));
+});
+
+test('books require authentication', function () {
+    $this->get('/books')
+        ->assertRedirect(route('login'));
 });
 
 test('users can not authenticate with invalid password', function () {
@@ -40,4 +45,11 @@ test('users can logout', function () {
 
     $this->assertGuest();
     $response->assertRedirect('/');
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Bookworm')
+        ->assertSee('Find your next favorite book, and share the stories you love.')
+        ->assertSee('Join Bookworm')
+        ->assertDontSee('A little thought for today');
 });

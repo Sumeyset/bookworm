@@ -22,6 +22,8 @@ test('book search shows the restored card design and rating controls', function 
     $response = $this->actingAs(User::factory()->create())->get('/books?q=test');
 
     $response->assertOk()
+        ->assertSee('Bookworm')
+        ->assertSee('Find your next favorite book,')
         ->assertSee('A Test Book')
         ->assertSee('A. Author')
         ->assertSee('aria-label="Rate 0.5 stars"', false)
