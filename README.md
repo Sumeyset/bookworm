@@ -21,6 +21,20 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Profile photos
+
+After installing the application, create Laravel's public storage link so uploaded profile photos can be displayed:
+
+```bash
+php artisan storage:link
+```
+
+## Private book PDFs
+
+Run `php artisan migrate` to create the private PDF and highlight tables. PDFs added to a book are stored on Laravel's private local disk and can only be viewed, downloaded, or highlighted by the account that uploaded them. Open a PDF from the book page to read it in the site, select text, and save or remove private highlights. Each account can add multiple PDFs per book, with a limit of 5 files per upload and 20 MB per file.
+
+Configure PHP's `upload_max_filesize` to at least `20M` and `post_max_size` to at least `110M` to support the full upload limits. Restart the PHP/web server after changing these settings.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.

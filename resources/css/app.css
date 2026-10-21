@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] {
+    display: none !important;
+}
+
+.pdf-reader-page {
+    position: relative;
+    background: #fff;
+    box-shadow: 0 4px 18px rgb(57 43 42 / 18%);
+}
+
+.pdf-reader-highlight-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.pdf-reader-highlight {
+    position: absolute;
+    background: rgb(250 204 21 / 38%);
+    mix-blend-mode: multiply;
+}
+
+.pdf-reader-page .textLayer {
+    z-index: 2;
+}
+
 @keyframes bookworm-cover-drift {
     0%, 100% {
         translate: 0 0;

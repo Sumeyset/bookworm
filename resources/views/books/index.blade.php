@@ -67,10 +67,7 @@
 
                                 <a href="{{ route('books.show', $book['database_id']) }}"
                                    class="mx-3.5 mb-3 inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#e4d2c4] bg-[#fffaf4] px-3 py-2 text-xs font-semibold text-[#713640] transition hover:border-[#c9a58f] hover:bg-[#f5e9dc] focus:outline-none focus:ring-2 focus:ring-[#b98768] dark:border-[#594749] dark:bg-[#302526] dark:text-[#f0d8c1]">
-                                    Book details &amp; comments
-                                    <span class="rounded-full bg-[#f1e3d6] px-1.5 py-0.5 text-[10px] leading-none text-[#713640] dark:bg-[#493536] dark:text-[#f0d8c1]">
-                                        {{ $book['comments_count'] }}
-                                    </span>
+                                    Book details &amp; reviews
                                 </a>
 
                                 <form method="POST" action="{{ route('books.rate') }}"

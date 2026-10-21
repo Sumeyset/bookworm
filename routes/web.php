@@ -2,11 +2,14 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BookController;
-use App\Http\Controllers\BookCommentController;
 use App\Http\Controllers\BookRatingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\FollowController;
+use App\Http\Controllers\BookPdfController;
+use App\Http\Controllers\BookPdfHighlightController;
 
 Route::get('/', WelcomeController::class)->name('home');
 
@@ -17,11 +20,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/books', [BookController::class, 'index'])->name('books.index');
     Route::post('/books/rating', [BookRatingController::class, 'store'])->name('books.rate');
     Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
+    Route::post('/books/{book}/pdfs', [BookPdfController::class, 'store'])->name('books.pdfs.store');
+    Route::get('/books/{book}/pdfs/{bookPdf}', [BookPdfController::class, 'download'])->name('books.pdfs.download');
+    Route::get('/books/{book}/pdfs/{bookPdf}/read', [BookPdfController::class, 'reader'])->name('books.pdfs.reader');
+    Route::get('/books/{book}/pdfs/{bookPdf}/file', [BookPdfController::class, 'file'])->name('books.pdfs.file');
+    Route::delete('/books/{book}/pdfs/{bookPdf}', [BookPdfController::class, 'destroy'])->name('books.pdfs.destroy');
+    Route::get('/books/{book}/pdfs/{bookPdf}/highlights', [BookPdfHighlightController::class, 'index'])->name('books.pdfs.highlights.index');
+    Route::post('/books/{book}/pdfs/{bookPdf}/highlights', [BookPdfHighlightController::class, 'store'])->name('books.pdfs.highlights.store');
+    Route::delete('/books/{book}/pdfs/{bookPdf}/highlights/{highlight}', [BookPdfHighlightController::class, 'destroy'])->name('books.pdfs.highlights.destroy');
     Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
-    Route::post('/books/{book}/comments', [BookCommentController::class, 'store'])->name('books.comments.store');
-    Route::delete('/books/{book}/comments/{comment}', [BookCommentController::class, 'destroy'])->name('books.comments.destroy');
-    Route::post('/books/{book}/comments/{comment}/vote', [BookCommentController::class, 'vote'])->name('books.comments.vote');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user:username}',[UserController::class,'show'])->name('users.show');
+    Route::post('/users/{user:username}/follow', [FollowController::class, 'store'])->name('users.follow');
+    Route::delete('/users/{user:username}/follow', [FollowController::class, 'destroy'])->name('users.unfollow');
 });
 
 require __DIR__.'/auth.php';

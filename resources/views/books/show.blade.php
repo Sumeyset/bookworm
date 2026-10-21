@@ -75,6 +75,76 @@
                 @endif
             </section>
 
+            <section aria-labelledby="private-pdfs-heading" class="rounded-2xl border border-[#eadfd4] bg-[#fffdf9] p-5 shadow-sm sm:p-6 dark:border-[#453538] dark:bg-[#291f20]">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#9b7466] dark:text-[#c7a491]">Private to your account</p>
+                <h2 id="private-pdfs-heading" class="mt-1 text-xl font-semibold text-[#392b2a] dark:text-[#f4e9e2]">Your PDFs for this book</h2>
+                <p id="book-pdf-help" class="mt-2 text-sm text-[#8a7065] dark:text-[#c1aaa0]">
+                    Upload up to 5 PDF files at a time (20 MB each). Only you can view, download, or delete your files.
+                </p>
+
+                <form method="POST" action="{{ route('books.pdfs.store', $book) }}" enctype="multipart/form-data" class="mt-4 space-y-3">
+                    @csrf
+                    <div>
+                        <label for="book-pdfs" class="block text-sm font-medium text-[#392b2a] dark:text-[#f4e9e2]">Choose PDF files</label>
+                        <input id="book-pdfs" name="pdfs[]" type="file" accept="application/pdf,.pdf" multiple required
+                               aria-describedby="book-pdf-help book-pdf-errors"
+                               class="mt-1 block min-h-11 w-full rounded-md text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-[#f1e3d6] file:px-4 file:py-2 file:font-semibold file:text-[#713640] hover:file:bg-[#ead5c2] focus:outline-none focus:ring-2 focus:ring-[#713640] focus:ring-offset-2 dark:text-gray-300 dark:focus:ring-offset-gray-800">
+                    </div>
+                    <div id="book-pdf-errors" role="alert" aria-live="polite">
+                        @foreach ($errors->get('pdfs') as $error)
+                            <p class="text-sm text-red-600 dark:text-red-400">{{ $error }}</p>
+                        @endforeach
+                        @foreach ($errors->getMessages() as $field => $messages)
+                            @if (str_starts_with($field, 'pdfs.'))
+                                @foreach ($messages as $error)
+                                    <p class="text-sm text-red-600 dark:text-red-400">{{ $error }}</p>
+                                @endforeach
+                            @endif
+                        @endforeach
+                    </div>
+                    <button type="submit" class="inline-flex min-h-11 items-center justify-center rounded-full bg-[#5b1f2b] px-5 py-2 text-sm font-semibold text-[#fff8ef] transition hover:bg-[#713640] focus:outline-none focus:ring-2 focus:ring-[#b98768] focus:ring-offset-2 dark:focus:ring-offset-[#291f20]">
+                        Upload PDFs
+                    </button>
+                </form>
+
+                @if ($myPdfs->isNotEmpty())
+                    <ul class="mt-5 divide-y divide-[#f0e8df] dark:divide-[#453538]" aria-label="Your private PDF files">
+                        @foreach ($myPdfs as $pdf)
+                            <li class="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                                <div class="min-w-0">
+                                    <p class="break-words text-sm font-medium text-[#392b2a] dark:text-[#f4e9e2]">{{ $pdf->original_name }}</p>
+                                    <p class="mt-1 text-xs text-[#8a7065] dark:text-[#c1aaa0]">Added {{ $pdf->created_at->diffForHumans() }}</p>
+                                </div>
+                                <div class="flex shrink-0 items-center gap-4">
+                                    <a href="{{ route('books.pdfs.reader', [$book, $pdf]) }}"
+                                       class="inline-flex min-h-11 items-center rounded-md px-2 text-sm font-semibold text-[#713640] underline hover:text-[#542331] focus:outline-none focus:ring-2 focus:ring-[#b98768] dark:text-[#e4b3a5]">
+                                        Read
+                                        <span class="sr-only">{{ $pdf->original_name }}</span>
+                                    </a>
+                                    <a href="{{ route('books.pdfs.download', [$book, $pdf]) }}"
+                                       class="inline-flex min-h-11 items-center rounded-md px-2 text-sm font-semibold text-[#713640] underline hover:text-[#542331] focus:outline-none focus:ring-2 focus:ring-[#b98768] dark:text-[#e4b3a5]">
+                                        Download
+                                        <span class="sr-only">{{ $pdf->original_name }}</span>
+                                    </a>
+                                    <form method="POST" action="{{ route('books.pdfs.destroy', [$book, $pdf]) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex min-h-11 items-center rounded-md px-2 text-sm font-semibold text-red-700 underline hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-red-300 dark:hover:text-red-200">
+                                            Delete
+                                            <span class="sr-only">{{ $pdf->original_name }}</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="mt-5 rounded-xl border border-dashed border-[#d9c6b6] px-4 py-5 text-center text-sm text-[#8a7065] dark:border-[#594749] dark:text-[#c1aaa0]">
+                        You haven’t uploaded any PDFs for this book yet.
+                    </p>
+                @endif
+            </section>
+
             <section class="rounded-2xl border border-[#eadfd4] bg-[#fffdf9] p-5 shadow-sm sm:p-6 dark:border-[#453538] dark:bg-[#291f20]">
                 <div class="flex items-baseline justify-between gap-3">
                     <h2 class="text-lg font-semibold text-[#392b2a] dark:text-[#f4e9e2]">Reader reviews</h2>
@@ -84,7 +154,10 @@
                     @forelse ($reviews as $review)
                         <article class="py-4 first:pt-0 last:pb-0">
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="text-sm font-semibold text-[#392b2a] dark:text-[#f4e9e2]">{{ '@' . $review->user->username }}</span>
+                                <a href="{{ route('users.show', $review->user->username) }}"
+                                   class="text-sm font-semibold text-[#713640] hover:underline focus:outline-none focus:ring-2 focus:ring-[#b98768] dark:text-[#e4b3a5]">
+                                    {{ '@' . $review->user->username }}
+                                </a>
                                 <x-star-display :rating="$review->rating" />
                                 <span class="text-xs text-[#9a8579] dark:text-[#b39d93]">{{ $review->created_at->diffForHumans() }}</span>
                             </div>
@@ -101,78 +174,6 @@
                 @endif
             </section>
 
-            <section class="overflow-hidden rounded-2xl border border-[#eadfd4] bg-[#fffdf9] shadow-sm dark:border-[#453538] dark:bg-[#291f20]">
-                <div class="border-b border-[#f0e8df] px-5 py-5 sm:px-6 dark:border-[#453538]">
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#9b7466] dark:text-[#c7a491]">Join the conversation</p>
-                    <h2 class="mt-1 text-xl font-semibold text-[#392b2a] dark:text-[#f4e9e2]">Leave a comment</h2>
-                    <form method="POST" action="{{ route('books.comments.store', $book) }}" class="mt-4">
-                        @csrf
-                        <label for="comment-body" class="sr-only">Your comment</label>
-                        <textarea id="comment-body" name="body" rows="3" maxlength="3000" required
-                                  placeholder="What would you like to discuss?"
-                                  class="block w-full rounded-xl border-[#dfd2c6] bg-[#fffdf9] text-sm text-[#392b2a] shadow-sm placeholder:text-[#a99487] focus:border-[#9b5b54] focus:ring-[#9b5b54] dark:border-[#594749] dark:bg-[#20191a] dark:text-[#f4e9e2]">{{ old('body', $myComment->body ?? '') }}</textarea>
-                        <x-input-error :messages="$errors->get('body')" class="mt-2" />
-                        <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-                            <p class="text-xs text-[#8a7065] dark:text-[#c1aaa0]">Be kind and keep it relevant to the book.</p>
-                            <x-primary-button>{{ $myComment ? 'Update comment' : 'Post comment' }}</x-primary-button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="px-5 py-5 sm:px-6">
-                    <div class="flex items-baseline justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-[#392b2a] dark:text-[#f4e9e2]">Comments</h2>
-                        <span class="text-sm text-[#8a7065] dark:text-[#c1aaa0]">{{ $comments->total() }} {{ Str::plural('comment', $comments->total()) }}</span>
-                    </div>
-                    <div class="mt-4 divide-y divide-[#f0e8df] dark:divide-[#453538]">
-                        @forelse ($comments as $comment)
-                            <article id="comment-{{ $comment->id }}" class="scroll-mt-24 py-4 first:pt-0 last:pb-0">
-                                <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#f1e3d6] text-xs font-semibold text-[#713640] dark:bg-[#493536] dark:text-[#f0d8c1]">{{ strtoupper(substr($comment->user->username, 0, 1)) }}</span>
-                                        <div>
-                                            <p class="text-sm font-semibold text-[#392b2a] dark:text-[#f4e9e2]">{{ '@' . $comment->user->username }}</p>
-                                            <p class="text-xs text-[#9a8579] dark:text-[#b39d93]">{{ $comment->created_at->diffForHumans() }}</p>
-                                        </div>
-                                    </div>
-                                    @if ($comment->user_id === auth()->id())
-                                        <form method="POST" action="{{ route('books.comments.destroy', [$book, $comment]) }}" onsubmit="return confirm('Delete your comment?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-xs font-medium text-[#9b5b54] hover:underline">Delete</button>
-                                        </form>
-                                    @endif
-                                </div>
-                                <p class="mt-3 whitespace-pre-line break-words text-sm leading-6 text-[#564541] dark:text-[#e3d3ca]">{{ $comment->body }}</p>
-                                <div class="mt-3 flex items-center gap-2">
-                                    <form method="POST" action="{{ route('books.comments.vote', [$book, $comment]) }}">
-                                        @csrf<input type="hidden" name="value" value="1">
-                                        <button type="submit" aria-label="Like comment" aria-pressed="{{ $comment->votes->first()?->value === 1 ? 'true' : 'false' }}"
-                                                class="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium {{ $comment->votes->first()?->value === 1 ? 'border-green-300 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200' : 'border-[#eadfd4] text-[#72584d] dark:border-[#594749] dark:text-[#ddc9be]' }}">
-                                            <span aria-hidden="true">👍</span>{{ $comment->likes_count }}
-                                        </button>
-                                    </form>
-                                    <form method="POST" action="{{ route('books.comments.vote', [$book, $comment]) }}">
-                                        @csrf<input type="hidden" name="value" value="-1">
-                                        <button type="submit" aria-label="Dislike comment" aria-pressed="{{ $comment->votes->first()?->value === -1 ? 'true' : 'false' }}"
-                                                class="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium {{ $comment->votes->first()?->value === -1 ? 'border-red-300 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200' : 'border-[#eadfd4] text-[#72584d] dark:border-[#594749] dark:text-[#ddc9be]' }}">
-                                            <span aria-hidden="true">👎</span>{{ $comment->dislikes_count }}
-                                        </button>
-                                    </form>
-                                </div>
-                            </article>
-                        @empty
-                            <div class="rounded-xl bg-[#faf5ef] px-4 py-8 text-center dark:bg-[#241b1c]">
-                                <p class="font-handwritten text-2xl font-semibold text-[#72584d] dark:text-[#ddc9be]">Start the conversation</p>
-                                <p class="mt-1 text-sm text-[#8a7065] dark:text-[#c1aaa0]">Share a thought about this book with the community.</p>
-                            </div>
-                        @endforelse
-                    </div>
-                    @if ($comments->hasPages())
-                        <div class="mt-6 border-t border-[#f0e8df] pt-4 dark:border-[#453538]">{{ $comments->links() }}</div>
-                    @endif
-                </div>
-            </section>
         </div>
     </div>
 </x-app-layout>

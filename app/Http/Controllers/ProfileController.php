@@ -7,7 +7,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use RuntimeException;
 
 class ProfileController extends Controller
 {
@@ -26,13 +28,34 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
+        $profilePhoto = $request->file('profile_photo');
+        unset($validated['profile_photo']);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill($validated);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $oldProfilePhotoPath = $user->profile_photo_path;
+
+        if ($profilePhoto) {
+            $path = $profilePhoto->store('profile-photos', 'public');
+
+            if ($path === false) {
+                throw new RuntimeException('Failed to store the uploaded profile photo.');
+            }
+
+            $user->profile_photo_path = $path;
+        }
+
+        $user->save();
+
+        if ($profilePhoto && $oldProfilePhotoPath && ! Storage::disk('public')->delete($oldProfilePhotoPath)) {
+            throw new RuntimeException('Failed to remove the previous profile photo.');
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -47,6 +70,12 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        foreach ($user->bookPdfs()->pluck('path') as $path) {
+            if (! Storage::disk('local')->delete($path)) {
+                throw new RuntimeException('Failed to remove a private book PDF for the deleted account.');
+            }
+        }
 
         Auth::logout();
 
