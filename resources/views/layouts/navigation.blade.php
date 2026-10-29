@@ -26,6 +26,7 @@
         @auth
             <nav class="flex w-full items-center justify-between gap-2 sm:w-auto sm:shrink-0 sm:justify-start sm:gap-4" aria-label="Main navigation">
                 <a href="{{ route('books.index') }}" class="rounded-full border border-[#f1d9c4]/20 px-3 py-2 text-xs font-semibold text-[#fff8ef] transition hover:border-[#f1d9c4]/45 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e6c795] sm:px-5 sm:text-sm">Books</a>
+                <a href="{{ route('users.show', Auth::user()->username) }}" class="rounded-full border border-[#f1d9c4]/20 px-3 py-2 text-xs font-semibold text-[#fff8ef] transition hover:border-[#f1d9c4]/45 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e6c795] sm:px-5 sm:text-sm">My Journal</a>
                 <a href="{{ route('users.index') }}" class="rounded-full border border-[#f1d9c4]/20 px-3 py-2 text-xs font-semibold text-[#fff8ef] transition hover:border-[#f1d9c4]/45 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e6c795] sm:px-5 sm:text-sm">Readers</a>
                 <details class="group relative">
                     <summary class="flex cursor-pointer list-none items-center gap-2 rounded-full border border-[#f1d9c4]/35 bg-white/[0.08] py-2 pl-2 pr-3.5 text-sm font-medium text-[#fff8ef] transition hover:bg-white/[0.14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e6c795] [&::-webkit-details-marker]:hidden">

@@ -61,3 +61,31 @@ test('a user can save a half-star review and update it without creating duplicat
     $this->post('/books/' . $book->id . '/comments', ['body' => 'No longer supported.'])
         ->assertNotFound();
 });
+
+test('my journal links to a bookshelf of books the reader has rated', function () {
+    $user = User::factory()->create();
+    $book = Book::create([
+        'ol_id' => 'OL82563W',
+        'title' => 'A Test Book',
+        'author_name' => 'A. Author',
+    ]);
+
+    Review::create([
+        'user_id' => $user->id,
+        'book_id' => $book->id,
+        'rating' => 4.5,
+        'body' => 'A lovely read.',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('users.show', $user->username));
+
+    $response->assertOk()
+        ->assertSee('My Journal')
+        ->assertSee('href="' . route('users.show', $user->username) . '"', false)
+        ->assertSee('Bookshelf')
+        ->assertSee("Books I've read & rated")
+        ->assertSee('A Test Book')
+        ->assertSee('A. Author')
+        ->assertSee('4.5 out of 5 stars')
+        ->assertSee('A lovely read.');
+});
