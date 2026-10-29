@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+        <h2 class="font-serif text-xl font-semibold text-ink dark:text-[#F4E9E2]">
             {{ __('Profile Information') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <p class="mt-1 text-sm leading-6 text-walnut dark:text-[#d4c2b9]">
             {{ __("Update your account's profile information and email address.") }}
         </p>
     </header>
@@ -27,7 +27,7 @@
                     <img x-show="!photoPreview" src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}'s current profile photo"
                          class="h-16 w-16 rounded-full object-cover">
                 @else
-                    <span x-show="!photoPreview" class="flex h-16 w-16 items-center justify-center rounded-full bg-[#f1e3d6] text-xl font-semibold text-[#713640]" aria-hidden="true">
+                    <span x-show="!photoPreview" class="flex h-16 w-16 items-center justify-center rounded-full bg-parchment font-serif text-2xl font-semibold text-burgundy dark:bg-[#493536] dark:text-burgundy-dark" aria-hidden="true">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </span>
                 @endif
@@ -35,11 +35,11 @@
                     <input id="profile_photo" name="profile_photo" type="file" accept="image/jpeg,image/png,image/webp"
                            aria-describedby="profile-photo-help profile-photo-selection profile-photo-error"
                            x-on:change="previewPhoto($event)"
-                           class="block min-h-11 w-full max-w-sm rounded-md text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-[#f1e3d6] file:px-4 file:py-2 file:font-semibold file:text-[#713640] hover:file:bg-[#ead5c2] focus:outline-none focus:ring-2 focus:ring-[#713640] focus:ring-offset-2 dark:text-gray-300 dark:focus:ring-offset-gray-800">
-                    <p id="profile-photo-selection" class="mt-2 text-sm text-gray-600 dark:text-gray-400" aria-live="polite" x-text="photoName || 'No new photo selected'"></p>
+                           class="focus-ring block min-h-11 w-full max-w-sm rounded-lg text-sm text-walnut file:mr-4 file:rounded-full file:border-0 file:bg-parchment file:px-4 file:py-2 file:font-semibold file:text-burgundy hover:file:bg-rosetint dark:text-[#d4c2b9] dark:focus:ring-offset-raised">
+                    <p id="profile-photo-selection" class="mt-2 text-sm text-walnut dark:text-[#d4c2b9]" aria-live="polite" x-text="photoName || 'No new photo selected'"></p>
                 </div>
             </div>
-            <p id="profile-photo-help" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <p id="profile-photo-help" class="mt-2 text-sm text-walnut dark:text-[#d4c2b9]">
                 {{ __('Choose a JPG, PNG, or WebP image up to 5 MB. Your current photo stays in place until you save.') }}
             </p>
             <div id="profile-photo-error" role="alert" aria-live="polite">
@@ -62,10 +62,10 @@
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
+                    <p class="mt-2 text-sm text-ink dark:text-[#F4E9E2]">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                        <button form="send-verification" class="focus-ring rounded-sm text-sm text-burgundy underline hover:text-burgundy-hover dark:text-burgundy-dark">
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
                     </p>
@@ -88,7 +88,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
+                    class="text-sm text-walnut dark:text-[#d4c2b9]"
                     role="status"
                     aria-live="polite"
                 >{{ __('Saved.') }}</p>

@@ -66,6 +66,9 @@ class BookPdfController extends Controller
             'fileUrl' => route('books.pdfs.file', [$book, $bookPdf], false),
             'highlightsUrl' => route('books.pdfs.highlights.index', [$book, $bookPdf], false),
             'storeHighlightUrl' => route('books.pdfs.highlights.store', [$book, $bookPdf], false),
+            'readingStatus' => $request->user()->shelfItems()->where('book_id', $book->id)->value('status') === 'read' ? 'read' : 'reading',
+            'initialPage' => $request->user()->shelfItems()->where('book_id', $book->id)->value('current_page') ?? 1,
+            'progressUrl' => route('books.shelf.update', $book, false),
         ]);
     }
 

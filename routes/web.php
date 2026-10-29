@@ -10,14 +10,28 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\BookPdfController;
 use App\Http\Controllers\BookPdfHighlightController;
+use App\Http\Controllers\FeedController;
+use App\Http\Controllers\LibraryController;
+use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\QuoteController;
 
 Route::get('/', WelcomeController::class)->name('home');
+Route::get('/quotes/{quote:share_token}', [QuoteController::class, 'showPublic'])->name('quotes.public');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/books', [BookController::class, 'index'])->name('books.index');
+    Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
+    Route::post('/books/{book}/shelf', [LibraryController::class, 'update'])->name('books.shelf.update');
+    Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
+    Route::get('/onboarding', [OnboardingController::class, 'show'])->name('onboarding.show');
+    Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
+    Route::post('/onboarding/skip', [OnboardingController::class, 'skip'])->name('onboarding.skip');
+    Route::post('/pdfs/{bookPdf}/highlights/{highlight}/quote', [QuoteController::class, 'store'])->name('quotes.store');
+    Route::post('/quotes/{quote}/share', [QuoteController::class, 'share'])->name('quotes.share');
+    Route::delete('/quotes/{quote}', [QuoteController::class, 'destroy'])->name('quotes.destroy');
     Route::post('/books/rating', [BookRatingController::class, 'store'])->name('books.rate');
     Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
     Route::post('/books/{book}/pdfs', [BookPdfController::class, 'store'])->name('books.pdfs.store');

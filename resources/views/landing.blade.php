@@ -4,151 +4,171 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#b99083">
-    <title>Bookworm — a little home for stories</title>
+    <meta name="theme-color" content="#F7F1EA">
+    <title>Bookworm — Your reading life, beautifully shelved</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=caveat:500,600,700|figtree:400,500,600,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=caveat:500,600,700|figtree:400,500,600,700|lora:400,500,600,700,400i,500i&display=swap" rel="stylesheet">
+    <script>
+        (() => {
+            const saved = localStorage.getItem('bookworm-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.classList.toggle('dark', saved ? saved === 'dark' : prefersDark);
+        })();
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-[#d9c2b4] font-sans text-[#392a2b] antialiased">
-    <div class="relative isolate flex min-h-screen flex-col overflow-hidden bg-[radial-gradient(ellipse_at_8%_8%,rgba(250,224,184,0.9),transparent_32%),radial-gradient(ellipse_at_91%_16%,rgba(174,76,85,0.48),transparent_30%),radial-gradient(ellipse_at_86%_88%,rgba(103,38,56,0.34),transparent_32%),radial-gradient(ellipse_at_15%_84%,rgba(194,139,61,0.4),transparent_30%),radial-gradient(ellipse_at_52%_0%,rgba(208,137,116,0.28),transparent_44%),linear-gradient(135deg,#ead9c6_0%,#d9c2b4_48%,#cfb4aa_100%)]">
-        <div class="pointer-events-none absolute inset-0 z-0 opacity-[0.1] [background-image:linear-gradient(rgba(103,38,56,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(103,38,56,0.2)_1px,transparent_1px)] [background-size:56px_56px]"></div>
-        <div class="pointer-events-none absolute -left-44 -top-48 z-0 h-[38rem] w-[38rem] rounded-full border border-[#8a5142]/35"></div>
-        <div class="pointer-events-none absolute -left-32 -top-36 z-0 h-[31rem] w-[31rem] rounded-full border border-[#8a5142]/25"></div>
-        <div class="pointer-events-none absolute -bottom-52 -right-40 z-0 h-[38rem] w-[38rem] rounded-full border border-[#672638]/28"></div>
-        <div class="pointer-events-none absolute -right-24 top-[16%] z-0 h-80 w-80 rounded-full bg-[#bd7166]/35 blur-3xl"></div>
-        <div class="pointer-events-none absolute -bottom-20 left-[18%] z-0 h-80 w-80 rounded-full bg-[#c39a5b]/30 blur-3xl"></div>
-
-        <header class="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-end gap-2 px-6 py-6 sm:px-10">
-            @auth
-                <a href="{{ route('books.index') }}" class="rounded-full px-4 py-2 text-sm font-medium text-[#76564e] transition hover:bg-white/60 hover:text-[#672638]">Explore books</a>
-                <a href="{{ route('dashboard') }}" class="rounded-full bg-[#672638] px-5 py-2.5 text-sm font-semibold text-[#fffaf4] transition hover:bg-[#7b3545]">My bookshelf</a>
-            @else
-                <a href="{{ route('login') }}" class="rounded-full px-4 py-2 text-sm font-medium text-[#76564e] transition hover:bg-white/60 hover:text-[#672638]">Log in</a>
-                <a href="{{ route('register') }}" class="rounded-full bg-[#672638] px-5 py-2.5 text-sm font-semibold text-[#fffaf4] transition hover:bg-[#7b3545]">Join Bookworm</a>
-            @endauth
+<body class="bg-ivory font-sans text-ink antialiased dark:bg-wineblack dark:text-[#F4E9E2]">
+    <div class="paper-grain min-h-screen">
+        <header class="sticky top-0 z-30 border-b border-warmborder/80 bg-paper/95 backdrop-blur-sm dark:border-[#4B3035] dark:bg-raised/95">
+            <div class="mx-auto flex max-w-7xl items-center justify-between gap-5 px-4 py-3 sm:px-8">
+                <a href="{{ route('home') }}" aria-label="Bookworm home" class="focus-ring group/logo rounded-xl">
+                    <x-logo variant="full" tone="dark" class="h-14 w-auto transition-transform duration-300 group-hover/logo:scale-105 group-focus-visible/logo:scale-105 motion-reduce:transition-none" />
+                </a>
+                <nav class="flex items-center gap-2" aria-label="Main navigation">
+                    <button type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to dark theme" class="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-full border border-warmborder text-burgundy transition hover:bg-parchment dark:border-[#4B3035] dark:text-[#F4E9E2] dark:hover:bg-[#382329]">
+                        <svg class="h-5 w-5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+                        <svg class="hidden h-5 w-5 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.4 15.2A8.5 8.5 0 0 1 8.8 3.6 8.5 8.5 0 1 0 20.4 15.2Z"/></svg>
+                    </button>
+                    @auth
+                        <a href="{{ route('books.index') }}" class="focus-ring rounded-full px-4 py-2 text-sm font-semibold text-burgundy hover:bg-rosetint dark:text-[#F4E9E2] dark:hover:bg-[#382329]">Explore books</a>
+                        <a href="{{ route('users.show', Auth::user()->username) }}" class="focus-ring rounded-full bg-burgundy px-5 py-2.5 text-sm font-semibold text-[#FFF8EF] transition hover:bg-burgundy-hover">My bookshelf</a>
+                    @else
+                        <a href="{{ route('login') }}" class="focus-ring rounded-full px-4 py-2 text-sm font-semibold text-burgundy hover:bg-rosetint dark:text-[#F4E9E2] dark:hover:bg-[#382329]">Log in</a>
+                        <a href="{{ route('register') }}" class="focus-ring rounded-full bg-burgundy px-5 py-2.5 text-sm font-semibold text-[#FFF8EF] transition hover:bg-burgundy-hover">Join Bookworm</a>
+                    @endauth
+                </nav>
+            </div>
         </header>
 
-        <main class="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-5 pb-10 pt-2 sm:px-8 sm:pb-14 lg:px-12">
-            <div class="relative mx-auto grid w-full max-w-6xl items-center gap-8 overflow-hidden rounded-[2rem] border border-[#b9957e]/70 bg-[#f8f2e9]/90 px-6 py-12 shadow-[0_32px_100px_-42px_rgba(76,42,39,0.46)] sm:gap-10 sm:rounded-[2.5rem] sm:px-12 sm:py-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-4 lg:px-16 lg:py-20">
-                <div class="pointer-events-none absolute inset-[9px] rounded-[1.5rem] border border-[#d8c5b2]/60 sm:inset-3 sm:rounded-[2rem]"></div>
-                <div class="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full border border-[#cbb29d]/30"></div>
-                <div class="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full border border-[#cbb29d]/30"></div>
-                <div class="pointer-events-none absolute -bottom-32 -left-20 h-64 w-64 rounded-full bg-[#8f4c4b]/[0.04] blur-2xl"></div>
-                <div class="pointer-events-none absolute bottom-0 left-0 top-0 w-1.5 bg-gradient-to-b from-[#b28a68] via-[#672638] to-[#8a5142]"></div>
-
-                <section class="relative z-10 flex flex-col items-center text-center lg:items-start lg:pl-2 lg:text-left" aria-labelledby="welcome-title">
-                    <div class="mb-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9b7865] sm:text-xs">
-                        <span class="h-px w-8 bg-[#a77863]"></span>
-                        For the love of stories
-                        <span class="h-px w-8 bg-[#a77863] lg:hidden"></span>
-                    </div>
-                    <a href="{{ route('home') }}" aria-label="Bookworm home" class="group relative mb-4 inline-flex rounded-full outline-none transition-transform duration-500 ease-out hover:scale-110 focus-visible:ring-4 focus-visible:ring-[#9b655e]/40">
-                        <span class="absolute -inset-3 rounded-full border border-[#b78d76]/40"></span>
-                        <span class="absolute -inset-6 rounded-full border border-[#b78d76]/20"></span>
-                        <svg class="relative h-28 w-28 drop-shadow-[0_9px_9px_rgba(79,42,38,0.18)] transition-transform duration-500 group-hover:-rotate-3 sm:h-32 sm:w-32" viewBox="0 0 140 140" fill="none" aria-hidden="true">
-                            <path d="M18 55c15-8 33-7 50 3v58c-17-9-35-10-50-3V55Z" fill="#672638"/>
-                            <path d="M122 55c-15-8-33-7-50 3v58c17-9 35-10 50-3V55Z" fill="#87434A"/>
-                            <path d="M24 61c12-5 25-3 38 4v40c-13-6-26-8-38-4V61Z" fill="#F5EBDD"/>
-                            <path d="M116 61c-12-5-25-3-38 4v40c13-6 26-8 38-4V61Z" fill="#EAD8C7"/>
-                            <path d="M70 57v59" stroke="#B58771" stroke-width="3.5" stroke-linecap="round"/>
-                            <path d="M70 59c-8-7-7-15-2-20 5-4 12-7 11-14" stroke="#A96B4F" stroke-width="10" stroke-linecap="round"/>
-                            <circle cx="79" cy="19" r="11" fill="#B77A58"/>
-                            <circle cx="75.5" cy="16.5" r="1.7" fill="#392A2B"/>
-                            <circle cx="82.5" cy="16.5" r="1.7" fill="#392A2B"/>
-                            <path d="M76.5 22c1.5 1.5 4.5 1.5 6 0" stroke="#392A2B" stroke-width="1.5" stroke-linecap="round"/>
-                            <path d="M31 68v29m78-29v29" stroke="#B58771" stroke-opacity=".55" stroke-width="1.5"/>
-                            <path d="M39 90h14m34 0h14" stroke="#C8A88D" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                    </a>
-                    <h1 id="welcome-title" class="font-handwritten text-7xl font-bold leading-[0.82] tracking-wide text-[#672638] [text-shadow:0_2px_0_rgba(255,255,255,0.75)] sm:text-8xl lg:text-[6.7rem]">
-                        Bookworm
-                    </h1>
-                    <span class="mt-7 h-px w-16 bg-[#a77863]"></span>
-                    <p class="mt-5 max-w-sm font-serif text-lg italic leading-8 text-[#76564e] sm:text-xl">
-                        Find your next favorite book, and share the stories you love.
+        <main>
+            <section class="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12 lg:py-28">
+                <div>
+                    <p class="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-tan dark:text-[#c7a491]">
+                        <span class="h-px w-8 bg-gold"></span> A quieter corner of the internet
                     </p>
-                    <div class="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                    <h1 class="mt-6 max-w-2xl font-serif text-5xl font-medium leading-[1.08] tracking-tight text-ink dark:text-[#F4E9E2] sm:text-6xl lg:text-7xl">
+                        Your reading life,<br><span class="italic text-burgundy dark:text-burgundy-dark">beautifully shelved.</span>
+                    </h1>
+                    <p class="mt-6 max-w-xl text-lg leading-8 text-walnut dark:text-[#d4c2b9]">Keep the books that stay with you. Rate a favorite, leave a note in the margin, and find readers who get it.</p>
+                    <div class="mt-8 flex flex-wrap items-center gap-4">
                         @auth
-                            <a href="{{ route('books.index') }}" class="inline-flex items-center gap-2 rounded-full bg-[#672638] px-6 py-3 text-sm font-semibold text-[#fffaf4] shadow-[0_10px_24px_-12px_rgba(103,38,56,0.75)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#7b3545] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#9b655e]/40">
-                                Explore books
-                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.69L10.22 5.03a.75.75 0 1 1 1.06-1.06l5.5 5.5a.75.75 0 0 1 0 1.06l-5.5 5.5a.75.75 0 1 1-1.06-1.06l4.22-4.22H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd"/></svg>
-                            </a>
+                            <a href="{{ route('books.index') }}" class="focus-ring rounded-full bg-burgundy px-6 py-3 text-sm font-semibold text-[#FFF8EF] shadow-sm transition hover:-translate-y-0.5 hover:bg-burgundy-hover">Find your next read</a>
+                            <a href="{{ route('users.index') }}" class="focus-ring rounded-full px-4 py-3 text-sm font-semibold text-burgundy hover:bg-rosetint dark:text-[#F4E9E2] dark:hover:bg-[#382329]">Meet the readers <span aria-hidden="true">&rarr;</span></a>
                         @else
-                            <a href="{{ route('register') }}" class="inline-flex items-center gap-2 rounded-full bg-[#672638] px-6 py-3 text-sm font-semibold text-[#fffaf4] shadow-[0_10px_24px_-12px_rgba(103,38,56,0.75)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#7b3545] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#9b655e]/40">
-                                Join to explore books
-                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.69L10.22 5.03a.75.75 0 1 1 1.06-1.06l5.5 5.5a.75.75 0 0 1 0 1.06l-5.5 5.5a.75.75 0 1 1-1.06-1.06l4.22-4.22H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd"/></svg>
-                            </a>
+                            <a href="{{ route('register') }}" class="focus-ring rounded-full bg-burgundy px-6 py-3 text-sm font-semibold text-[#FFF8EF] shadow-sm transition hover:-translate-y-0.5 hover:bg-burgundy-hover">Get started free</a>
+                            <a href="#how-it-works" class="focus-ring rounded-full px-4 py-3 text-sm font-semibold text-burgundy hover:bg-rosetint dark:text-[#F4E9E2] dark:hover:bg-[#382329]">See how it works <span aria-hidden="true">&darr;</span></a>
                         @endauth
-                        <div class="flex items-center gap-2 text-xs font-medium tracking-wide text-[#9b7865]" aria-hidden="true">
-                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5 12 8l6.5 2-6.5 2-2 6.5L8 12l-6.5-2L8 8l2-6.5Z"/></svg>
-                            Your next favorite is waiting
-                        </div>
                     </div>
-                </section>
+                    <p class="mt-5 text-xs text-tan dark:text-[#c7a491]">A shelf of your own. No rush, no reading challenge required.</p>
+                </div>
 
-                <div class="relative mx-auto flex h-[17rem] w-full max-w-[37rem] items-center justify-center sm:h-[25rem] lg:h-[29rem] max-[480px]:gap-1" role="img" aria-label="Three illustrated books: Pride and Prejudice by Jane Austen, The Hobbit by J. R. R. Tolkien, and Little Women by Louisa May Alcott">
-                    <div class="absolute left-1/2 top-1/2 h-[70%] w-[76%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(219,177,105,0.3),rgba(171,103,83,0.12)_48%,transparent_72%)]"></div>
-                    <div class="absolute left-1/2 top-1/2 h-[82%] w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#a77863]/25"></div>
-                    <svg class="absolute right-[10%] top-[5%] h-10 w-10 animate-pulse text-[#b28a4b]/80 motion-reduce:animate-none" viewBox="0 0 40 40" fill="currentColor" aria-hidden="true"><path d="m20 2 3.6 13.4L37 19l-13.4 3.6L20 36l-3.6-13.4L20 2Z"/></svg>
-                    <span class="absolute left-[7%] top-[18%] h-2.5 w-2.5 rounded-full bg-[#b87b62] shadow-[0_0_0_5px_rgba(184,123,98,0.12)]"></span>
-                    <span class="absolute bottom-[19%] right-[8%] h-2 w-2 rounded-full bg-[#c5a45f] shadow-[0_0_0_5px_rgba(197,164,95,0.14)]"></span>
-                    <span class="absolute bottom-[7%] left-[18%] hidden -rotate-6 rounded-full border border-[#a77863]/30 bg-[#fffaf3]/75 px-3 py-1 font-serif text-[9px] italic tracking-[0.12em] text-[#8a5142] sm:block">stories worth keeping</span>
-                    <div class="absolute bottom-[8%] left-[4%] right-[4%] h-28 rounded-[50%] bg-[radial-gradient(ellipse,rgba(103,38,56,0.12),transparent_68%)]"></div>
-                    <div class="absolute bottom-[10%] left-1/2 h-10 w-[85%] -translate-x-1/2 rounded-[50%] bg-[#58392f]/20 blur-xl"></div>
-                    <div class="absolute bottom-[13%] left-[10%] right-[10%] h-3 rounded-full bg-[#a88b73]/25 blur-md"></div>
+                <div class="relative mx-auto flex min-h-[26rem] w-full max-w-lg items-center justify-center" aria-label="A small arrangement of favorite books">
+                    <div class="absolute inset-x-7 bottom-8 h-5 rounded-sm bg-gradient-to-b from-[#9B7356] to-[#5A3A2E] shadow-[0_16px_22px_-12px_rgba(42,26,29,0.55)]"></div>
+                    <article class="absolute left-[8%] top-[15%] z-10 flex h-60 w-40 -rotate-6 flex-col justify-between rounded-r-sm border-l-4 border-[#E6D9D0]/80 bg-gradient-to-br from-burgundy via-[#8B2A3D] to-burgundy-deep p-4 text-[#FFF8EF] shadow-[0_22px_32px_-18px_rgba(42,26,29,0.6)] transition-transform duration-200 hover:-translate-y-2 hover:rotate-0">
+                        <span class="text-center font-serif text-xs uppercase tracking-[0.18em] text-[#E8CFA6]">Jane Austen</span>
+                        <span class="text-center font-serif text-2xl leading-tight">Pride &amp;<br>Prejudice</span>
+                        <span class="text-center text-[10px] uppercase tracking-[0.2em] text-[#E8CFA6]">A classic, still</span>
+                    </article>
+                    <article class="absolute left-[35%] top-[7%] z-20 flex h-72 w-44 flex-col justify-between rounded-r-sm border-l-4 border-[#E6D9D0]/80 bg-gradient-to-br from-[#63442D] via-[#8A6A55] to-[#3B2418] p-4 text-[#FFF8EF] shadow-[0_24px_36px_-18px_rgba(42,26,29,0.65)] transition-transform duration-200 hover:-translate-y-2">
+                        <span class="text-center font-serif text-xs uppercase tracking-[0.18em] text-[#E8CFA6]">J. R. R. Tolkien</span>
+                        <span class="text-center font-serif text-3xl leading-tight">The<br>Hobbit</span>
+                        <span class="text-center text-[10px] uppercase tracking-[0.2em] text-[#E8CFA6]">There and back again</span>
+                    </article>
+                    <article class="absolute right-[5%] top-[19%] z-10 flex h-56 w-36 rotate-6 flex-col justify-between rounded-r-sm border-l-4 border-[#E6D9D0]/80 bg-gradient-to-br from-[#54382A] via-[#72513A] to-[#3B2418] p-3 text-[#FFF8EF] shadow-[0_20px_30px_-18px_rgba(42,26,29,0.6)] transition-transform duration-200 hover:-translate-y-2 hover:rotate-0">
+                        <span class="text-center font-serif text-[10px] uppercase tracking-[0.16em] text-[#E8CFA6]">Louisa May Alcott</span>
+                        <span class="text-center font-serif text-2xl">Little<br>Women</span>
+                        <span class="text-center text-[10px] uppercase tracking-[0.2em] text-[#E8CFA6]">Since 1868</span>
+                    </article>
+                    <blockquote class="absolute bottom-0 right-[2%] z-30 max-w-[17rem] rotate-2 border border-warmborder bg-paper px-5 py-4 shadow-bookplate dark:border-[#4B3035] dark:bg-raised">
+                        <span class="font-serif text-4xl leading-none text-burgundy dark:text-burgundy-dark" aria-hidden="true">“</span>
+                        <p class="-mt-2 font-serif text-base italic leading-6 text-ink dark:text-[#F4E9E2]">A book is a door you can open again.</p>
+                        <cite class="mt-2 block text-right text-xs not-italic text-tan dark:text-[#c7a491]">— your reading journal</cite>
+                    </blockquote>
+                </div>
+            </section>
 
-                    <div class="bookworm-cover-drift bookworm-cover-drift-slow absolute left-[5%] top-[23%] z-[1] h-52 w-32 -rotate-[14deg] rounded-r-md rounded-l-sm bg-gradient-to-br from-[#824255] via-[#713345] to-[#542638] shadow-[12px_24px_28px_-17px_rgba(57,42,43,0.65)] transition duration-300 hover:-rotate-[10deg] hover:shadow-[16px_28px_32px_-15px_rgba(57,42,43,0.55)] sm:left-[8%] sm:h-64 sm:w-40 max-[480px]:relative max-[480px]:left-auto max-[480px]:top-auto max-[480px]:h-36 max-[480px]:w-20 max-[480px]:rotate-0">
-                        <div class="absolute -right-2 inset-y-2 w-2 rounded-r-sm bg-gradient-to-r from-[#d9c6ab] to-[#a58b70]"></div>
-                        <div class="absolute inset-y-0 left-3 w-1 rounded-l bg-[#c89c7c]/45"></div>
-                        <div class="absolute inset-[10px] rounded-r border border-[#e4c6a6]/65"></div>
-                        <div class="absolute inset-x-5 top-7 flex items-center justify-center text-[#efd8b8]">
-                            <svg class="h-8 w-8" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 34V7m0 18C9 25 7 18 7 12c8 0 13 5 13 13Zm0-7c0-8 5-13 13-13 0 8-5 13-13 13Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </div>
-                        <div class="absolute inset-x-4 top-1/2 -translate-y-1 text-center text-[#f0d8b7]">
-                            <p class="font-serif text-xs tracking-[0.1em] sm:text-sm">PRIDE AND</p>
-                            <p class="font-serif text-xs tracking-[0.1em] sm:text-sm">PREJUDICE</p>
-                            <span class="mx-auto mt-2 block h-px w-8 bg-current/70"></span>
-                            <p class="mt-2 font-serif text-[7px] tracking-[0.08em] sm:text-[8px]">JANE AUSTEN</p>
-                        </div>
-                        <div class="absolute inset-x-0 bottom-7 text-center font-handwritten text-sm text-[#eacba8]">1813</div>
+            <section id="how-it-works" class="border-y border-warmborder bg-paper/75 py-16 dark:border-[#4B3035] dark:bg-raised/60 sm:py-20">
+                <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+                    <div class="max-w-2xl">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tan dark:text-[#c7a491]">A reader’s kind of social</p>
+                        <h2 class="mt-3 font-serif text-3xl font-semibold text-ink dark:text-[#F4E9E2] sm:text-4xl">Make room for the books that matter.</h2>
                     </div>
-
-                    <div class="bookworm-cover-drift absolute left-1/2 top-[8%] z-10 h-60 w-36 -translate-x-1/2 rotate-[1deg] rounded-r-md rounded-l-sm bg-gradient-to-br from-[#a76550] via-[#8a5142] to-[#683b35] shadow-[15px_26px_32px_-17px_rgba(57,42,43,0.7)] transition duration-300 hover:rotate-0 hover:shadow-[18px_32px_38px_-16px_rgba(57,42,43,0.6)] sm:h-72 sm:w-44 max-[480px]:relative max-[480px]:left-auto max-[480px]:top-auto max-[480px]:h-40 max-[480px]:w-24 max-[480px]:translate-x-0 max-[480px]:rotate-0">
-                        <div class="absolute -top-3 right-7 z-20 h-10 w-5 bg-[#d5ad5d] shadow-sm [clip-path:polygon(0_0,100%_0,100%_100%,50%_76%,0_100%)]"></div>
-                        <div class="absolute -right-2 inset-y-2 w-2 rounded-r-sm bg-gradient-to-r from-[#e0ceb2] to-[#ad9275]"></div>
-                        <div class="absolute inset-y-0 left-3 w-1 rounded-l bg-[#e0bd99]/50"></div>
-                        <div class="absolute inset-[10px] rounded-r border border-[#eed4ad]/70"></div>
-                        <div class="absolute inset-x-5 top-7 flex justify-center text-[#f1dcbb]">
-                            <svg class="h-10 w-10" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 8c-5 7-6 13-1 19 1-5 4-8 8-11 1 7 6 10 5 16-1 7-7 11-14 10-8-1-13-7-12-14 .5-6 5-10 8-13 0 5 1 8 4 10 1-7 0-12 2-17Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </div>
-                        <div class="absolute inset-x-4 top-[43%] text-center text-[#f5dfbd]">
-                            <p class="font-serif text-xl tracking-[0.12em] sm:text-2xl">THE</p>
-                            <p class="mt-1 font-serif text-lg tracking-[0.08em] sm:text-xl">HOBBIT</p>
-                            <span class="mx-auto mt-3 block h-px w-10 bg-current/70"></span>
-                            <p class="mt-3 font-serif text-[7px] tracking-[0.08em] text-[#ecd0a9] sm:text-[8px]">J. R. R. TOLKIEN</p>
-                        </div>
-                        <div class="absolute inset-x-0 bottom-8 text-center font-handwritten text-base text-[#f1d9b4]">1937</div>
-                    </div>
-
-                    <div class="bookworm-cover-drift bookworm-cover-drift-slower absolute right-[4%] top-[25%] z-[2] h-48 w-32 rotate-[13deg] rounded-r-md rounded-l-sm bg-gradient-to-br from-[#614743] via-[#493536] to-[#342729] shadow-[12px_24px_28px_-17px_rgba(57,42,43,0.65)] transition duration-300 hover:rotate-[9deg] hover:shadow-[16px_28px_32px_-15px_rgba(57,42,43,0.55)] sm:right-[7%] sm:h-60 sm:w-40 max-[480px]:relative max-[480px]:right-auto max-[480px]:top-auto max-[480px]:h-36 max-[480px]:w-20 max-[480px]:rotate-0">
-                        <div class="absolute -right-2 inset-y-2 w-2 rounded-r-sm bg-gradient-to-r from-[#d1bea2] to-[#947d67]"></div>
-                        <div class="absolute inset-y-0 left-3 w-1 rounded-l bg-[#bfa17e]/45"></div>
-                        <div class="absolute inset-[10px] rounded-r border border-[#d9bc98]/60"></div>
-                        <div class="absolute inset-x-5 top-7 flex justify-center text-[#dfc5a0]">
-                            <svg class="h-8 w-8" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="m20 4 3.5 11.5L35 19l-11.5 3.5L20 34l-3.5-11.5L5 19l11.5-3.5L20 4Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="m32 5 1.5 4.5L38 11l-4.5 1.5L32 17l-1.5-4.5L26 11l4.5-1.5L32 5Z" fill="currentColor"/></svg>
-                        </div>
-                        <div class="absolute inset-x-4 top-1/2 -translate-y-1 text-center text-[#ead3b1]">
-                            <p class="font-serif text-sm tracking-[0.13em] sm:text-base">LITTLE</p>
-                            <p class="mt-1 font-serif text-sm tracking-[0.13em] sm:text-base">WOMEN</p>
-                            <span class="mx-auto mt-2 block h-px w-8 bg-current/70"></span>
-                            <p class="mt-2 font-serif text-[6px] tracking-[0.04em] text-[#d3b895] sm:text-[7px]">LOUISA MAY ALCOTT</p>
-                        </div>
-                        <div class="absolute inset-x-0 bottom-6 text-center font-handwritten text-sm text-[#d9bd99]">1868</div>
+                    <div class="mt-10 grid gap-8 md:grid-cols-3">
+                        <article class="border-t border-gold/50 pt-5">
+                            <p class="font-serif text-4xl text-burgundy dark:text-burgundy-dark">01</p>
+                            <h3 class="mt-4 font-serif text-xl font-semibold text-ink dark:text-[#F4E9E2]">Keep your shelf</h3>
+                            <p class="mt-2 text-sm leading-6 text-walnut dark:text-[#d4c2b9]">Find a title, give it a star or five, and remember what you thought when you turned the last page.</p>
+                        </article>
+                        <article class="border-t border-gold/50 pt-5 md:mt-8">
+                            <p class="font-serif text-4xl text-burgundy dark:text-burgundy-dark">02</p>
+                            <h3 class="mt-4 font-serif text-xl font-semibold text-ink dark:text-[#F4E9E2]">Read with company</h3>
+                            <p class="mt-2 text-sm leading-6 text-walnut dark:text-[#d4c2b9]">Follow readers whose reviews make you pause, smile, or add another book to your list.</p>
+                        </article>
+                        <article class="border-t border-gold/50 pt-5">
+                            <p class="font-serif text-4xl text-burgundy dark:text-burgundy-dark">03</p>
+                            <h3 class="mt-4 font-serif text-xl font-semibold text-ink dark:text-[#F4E9E2]">Keep the good lines</h3>
+                            <p class="mt-2 text-sm leading-6 text-walnut dark:text-[#d4c2b9]">Bring along a personal PDF and mark the passages you want to revisit.</p>
+                        </article>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <section class="mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[0.9fr_1.1fr] lg:px-12">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tan dark:text-[#c7a491]">The reading room</p>
+                    <h2 class="mt-3 font-serif text-3xl font-semibold text-ink dark:text-[#F4E9E2] sm:text-4xl">Good stories make good company.</h2>
+                    <p class="mt-4 max-w-lg text-sm leading-7 text-walnut dark:text-[#d4c2b9]">Your profile is a living shelf: reviews, readers you follow, and the books you’ve decided to keep close.</p>
+                    @guest
+                        <a href="{{ route('register') }}" class="focus-ring mt-6 inline-flex rounded-full bg-burgundy px-5 py-3 text-sm font-semibold text-[#FFF8EF] transition hover:bg-burgundy-hover">Start your journal</a>
+                    @endguest
+                </div>
+                <div class="bookplate overflow-hidden rounded-xl border-[10px] border-leather bg-leather p-5 shadow-shelf sm:border-[14px]">
+                    <div class="flex items-center justify-between border-b border-[#E8CFA6]/40 pb-4 text-[#FFF8EF]">
+                        <div>
+                            <p class="font-serif text-xl">Mara’s reading shelf</p>
+                            <p class="mt-1 text-xs text-[#E8CFA6]">Three books, three good reasons</p>
+                        </div>
+                        <span class="font-hand text-2xl text-[#D1A24E]">since 2021</span>
+                    </div>
+                    <div class="flex h-52 items-end justify-center gap-2 pt-5" aria-label="Sample book spines">
+                        <div class="h-36 w-12 rounded-t-sm border-l-4 border-[#E6D9D0]/70 bg-gradient-to-r from-[#4A1220] via-[#8B2A3D] to-[#4A1220] shadow-lg"></div>
+                        <div class="h-44 w-14 rounded-t-sm border-l-4 border-[#E6D9D0]/70 bg-gradient-to-r from-[#3B2418] via-[#72513a] to-[#493023] shadow-lg"></div>
+                        <div class="h-40 w-12 rounded-t-sm border-l-4 border-[#E6D9D0]/70 bg-gradient-to-r from-[#54382A] via-[#8A6A55] to-[#3B2418] shadow-lg"></div>
+                        <div class="h-32 w-14 rounded-t-sm border-l-4 border-[#E6D9D0]/70 bg-gradient-to-r from-[#4A1220] via-[#69323a] to-[#3B2418] shadow-lg"></div>
+                    </div>
+                    <div class="h-3 border-y border-[#E8CFA6]/70 bg-gradient-to-b from-[#B8893B] to-[#79543d]"></div>
+                </div>
+            </section>
+
+            <section class="bg-parchment/70 py-14 dark:bg-[#211317]">
+                <div class="mx-auto flex max-w-7xl flex-col gap-5 px-5 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12">
+                    <div>
+                        <p class="font-serif text-2xl italic text-ink dark:text-[#F4E9E2]">“The right book finds you at the right time.”</p>
+                        <p class="mt-2 text-sm text-tan dark:text-[#c7a491]">A small reminder from one reader to another.</p>
+                    </div>
+                    <p class="font-hand text-2xl text-burgundy dark:text-burgundy-dark">— the Bookworm readers</p>
+                </div>
+            </section>
+
+            <section class="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-12">
+                <div class="flex flex-col items-start justify-between gap-6 rounded-xl border border-burgundy/15 bg-paper p-7 shadow-bookplate dark:border-burgundy-dark/30 dark:bg-raised sm:flex-row sm:items-center sm:p-10">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tan dark:text-[#c7a491]">A little home for stories</p>
+                        <h2 class="mt-3 font-serif text-3xl font-semibold text-ink dark:text-[#F4E9E2]">Free to read. Free to remember.</h2>
+                        <p class="mt-2 text-sm text-walnut dark:text-[#d4c2b9]">Make an account and start your shelf today.</p>
+                    </div>
+                    <a href="{{ route('register') }}" class="focus-ring inline-flex shrink-0 rounded-full bg-burgundy px-6 py-3 text-sm font-semibold text-[#FFF8EF] transition hover:bg-burgundy-hover">Join Bookworm</a>
+                </div>
+            </section>
         </main>
+
+        <footer class="border-t border-warmborder bg-paper dark:border-[#4B3035] dark:bg-raised">
+            <div class="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+                <x-logo variant="full" tone="dark" class="h-10 w-auto" />
+                <p class="text-xs text-tan dark:text-[#c7a491]">For the love of stories, and the people who pass them along.</p>
+            </div>
+        </footer>
     </div>
 </body>
 </html>

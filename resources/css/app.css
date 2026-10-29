@@ -2,6 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    background-color: #F7F1EA;
+    color: #2A1A1D;
+}
+
+.dark body {
+    background-color: #1A0F12;
+    color: #F4E9E2;
+}
+
+.paper-grain {
+    position: relative;
+}
+
+.paper-grain::before {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    content: "";
+}
+
+.paper-grain > * {
+    position: relative;
+}
+
+.bookplate {
+    position: relative;
+    border: 1px solid #E6D9D0;
+    background: #FFFDF9;
+    box-shadow: 0 12px 32px -22px rgb(74 18 32 / 35%), inset 0 0 0 1px rgb(184 137 59 / 9%);
+}
+
+.dark .bookplate {
+    border-color: #4B3035;
+    background: #271519;
+}
+
+.focus-ring:focus-visible {
+    outline: 2px solid #B8893B;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 [x-cloak] {
     display: none !important;
 }

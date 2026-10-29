@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\QuoteCard;
+use App\Models\UserBookShelf;
 use App\Services\OpenLibraryService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
@@ -68,7 +70,15 @@ class BookController extends Controller
             'average' => $stats->average,
             'count' => (int) $stats->count,
             'myReview' => $book->reviews()->where('user_id', auth()->id())->first(),
+            'myShelfItem' => $request->user()->shelfItems()->where('book_id', $book->id)->first(),
+            'shelfStatuses' => UserBookShelf::STATUSES,
             'myPdfs' => $request->user()->bookPdfs()->where('book_id', $book->id)->latest()->get(),
+            'quotes' => QuoteCard::query()
+                ->whereHas('highlight.bookPdf', fn ($pdfs) => $pdfs->where('book_id', $book->id))
+                ->where(fn ($quotes) => $quotes->where('user_id', $request->user()->id)->orWhereNotNull('shared_at'))
+                ->with(['highlight', 'user'])
+                ->latest()
+                ->paginate(12, ['*'], 'quotes_page'),
             'reviews' => $book->reviews()->with('user')->latest()->paginate(10, ['*'], 'reviews_page'),
         ]);
     }

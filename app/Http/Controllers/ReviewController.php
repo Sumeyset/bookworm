@@ -23,6 +23,9 @@ class ReviewController extends Controller
                 'body' => $validated['body'] ?? null,
             ],
         );
+        $request->user()->shelfItems()
+            ->firstOrNew(['book_id' => $book->id])
+            ->markAsRead();
 
         return to_route('books.show', $book)->with('status', 'Your review has been saved.');
     }

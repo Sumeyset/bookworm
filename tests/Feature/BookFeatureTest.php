@@ -24,6 +24,7 @@ test('book search shows the restored card design and rating controls', function 
         ->assertSee('Find your next favorite book,')
         ->assertSee('A Test Book')
         ->assertSee('A. Author')
+        ->assertSee('Bookshelf · your reading life, all on one shelf')
         ->assertSee('aria-label="Rate 0.5 stars"', false)
         ->assertSee('Book details & reviews')
         ->assertDontSee('comments');
@@ -62,12 +63,13 @@ test('a user can save a half-star review and update it without creating duplicat
         ->assertNotFound();
 });
 
-test('my journal links to a bookshelf of books the reader has rated', function () {
+test('my bookshelf combines the readers shelf, ratings, and reading journal', function () {
     $user = User::factory()->create();
     $book = Book::create([
         'ol_id' => 'OL82563W',
         'title' => 'A Test Book',
         'author_name' => 'A. Author',
+        'cover_url' => 'https://covers.example.test/a-test-book.jpg',
     ]);
 
     Review::create([
@@ -80,12 +82,20 @@ test('my journal links to a bookshelf of books the reader has rated', function (
     $response = $this->actingAs($user)->get(route('users.show', $user->username));
 
     $response->assertOk()
-        ->assertSee('My Journal')
+        ->assertSee('My bookshelf')
         ->assertSee('href="' . route('users.show', $user->username) . '"', false)
         ->assertSee('Bookshelf')
-        ->assertSee("Books I've read & rated")
+        ->assertSee('My bookshelf')
         ->assertSee('A Test Book')
         ->assertSee('A. Author')
+        ->assertSee('aria-label="Bookshelf row"', false)
+        ->assertSee('border-[#a96c42]', false)
+        ->assertSee('from-[#f1d7af_0%,#dbb17f_24%,#c18a59_78%,#a96f45_100%]', false)
+        ->assertSee('Cover of A Test Book')
+        ->assertSee('https://covers.example.test/a-test-book.jpg')
+        ->assertSee('Update my list')
+        ->assertSee('Want to read')
+        ->assertSee('Currently reading')
         ->assertSee('4.5 out of 5 stars')
         ->assertSee('A lovely read.');
 });

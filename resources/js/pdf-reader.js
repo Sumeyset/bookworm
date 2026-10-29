@@ -24,6 +24,9 @@ function initializeReader(reader) {
     let scale = 1;
     let highlights = [];
     let pendingSelection = null;
+    let progressTimer;
+    let progressSaveInFlight = false;
+    let lastSavedPage = null;
 
     const setStatus = (message, isError = false) => {
         status.textContent = message;
@@ -52,6 +55,34 @@ function initializeReader(reader) {
         }
 
         return payload;
+    }
+
+    function scheduleProgressSave() {
+        if (!reader.dataset.progressUrl || !documentProxy) return;
+
+        window.clearTimeout(progressTimer);
+        progressTimer = window.setTimeout(async () => {
+            if (progressSaveInFlight || lastSavedPage === pageNumber) return;
+
+            const pageToSave = pageNumber;
+            progressSaveInFlight = true;
+            try {
+                await requestJson(reader.dataset.progressUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        status: reader.dataset.readingStatus || 'reading',
+                        current_page: pageToSave,
+                        total_pages: documentProxy.numPages,
+                    }),
+                });
+                lastSavedPage = pageToSave;
+            } catch (error) {
+                setStatus(`Reading progress could not be saved: ${error.message}`, true);
+            } finally {
+                progressSaveInFlight = false;
+                if (pageNumber !== pageToSave) scheduleProgressSave();
+            }
+        }, 500);
     }
 
     function drawHighlights() {
@@ -120,7 +151,26 @@ function initializeReader(reader) {
                 }
             });
 
-            actions.append(goToPage, deleteButton);
+            const saveQuoteButton = document.createElement('button');
+            saveQuoteButton.type = 'button';
+            saveQuoteButton.className = 'min-h-11 rounded-full border border-[#6D1A2B]/30 px-3 text-xs font-semibold text-[#6D1A2B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8893B] dark:text-[#A3324A]';
+            saveQuoteButton.textContent = 'Save quote';
+            saveQuoteButton.setAttribute('aria-label', `Save quote: ${highlight.text}`);
+            saveQuoteButton.addEventListener('click', async () => {
+                saveQuoteButton.disabled = true;
+                try {
+                    await requestJson(reader.dataset.saveQuoteUrl.replace('__HIGHLIGHT__', highlight.id), {
+                        method: 'POST',
+                    });
+                    setStatus('Saved to your quote collection.');
+                    saveQuoteButton.textContent = 'Saved';
+                } catch (error) {
+                    saveQuoteButton.disabled = false;
+                    setStatus(error.message, true);
+                }
+            });
+
+            actions.append(goToPage, saveQuoteButton, deleteButton);
             item.append(quote, actions);
             highlightsList.append(item);
         });
@@ -170,6 +220,7 @@ function initializeReader(reader) {
         zoomInButton.disabled = scale >= 2.5;
         zoomLabel.textContent = `${Math.round(scale * 100)}%`;
         drawHighlights();
+        scheduleProgressSave();
     }
 
     function captureSelection() {
@@ -264,14 +315,14 @@ function initializeReader(reader) {
         documentProxy = loadedDocument;
         highlights = savedHighlights;
         pageCountLabel.textContent = String(documentProxy.numPages);
-        const firstPage = await documentProxy.getPage(1);
+        pageNumber = Math.min(documentProxy.numPages, Math.max(1, Number(reader.dataset.initialPage) || 1));
+        const firstPage = await documentProxy.getPage(pageNumber);
         const baseViewport = firstPage.getViewport({ scale: 1 });
         const availableWidth = Math.max(pageViewport.parentElement.clientWidth - 40, 280);
         scale = Math.min(1.3, availableWidth / baseViewport.width);
 
         renderHighlightList();
         await renderPage();
-        previousButton.disabled = true;
         setStatus('Select text on the page to highlight it. Your highlights save to your private library.');
     }
 

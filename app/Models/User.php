@@ -25,6 +25,9 @@ class User extends Authenticatable
         'email',
         'password',
         'username',
+        'preferred_genres',
+        'yearly_reading_goal',
+        'onboarding_completed_at',
     ];
 
     /**
@@ -47,6 +50,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'preferred_genres' => 'array',
+            'onboarding_completed_at' => 'datetime',
         ];
     }
 
@@ -58,6 +63,16 @@ class User extends Authenticatable
     public function bookPdfs(): HasMany
     {
         return $this->hasMany(BookPdf::class);
+    }
+
+    public function shelfItems(): HasMany
+    {
+        return $this->hasMany(UserBookShelf::class);
+    }
+
+    public function quoteCards(): HasMany
+    {
+        return $this->hasMany(QuoteCard::class);
     }
 
     public function followers(): BelongsToMany

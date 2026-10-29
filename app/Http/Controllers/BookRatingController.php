@@ -33,6 +33,9 @@ class BookRatingController extends Controller
             ['user_id' => $request->user()->id],
             ['rating' => $validated['rating']],
         );
+        $request->user()->shelfItems()
+            ->firstOrNew(['book_id' => $book->id])
+            ->markAsRead();
 
         return back()->with('status', 'Your rating has been saved.');
     }
