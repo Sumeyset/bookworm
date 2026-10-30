@@ -89,7 +89,7 @@
             </section>
 
             @if ($isOwnProfile)
-                @php($goalPercent = min(100, (int) round($readingStats['books_this_year'] / max(1, $readingStats['yearly_goal']) * 100)))
+                @php $goalPercent = min(100, (int) round($readingStats['books_this_year'] / max(1, $readingStats['yearly_goal']) * 100)); @endphp
                 <section aria-labelledby="yearly-reading-heading" class="bookplate rounded-xl p-5 sm:p-7">
                     <div class="flex flex-wrap items-start justify-between gap-4">
                         <div>
@@ -133,7 +133,7 @@
                         <p class="text-xs font-semibold uppercase tracking-[0.16em] text-tan dark:text-[#c7a491]">Books marked read by month</p>
                         <div class="mt-4 grid grid-cols-6 items-end gap-2 sm:grid-cols-12" aria-label="Books read each month">
                             @foreach ($readingStats['monthly_reads'] as $monthIndex => $count)
-                                @php($barHeight = $count > 0 ? max(12, min(100, $count * 16)) : 3)
+                                @php $barHeight = $count > 0 ? max(12, min(100, $count * 16)) : 3; @endphp
                                 <div class="flex flex-col items-center gap-2" aria-label="{{ $count }} {{ Str::plural('book', $count) }} in {{ \Carbon\Carbon::create()->month($monthIndex + 1)->format('F') }}">
                                     <span class="w-full rounded-t-sm bg-burgundy/80 dark:bg-burgundy-dark/80" style="height: {{ $barHeight }}px"></span>
                                     <span class="text-[10px] text-tan dark:text-[#c7a491]">{{ \Carbon\Carbon::create()->month($monthIndex + 1)->format('M') }}</span>
@@ -184,49 +184,53 @@
                     <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#f0e2d2] bg-white/75 px-4 py-3">
                         <div>
                             <p class="font-serif text-lg font-semibold text-[#49352f]">A shelf that feels like yours</p>
-                            <p class="mt-0.5 text-sm text-[#8b7569]">Tap a cover to revisit its story. Open a card to update your reading list.</p>
+                            <p class="mt-0.5 text-sm text-[#8b7569]">Tap a cover to revisit its story. Use “Manage books” below the shelf to update your list.</p>
                         </div>
                         <span class="rounded-full bg-[#f7eadb] px-3 py-1.5 text-xs font-semibold text-[#825b46]">{{ $bookshelf->total() }} {{ Str::plural('book', $bookshelf->total()) }}</span>
                     </div>
 
-                    @forelse ($bookshelf->getCollection()->chunk(5) as $shelf)
-                        <div class="relative mb-7 overflow-hidden rounded-xl border-[10px] border-[#a96c42] bg-[linear-gradient(90deg,rgba(92,50,27,0.16),transparent_16%,rgba(255,232,193,0.2)_50%,transparent_84%,rgba(92,50,27,0.16)),repeating-linear-gradient(2deg,#b77d50_0px,#c58b5a_5px,#b77d50_11px,#d09a68_18px)] shadow-[0_12px_26px_rgba(76,45,29,0.2),inset_0_0_0_2px_rgba(255,228,190,0.38)] last:mb-0">
-                            <div class="h-3 border-b border-[#9a6039] bg-[linear-gradient(180deg,#d09a68,#b77d50)]" aria-hidden="true"></div>
-                            <div class="mx-2 border-x-[10px] border-[#b77d50] bg-[#d6b18a] shadow-[inset_8px_0_12px_rgba(92,50,27,0.12),inset_-8px_0_12px_rgba(92,50,27,0.12)]">
-                            <div role="region" aria-label="Bookshelf row" tabindex="0" class="relative flex min-h-64 items-end gap-4 overflow-x-auto bg-[linear-gradient(90deg,rgba(119,74,43,0.08),transparent_18%,rgba(255,244,221,0.2)_50%,transparent_82%,rgba(119,74,43,0.08)),repeating-linear-gradient(0deg,#d9b891_0px,#e4c7a2_8px,#d4ae84_18px,#e2c29a_29px)] px-4 pt-8 shadow-[inset_0_10px_18px_rgba(102,66,40,0.13)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8b3e4b] sm:justify-center sm:gap-5 sm:px-7">
-                                @foreach ($shelf as $item)
-                                    <article class="group/book flex w-28 flex-none flex-col items-center sm:w-32">
-                                        <a href="{{ route('books.show', $item->book) }}"
-                                           aria-label="{{ $item->book->title }} by {{ $item->book->author_name ?? 'Unknown author' }}, {{ $shelfStatuses[$item->status] ?? 'on shelf' }}"
-                                           title="{{ $item->book->title }} · {{ $shelfStatuses[$item->status] ?? 'On shelf' }}"
-                                           class="relative block aspect-[2/3] w-full overflow-hidden rounded-t-[3px] bg-gradient-to-br from-[#f3dfc7] via-[#f9eee0] to-[#e8d1bc] shadow-[3px_1px_5px_rgba(73,53,47,0.24),inset_4px_0_6px_rgba(255,255,255,0.35)] transition duration-200 group-hover/book:-translate-y-1 group-hover/book:shadow-[4px_5px_12px_rgba(73,53,47,0.25)] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9a5d48]">
-                                            @if ($item->book->cover_url)
-                                                <img src="{{ $item->book->cover_url }}" alt="Cover of {{ $item->book->title }}" loading="lazy" class="h-full w-full object-cover">
-                                            @else
-                                                <span class="flex h-full flex-col items-center justify-center border-y-[5px] border-[#bd9367] px-3 text-center text-[#795544]">
-                                                    <svg class="mb-3 h-8 w-8 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.75A2.75 2.75 0 0 1 7.25 3H20v17H7.25A2.75 2.75 0 0 0 4.5 22V5.75Zm0 0V22M8 7h8M8 10h8" />
-                                                    </svg>
-                                                    <span class="line-clamp-4 font-serif text-sm font-semibold leading-tight">{{ $item->book->title }}</span>
-                                                    @if ($item->book->author_name)
-                                                        <span class="mt-2 line-clamp-2 text-[10px]">{{ $item->book->author_name }}</span>
-                                                    @endif
-                                                </span>
-                                            @endif
-                                        </a>
-                                        <span class="mt-2 max-w-full truncate text-center text-[11px] font-medium text-[#765c4d]">{{ $shelfStatuses[$item->status] ?? 'Read' }}</span>
-                                    </article>
-                                @endforeach
+                    @forelse ($bookshelf->getCollection()->chunk(1000) as $allItems)
+                        <div class="relative">
+                            <div class="rounded-xl border-[14px] border-[#9a6338] bg-[#7b4a29] p-0 shadow-[0_24px_40px_-12px_rgba(60,30,12,0.55),inset_0_0_0_2px_rgba(255,226,180,0.35)] [background-image:repeating-linear-gradient(90deg,rgba(255,255,255,0.05)_0_2px,transparent_2px_14px),linear-gradient(180deg,#a8703f,#8a5a36)]">
+                                <div class="overflow-hidden rounded-md border-[3px] border-[#5c3a20] bg-[#e7cfa8] shadow-[inset_0_6px_14px_rgba(60,30,12,0.45)]">
+                                    @foreach ($allItems->chunk(5) as $shelf)
+                                        <div class="relative">
+                                            <div role="region" aria-label="Bookshelf row" tabindex="0" class="flex min-h-[17rem] items-end justify-start gap-4 overflow-x-auto bg-[radial-gradient(ellipse_at_50%_100%,rgba(255,240,205,0.55),transparent_70%),linear-gradient(180deg,#d9b98a,#ecd6ae)] px-6 pt-8 shadow-[inset_8px_0_14px_-8px_rgba(60,30,12,0.5),inset_-8px_0_14px_-8px_rgba(60,30,12,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8b3e4b] sm:justify-center sm:gap-6 sm:px-10">
+                                                @foreach ($shelf as $item)
+                                                    <a href="{{ route('books.show', $item->book) }}"
+                                                       aria-label="{{ $item->book->title }} by {{ $item->book->author_name ?? 'Unknown author' }}, {{ $shelfStatuses[$item->status] ?? 'on shelf' }}"
+                                                       title="{{ $item->book->title }} · {{ $shelfStatuses[$item->status] ?? 'On shelf' }}"
+                                                       class="group/book relative block w-28 flex-none origin-bottom transition duration-200 hover:-translate-y-3 hover:-rotate-1 focus-visible:-translate-y-3 focus-visible:outline-none sm:w-36">
+                                                        <span class="relative block aspect-[2/3] overflow-hidden rounded-[3px] rounded-l-[5px] bg-gradient-to-br from-[#7a1f2b] to-[#3b1420] shadow-[6px_4px_10px_rgba(60,30,12,0.55)] group-focus-visible/book:ring-2 group-focus-visible/book:ring-[#8b3e4b]">
+                                                            <span class="absolute inset-0 flex flex-col items-center justify-center border-[3px] border-double border-[#e9c98b]/60 m-2 p-2 text-center text-[#f3d9a4]">
+                                                                <span class="line-clamp-4 font-serif text-sm font-semibold leading-tight">{{ $item->book->title }}</span>
+                                                                @if ($item->book->author_name)
+                                                                    <span class="mt-2 line-clamp-2 text-[10px] opacity-80">{{ $item->book->author_name }}</span>
+                                                                @endif
+                                                            </span>
+                                                            @if ($item->book->cover_url)
+                                                                <img src="{{ $item->book->cover_url }}" alt="Cover of {{ $item->book->title }}" loading="lazy" onerror="this.remove()" class="absolute inset-0 h-full w-full object-cover">
+                                                            @endif
+                                                            <span class="pointer-events-none absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-black/50 via-white/25 to-transparent" aria-hidden="true"></span>
+                                                            <span class="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/20" aria-hidden="true"></span>
+                                                        </span>
+                                                        @if ($item->status === 'reading')
+                                                            <span class="absolute -right-2 -top-2 rounded-full border border-[#8a5a36] bg-[#f6e3b4] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#5c3a20] shadow">Reading</span>
+                                                        @endif
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                            <div class="relative z-10 h-5 border-t border-[#f4dcae] bg-[linear-gradient(180deg,#b9824f,#8a5a36_60%,#6b4226)] shadow-[0_10px_12px_-2px_rgba(60,30,12,0.6)]" aria-hidden="true"></div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
-                            <div class="relative z-10 h-7 border-y border-[#9e663e] bg-[linear-gradient(180deg,#f1d7af_0%,#dbb17f_24%,#c18a59_78%,#a96f45_100%)] shadow-[0_8px_12px_rgba(76,45,29,0.27)]" aria-hidden="true">
-                                <span class="absolute inset-x-0 top-0 h-px bg-[#fff2d9]"></span>
-                                <span class="absolute inset-x-0 top-1 h-px bg-[#f7dfb9]/70"></span>
-                                <span class="absolute inset-x-0 bottom-1 h-px bg-[#9c704d]/40"></span>
-                            </div>
-                            </div>
-                            <div class="mx-2 border-x-[10px] border-[#b77d50] bg-[#d6b18a]">
-                            <div class="grid gap-px border-t-[5px] border-[#b77d50] bg-[#c89566] sm:grid-cols-2 lg:grid-cols-5">
-                                @foreach ($shelf as $item)
+                            <div class="mx-6 h-3 rounded-b-md bg-[#5c3a20] shadow-[0_8px_14px_rgba(60,30,12,0.4)]" aria-hidden="true"></div>
+
+                            <details class="mt-6 overflow-hidden rounded-2xl border border-[#e3d2c1] bg-[#fbf3e6]">
+                            <summary class="focus-ring cursor-pointer select-none px-5 py-3 text-sm font-semibold text-[#6b4226] hover:bg-[#f3e6d3]">Manage books on my shelf</summary>
+                            <div class="grid gap-px bg-[#e3d2c1] sm:grid-cols-2 lg:grid-cols-3">
+                                @foreach ($allItems as $item)
                                     <article class="min-w-0 bg-white/90 p-3 sm:p-4">
                                         <a href="{{ route('books.show', $item->book) }}" class="line-clamp-2 font-serif text-sm font-semibold leading-snug text-[#49352f] hover:text-[#8b3e4b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9a5d48]">
                                             {{ $item->book->title }}
@@ -236,7 +240,7 @@
                                         @endif
 
                                         @if ($item->status === 'reading' && $item->total_pages)
-                                            @php($progress = min(100, (int) round(($item->current_page ?? 0) / $item->total_pages * 100)))
+                                            @php $progress = min(100, (int) round(($item->current_page ?? 0) / $item->total_pages * 100)); @endphp
                                             <p class="mt-2 text-xs text-[#80695d]">Page {{ $item->current_page ?? 0 }} of {{ $item->total_pages }} · {{ $progress }}%</p>
                                             <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#f1e7dc]">
                                                 <span class="block h-full rounded-full bg-gradient-to-r from-[#d5a469] to-[#b56d68]" style="width: {{ $progress }}%"></span>
@@ -291,8 +295,7 @@
                                     </article>
                                 @endforeach
                             </div>
-                            </div>
-                            <div class="h-3 border-t border-[#9a6039] bg-[linear-gradient(180deg,#bd8555,#a96c42)]" aria-hidden="true"></div>
+                            </details>
                         </div>
                     @empty
                         <div class="rounded-2xl border border-dashed border-[#e6d5c4] bg-white/70 px-5 py-12 text-center">
