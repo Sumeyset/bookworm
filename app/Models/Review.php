@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasReactions;
+use App\Support\FriendActivity;
 use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
@@ -18,19 +19,16 @@ class Review extends Model
 
     protected static function booted(): void
     {
-        // Let followers who want to read this book know a reader they trust reviewed it.
+        // Followers hear about ratings and reviews in their notifications (not the feed).
         static::created(function (Review $review): void {
-            $author = $review->user;
-            $review->user->followers()
-                ->whereHas('shelfItems', fn ($items) => $items->where('book_id', $review->book_id)->where('status', 'want_to_read'))
-                ->get()
-                ->each(fn (User $follower) => \App\Notifications\BookwormNotification::send(
-                    $follower,
-                    'review',
-                    $author->name . ' reviewed “' . $review->book->title . '”, which is on your Want to read list.',
-                    route('books.show', $review->book_id),
-                    $author,
-                ));
+            filled($review->body) ? FriendActivity::reviewed($review) : FriendActivity::rated($review);
+        });
+
+        // A star rating that later gets written words counts as a review.
+        static::updated(function (Review $review): void {
+            if ($review->wasChanged('body') && blank($review->getOriginal('body')) && filled($review->body)) {
+                FriendActivity::reviewed($review);
+            }
         });
     }
 

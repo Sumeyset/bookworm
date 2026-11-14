@@ -73,6 +73,14 @@ class UserBookShelf extends Model
             if ($finished) {
                 static::notifyGoalMilestone($item);
             }
+
+            // Tell followers when a book is started or finished.
+            $statusMoved = $item->wasRecentlyCreated || $item->wasChanged('status');
+            if ($statusMoved && in_array($item->status, ['reading', 'read'], true) && $item->user && $item->book) {
+                $item->status === 'read'
+                    ? \App\Support\FriendActivity::finishedReading($item->user, $item->book)
+                    : \App\Support\FriendActivity::startedReading($item->user, $item->book);
+            }
         });
     }
 

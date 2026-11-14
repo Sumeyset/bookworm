@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="title">Reading feed · Bookworm</x-slot>
     <x-slot name="header">
-        <x-page-header eyebrow="Notes from your reading circle" title="Reading feed" subtitle="Share a thought, pass along a quote, and see what your reading circle is loving." />
+        <x-page-header eyebrow="Notes from your reading circle" title="Reading feed" subtitle="Thoughts and quotes from your reading circle. What friends start, finish and rate shows up in your notifications." />
     </x-slot>
 
     <div class="page-section grid justify-center gap-8 lg:grid-cols-[minmax(0,30rem)_20rem]">

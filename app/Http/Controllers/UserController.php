@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\User;
 use App\Models\UserBookShelf;
 use App\Support\BookTree;
+use App\Support\FriendActivity;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -49,6 +50,7 @@ class UserController extends Controller
         // Older accounts rated books before shelves existed: give each of
         // those books a place on the tree (once) so nothing is missing.
         if ($user->reviews_count > 0 && ! $user->shelfItems()->exists()) {
+            FriendActivity::$quiet = true;
             $user->reviews()->orderBy('created_at')->get()->each(
                 fn ($review) => $user->shelfItems()->create([
                     'book_id' => $review->book_id,
@@ -56,6 +58,7 @@ class UserController extends Controller
                     'read_at' => $review->updated_at,
                 ]),
             );
+            FriendActivity::$quiet = false;
         }
 
         $isOwnProfile = $request->user()->id === $user->id;

@@ -38,48 +38,53 @@ class ReadingImport
         $stats = ['source' => $source, 'imported' => 0, 'skipped' => 0, 'reviews' => 0];
         $existing = $user->shelfItems()->pluck('book_id')->flip();
 
-        // Bulk import: don't notify followers for every single historic review.
-        Review::withoutEvents(function () use ($handle, $header, $source, $user, &$stats, $existing) {
-            DB::transaction(function () use ($handle, $header, $source, $user, &$stats, $existing) {
-                $rows = 0;
-                while (($values = fgetcsv($handle)) !== false && $rows++ < self::MAX_ROWS) {
-                    if (count($values) < 2) {
-                        continue;
-                    }
-                    $row = array_combine($header, array_pad(array_slice($values, 0, count($header)), count($header), ''));
-                    $data = $source === 'goodreads' ? self::fromGoodreads($row) : self::fromStoryGraph($row);
-                    if (! $data || $data['title'] === '') {
-                        $stats['skipped']++;
-                        continue;
-                    }
+        // Bulk import: don't notify followers for every single historic book or review.
+        FriendActivity::$quiet = true;
+        try {
+            Review::withoutEvents(function () use ($handle, $header, $source, $user, &$stats, $existing) {
+                DB::transaction(function () use ($handle, $header, $source, $user, &$stats, $existing) {
+                    $rows = 0;
+                    while (($values = fgetcsv($handle)) !== false && $rows++ < self::MAX_ROWS) {
+                        if (count($values) < 2) {
+                            continue;
+                        }
+                        $row = array_combine($header, array_pad(array_slice($values, 0, count($header)), count($header), ''));
+                        $data = $source === 'goodreads' ? self::fromGoodreads($row) : self::fromStoryGraph($row);
+                        if (! $data || $data['title'] === '') {
+                            $stats['skipped']++;
+                            continue;
+                        }
 
-                    $book = self::findOrCreateBook($data);
-                    if ($existing->has($book->id)) {
-                        $stats['skipped']++;
-                        continue;
-                    }
-                    $existing->put($book->id, true);
+                        $book = self::findOrCreateBook($data);
+                        if ($existing->has($book->id)) {
+                            $stats['skipped']++;
+                            continue;
+                        }
+                        $existing->put($book->id, true);
 
-                    UserBookShelf::create([
-                        'user_id' => $user->id,
-                        'book_id' => $book->id,
-                        'status' => $data['status'],
-                        'total_pages' => $data['pages'],
-                        'current_page' => $data['status'] === 'read' ? $data['pages'] : null,
-                        'read_at' => $data['status'] === 'read' ? ($data['read_at'] ?? $data['added_at'] ?? now()) : null,
-                    ]);
-                    $stats['imported']++;
+                        UserBookShelf::create([
+                            'user_id' => $user->id,
+                            'book_id' => $book->id,
+                            'status' => $data['status'],
+                            'total_pages' => $data['pages'],
+                            'current_page' => $data['status'] === 'read' ? $data['pages'] : null,
+                            'read_at' => $data['status'] === 'read' ? ($data['read_at'] ?? $data['added_at'] ?? now()) : null,
+                        ]);
+                        $stats['imported']++;
 
-                    if ($data['rating']) {
-                        Review::updateOrCreate(
-                            ['user_id' => $user->id, 'book_id' => $book->id],
-                            ['rating' => $data['rating'], 'body' => $data['review']],
-                        );
-                        $stats['reviews']++;
+                        if ($data['rating']) {
+                            Review::updateOrCreate(
+                                ['user_id' => $user->id, 'book_id' => $book->id],
+                                ['rating' => $data['rating'], 'body' => $data['review']],
+                            );
+                            $stats['reviews']++;
+                        }
                     }
-                }
+                });
             });
-        });
+        } finally {
+            FriendActivity::$quiet = false;
+        }
 
         fclose($handle);
 

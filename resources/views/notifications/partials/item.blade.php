@@ -1,6 +1,6 @@
 @php
     $data = $notification->data;
-    $icon = ['follow' => '👋', 'like' => '❤️', 'comment' => '💬', 'review' => '📖', 'goal' => '🎯', 'buddy' => '🤝'][$data['kind'] ?? ''] ?? '🔔';
+    $icon = ['follow' => '👋', 'like' => '❤️', 'comment' => '💬', 'review' => '📖', 'goal' => '🎯', 'buddy' => '🤝', 'reading' => '📖', 'finished' => '✅', 'rated' => '⭐', 'reviewed' => '📝'][$data['kind'] ?? ''] ?? '🔔';
 @endphp
 <a href="{{ route('notifications.open', $notification->id) }}" class="focus-ring flex items-start gap-3 rounded-2xl px-3 py-2.5 transition hover:bg-parchment/70 dark:hover:bg-white/5 {{ $notification->read_at ? '' : 'bg-rosetint/40 dark:bg-white/[0.04]' }}">
     <span class="relative shrink-0">

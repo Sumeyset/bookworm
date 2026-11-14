@@ -7,7 +7,8 @@ use Illuminate\Notifications\Notification;
 
 /**
  * One notification type for everything in the bell menu: new followers,
- * likes, comments, buddy reads, goal milestones and reviews of books you want to read.
+ * likes, comments, buddy reads, goal milestones, and what the readers you follow are
+ * reading (started, finished, rated, reviewed — see App\Support\FriendActivity).
  */
 class BookwormNotification extends Notification
 {
@@ -16,6 +17,7 @@ class BookwormNotification extends Notification
         public string $message,
         public string $url,
         public ?User $actor = null,
+        public ?string $key = null,
     ) {
     }
 
@@ -33,6 +35,7 @@ class BookwormNotification extends Notification
             'actor_name' => $this->actor?->name,
             'actor_username' => $this->actor?->username,
             'actor_photo' => $this->actor?->profile_photo_url,
+            'key' => $this->key,
         ];
     }
 
