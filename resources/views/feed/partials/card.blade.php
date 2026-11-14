@@ -127,36 +127,54 @@
             @endif
         @endif
 
-        {{-- Replies --}}
-        @if ($comments->count() > 2)
-            <button type="button" x-show="!all" @click="all = true" class="mt-1 text-sm text-tan hover:underline">View all {{ $comments->count() }} replies</button>
-        @endif
-        @if ($comments->isNotEmpty())
-            <ul class="mt-1 space-y-0.5 text-sm">
+        <p class="ig-time"><time datetime="{{ $item->created_at->toIso8601String() }}">{{ $item->created_at->diffForHumans() }}</time></p>
+    </div>
+
+    {{-- Replies: their own section, separate from the caption --}}
+    <section class="ig-replies" aria-label="Replies">
+        <div class="flex items-center justify-between">
+            <h3 class="ig-replies__title">
+                Replies
+                @if ($comments->isNotEmpty())<span class="ig-replies__count">{{ $comments->count() }}</span>@endif
+            </h3>
+            @if ($comments->count() > 2)
+                <button type="button" @click="all = !all" class="text-xs font-semibold text-tan hover:text-burgundy hover:underline dark:hover:text-[#E9A2AE]" x-text="all ? 'Show fewer' : 'View all {{ $comments->count() }}'">View all {{ $comments->count() }}</button>
+            @endif
+        </div>
+
+        @if ($comments->isEmpty())
+            <p class="mt-1 text-sm text-tan">No replies yet. Start the conversation.</p>
+        @else
+            <ul class="mt-2 space-y-3">
                 @foreach ($comments as $index => $comment)
-                    <li class="group flex gap-1.5" @if ($index < $comments->count() - 2) x-show="all" x-cloak @endif>
-                        <p class="min-w-0 flex-1 break-words">
-                            <a href="{{ route('users.show', $comment->user->username) }}" class="font-semibold hover:underline">{{ $comment->user->username ?? $comment->user->name }}</a>
-                            {{ $comment->body }}
-                        </p>
-                        @if ($comment->user_id === auth()->id())
-                            <form method="POST" action="{{ route('comments.destroy', $comment) }}" class="shrink-0 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
-                                @csrf @method('DELETE')
-                                <button class="text-xs text-tan hover:text-burgundy" aria-label="Delete reply">Delete</button>
-                            </form>
-                        @endif
+                    <li class="group flex gap-2.5" @if ($index < $comments->count() - 2) x-show="all" x-cloak @endif>
+                        <a href="{{ route('users.show', $comment->user->username) }}" class="shrink-0" tabindex="-1" aria-hidden="true">
+                            <x-avatar :src="$comment->user->profile_photo_url" :name="$comment->user->name" size="sm" />
+                        </a>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs">
+                                <a href="{{ route('users.show', $comment->user->username) }}" class="font-semibold text-ink hover:underline dark:text-[#F4E9E2]">{{ $comment->user->username ?? $comment->user->name }}</a>
+                                <span class="text-tan">· {{ $comment->created_at->diffForHumans(short: true) }}</span>
+                                @if ($comment->user_id === auth()->id())
+                                    <form method="POST" action="{{ route('comments.destroy', $comment) }}" class="inline opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                                        @csrf @method('DELETE')
+                                        <button class="ml-1 text-tan hover:text-burgundy" aria-label="Delete reply">Delete</button>
+                                    </form>
+                                @endif
+                            </div>
+                            <p class="mt-0.5 whitespace-pre-line break-words text-sm leading-6 text-ink dark:text-[#F4E9E2]">{{ $comment->body }}</p>
+                        </div>
                     </li>
                 @endforeach
             </ul>
         @endif
 
-        <p class="ig-time"><time datetime="{{ $item->created_at->toIso8601String() }}">{{ $item->created_at->diffForHumans() }}</time></p>
-
-        <form method="POST" action="{{ route('reactions.comment', [$type, $item->id]) }}" class="mt-2 flex items-center gap-2 border-t border-warmborder/70 pt-2 dark:border-[#4B3035]">
+        <form method="POST" action="{{ route('reactions.comment', [$type, $item->id]) }}" class="ig-replies__form">
             @csrf
+            <x-avatar :src="auth()->user()->profile_photo_url" :name="auth()->user()->name" size="sm" />
             <label class="sr-only" for="reply-{{ $key }}">Add a reply</label>
             <input x-ref="reply" id="reply-{{ $key }}" name="body" maxlength="1000" required autocomplete="off" placeholder="Add a reply…" class="min-w-0 flex-1 border-0 bg-transparent px-0 py-1.5 text-sm placeholder:text-tan/70 focus:ring-0">
             <button type="submit" class="text-sm font-semibold text-burgundy hover:text-burgundy-hover dark:text-[#E9A2AE]">Post</button>
         </form>
-    </div>
+    </section>
 </article>
