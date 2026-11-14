@@ -101,3 +101,78 @@ test('the send button on a post shares it into chats', function () {
 
     $this->actingAs($me)->postJson(route('posts.send', $post), ['recipients' => []])->assertUnprocessable();
 });
+
+test('photos, voice messages and files can be sent, and only chat members can open them', function () {
+    $me = User::factory()->create();
+    $friend = User::factory()->create();
+    $outsider = User::factory()->create();
+    $friend->following()->attach($me->id);
+
+    $this->actingAs($me)->get(route('messages.start', $friend->username));
+    $conversation = Conversation::firstOrFail();
+
+    // Two photos and a caption in one message.
+    $this->postJson(route('messages.store', $conversation), [
+        'body' => 'My new shelf!',
+        'photos' => [\Illuminate\Http\UploadedFile::fake()->image('a.jpg', 800, 600), \Illuminate\Http\UploadedFile::fake()->image('b.png', 600, 800)],
+    ])->assertCreated()->assertSee('dm-photos--2', false);
+
+    // A voice message.
+    $this->postJson(route('messages.store', $conversation), [
+        'voice' => \Illuminate\Http\UploadedFile::fake()->create('voice-message.webm', 40, 'audio/webm'),
+        'voice_duration' => 7.4,
+    ])->assertCreated()->assertSee('0:07');
+
+    // A PDF.
+    $this->postJson(route('messages.store', $conversation), [
+        'files' => [\Illuminate\Http\UploadedFile::fake()->create('chapter-notes.pdf', 120, 'application/pdf')],
+    ])->assertCreated()->assertSee('chapter-notes.pdf');
+
+    $attachments = \App\Models\MessageAttachment::orderBy('id')->get();
+    expect($attachments->pluck('type')->all())->toBe(['image', 'image', 'audio', 'file'])
+        ->and($attachments[0]->width)->toBe(800)
+        ->and($attachments[2]->duration)->toBe(7.4)
+        ->and($attachments[0]->path)->toStartWith('message-attachments/' . $me->id . '/');
+    \Illuminate\Support\Facades\Storage::disk('local')->assertExists($attachments[0]->path);
+
+    // The inbox preview says what was sent.
+    $this->actingAs($friend)->get(route('messages.index'))->assertSee('Sent a file');
+
+    // Members can open attachments; nobody else can.
+    $this->get(route('messages.attachment', $attachments[0]))->assertOk();
+    $this->get(route('messages.attachment', $attachments[3]))->assertOk()->assertDownload('chapter-notes.pdf');
+    $this->actingAs($outsider)->get(route('messages.attachment', $attachments[0]))->assertNotFound();
+
+    // Unsafe or empty sends are refused.
+    $this->actingAs($me)->postJson(route('messages.store', $conversation), [
+        'files' => [\Illuminate\Http\UploadedFile::fake()->create('virus.exe', 10, 'application/x-msdownload')],
+    ])->assertUnprocessable()->assertJsonValidationErrors('files.0');
+    $this->postJson(route('messages.store', $conversation), [])->assertUnprocessable()->assertJsonValidationErrors('body');
+});
+
+test('the list refreshes, shows "Seen", and attachment files go when a request is deleted', function () {
+    $me = User::factory()->create(['name' => 'Asker']);
+    $other = User::factory()->create();
+
+    $this->actingAs($me)->get(route('messages.start', $other->username));
+    $conversation = Conversation::firstOrFail();
+    $this->postJson(route('messages.store', $conversation), ['photos' => [\Illuminate\Http\UploadedFile::fake()->image('p.jpg')]]);
+    $path = \App\Models\MessageAttachment::firstOrFail()->path;
+
+    // Not seen yet…
+    expect($this->getJson(route('messages.poll', $conversation))->json('seen_id'))->toBeNull();
+
+    // …the other reader sees it in their (requests) list, opens it…
+    $this->actingAs($other)->getJson(route('messages.list', ['tab' => 'requests']))
+        ->assertOk()->assertJsonPath('requests', 1)->assertSee('Asker')->assertSee('Sent a photo');
+    $this->getJson(route('messages.unread'))->assertJsonPath('unread', 1);
+    $this->get(route('messages.show', $conversation));
+
+    // …and now it's seen.
+    $this->actingAs($me)->getJson(route('messages.poll', $conversation))
+        ->assertJsonPath('seen_id', \App\Models\Message::firstOrFail()->id);
+
+    // Deleting the request removes the stored photo too.
+    $this->actingAs($other)->delete(route('messages.destroy', $conversation));
+    \Illuminate\Support\Facades\Storage::disk('local')->assertMissing($path);
+});

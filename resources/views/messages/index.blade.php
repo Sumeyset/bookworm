@@ -17,7 +17,7 @@
                 <nav class="dm-tabs" aria-label="Messages or requests">
                     <a href="{{ route('messages.index') }}" @class(['is-active' => $tab === 'inbox']) @if ($tab === 'inbox') aria-current="page" @endif>Messages</a>
                     <a href="{{ route('messages.index', ['tab' => 'requests']) }}" @class(['is-active' => $tab === 'requests']) @if ($tab === 'requests') aria-current="page" @endif>
-                        Requests @if ($requestCount)<span class="dm-tabs__count">{{ $requestCount }}</span>@endif
+                        Requests <span class="dm-tabs__count" data-dm-requests @if (! $requestCount) hidden @endif>{{ $requestCount }}</span>
                     </a>
                 </nav>
 
@@ -25,28 +25,8 @@
                     <p class="px-4 pb-2 text-xs text-tan">Messages from readers you don’t follow. They won’t know you’ve seen them until you reply or accept.</p>
                 @endif
 
-                <ul class="dm-list__items">
-                    @forelse ($conversations as $conversation)
-                        @php $person = $conversation->other($me); @endphp
-                        @continue(! $person)
-                        <li>
-                            <a href="{{ route('messages.show', $conversation) }}" @class(['dm-item', 'is-active' => $active?->id === $conversation->id, 'is-unread' => $conversation->unread])>
-                                <x-avatar :src="$person->profile_photo_url" :name="$person->name" size="reader" class="!ring-0 !ring-offset-0" />
-                                <span class="min-w-0 flex-1">
-                                    <span class="dm-item__name">{{ $person->name }}</span>
-                                    <span class="dm-item__preview">
-                                        <span class="truncate">{{ $conversation->latestMessage?->preview($me) }}</span>
-                                        <span class="shrink-0">· {{ $conversation->last_message_at?->diffForHumans(short: true) }}</span>
-                                    </span>
-                                </span>
-                                @if ($conversation->unread)<span class="dm-item__dot" aria-label="Unread"></span>@endif
-                            </a>
-                        </li>
-                    @empty
-                        <li class="px-6 py-10 text-center text-sm text-tan">
-                            {{ $tab === 'requests' ? 'No message requests.' : 'No messages yet.' }}
-                        </li>
-                    @endforelse
+                <ul class="dm-list__items" data-dm-list data-list-url="{{ route('messages.list', array_filter(['tab' => $tab === 'requests' ? 'requests' : null, 'active' => $active?->id])) }}" aria-live="polite">
+                    @include('messages.partials.list', ['activeId' => $active?->id, 'me' => $me])
                 </ul>
             </aside>
 
@@ -74,9 +54,10 @@
                             <a href="{{ route('users.show', $other->username) }}" class="btn-ghost mt-3 min-h-0 py-1.5 text-xs">View profile</a>
                             @if ($hasOlder)<p class="mt-4 text-xs text-tan">Showing the latest messages</p>@endif
                         </div>
-                        <div class="dm-chat__messages" data-dm-messages>
+                        <div class="dm-chat__messages" data-dm-messages data-seen-id="{{ $seenId }}">
                             @include('messages.partials.messages', ['messages' => $messages, 'viewer' => $me])
                         </div>
+                        <p class="dm-seen" data-dm-seen hidden>Seen</p>
                     </div>
 
                     @if ($isRequest)
@@ -90,12 +71,39 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('messages.store', $active) }}" class="dm-compose" data-dm-form
+                    <form method="POST" action="{{ route('messages.store', $active) }}" enctype="multipart/form-data" class="dm-composer" data-dm-form
                           data-poll-url="{{ route('messages.poll', $active) }}" data-me="{{ $me->id }}">
                         @csrf
-                        <label for="dm-body" class="sr-only">Message</label>
-                        <textarea id="dm-body" name="body" rows="1" maxlength="2000" required placeholder="Message…" autocomplete="off" data-dm-input></textarea>
-                        <button type="submit" class="dm-compose__send" data-dm-send disabled>Send</button>
+                        {{-- Photos and files waiting to be sent --}}
+                        <div class="dm-tray" data-dm-tray hidden></div>
+
+                        {{-- Voice recorder (replaces the box while recording) --}}
+                        <div class="dm-recorder" data-dm-recorder hidden>
+                            <button type="button" class="dm-tool dm-tool--danger" data-dm-record-cancel aria-label="Delete recording">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                            </button>
+                            <span class="dm-recorder__dot" aria-hidden="true"></span>
+                            <span class="dm-recorder__time" data-dm-record-time>0:00</span>
+                            <span class="dm-recorder__bars" aria-hidden="true" data-dm-record-bars></span>
+                            <button type="button" class="dm-compose__send" data-dm-record-send>Send</button>
+                        </div>
+
+                        <div class="dm-compose" data-dm-compose>
+                            <input type="file" accept="image/*" multiple class="sr-only" id="dm-photos" data-dm-photos tabindex="-1">
+                            <input type="file" accept=".pdf,.epub,.txt,.md,.doc,.docx,.odt,.rtf,.csv,.xls,.xlsx,.ppt,.pptx,.zip" multiple class="sr-only" id="dm-files" data-dm-files tabindex="-1">
+                            <label for="dm-photos" class="dm-tool" title="Send photos" aria-label="Send photos">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="9" r="1.8"/><path d="m21 15-4.5-4.5L6 21"/></svg>
+                            </label>
+                            <label for="dm-files" class="dm-tool" title="Send a file" aria-label="Send a file">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20.5 11.5-8.3 8.3a5 5 0 0 1-7.1-7.1l8.3-8.3a3.4 3.4 0 0 1 4.8 4.8l-8.3 8.3a1.7 1.7 0 0 1-2.4-2.4l7.6-7.6"/></svg>
+                            </label>
+                            <label for="dm-body" class="sr-only">Message</label>
+                            <textarea id="dm-body" name="body" rows="1" maxlength="2000" placeholder="Message…" autocomplete="off" data-dm-input></textarea>
+                            <button type="button" class="dm-tool" data-dm-record title="Record a voice message" aria-label="Record a voice message">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+                            </button>
+                            <button type="submit" class="dm-compose__send" data-dm-send hidden>Send</button>
+                        </div>
                     </form>
                 @else
                     <div class="dm-empty">

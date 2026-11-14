@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\MessageAttachment;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -49,7 +52,7 @@ class MessageController extends Controller
         abort_unless($conversation->membership($user), 404);
 
         $messages = $conversation->messages()
-            ->with(['user', 'post.photos', 'post.book', 'post.user'])
+            ->with(['user', 'attachments', 'post.photos', 'post.book', 'post.user'])
             ->latest('id')
             ->take(self::PAGE)
             ->get()
@@ -68,6 +71,7 @@ class MessageController extends Controller
             'messages' => $messages,
             'isRequest' => $isRequest,
             'hasOlder' => $conversation->messages()->count() > self::PAGE,
+            'seenId' => $this->seenMessageId($conversation, $user),
         ]);
     }
 
@@ -78,10 +82,31 @@ class MessageController extends Controller
         abort_unless($conversation->membership($user), 404);
 
         $validated = $request->validate([
-            'body' => ['required', 'string', 'max:2000'],
+            'body' => ['nullable', 'string', 'max:2000'],
+            'photos' => ['nullable', 'array', 'max:10'],
+            'photos.*' => ['image', 'mimes:jpg,jpeg,png,webp,gif', 'max:10240'],
+            'voice' => ['nullable', 'file', 'mimetypes:audio/webm,audio/ogg,audio/mp4,audio/x-m4a,audio/mpeg,audio/wav,audio/x-wav,audio/aac,video/webm,video/mp4,application/octet-stream', 'max:10240'],
+            'voice_duration' => ['nullable', 'numeric', 'min:0', 'max:300'],
+            'files' => ['nullable', 'array', 'max:5'],
+            'files.*' => ['file', 'mimes:pdf,epub,txt,md,doc,docx,odt,rtf,csv,xls,xlsx,ppt,pptx,zip', 'max:20480'],
+        ], [
+            'photos.max' => 'You can send up to 10 photos at once.',
+            'photos.*.max' => 'Each photo must be smaller than 10 MB.',
+            'photos.*.image' => 'That photo couldn’t be read.',
+            'voice.max' => 'Voice messages can be up to 10 MB.',
+            'voice.mimetypes' => 'That voice message format isn’t supported.',
+            'files.max' => 'You can send up to 5 files at once.',
+            'files.*.max' => 'Each file must be 20 MB or smaller.',
+            'files.*.mimes' => 'You can send documents like PDF, EPUB, Word, text, spreadsheets or ZIP files.',
         ]);
 
-        $message = $this->send($conversation, $user, trim($validated['body']));
+        $body = trim((string) ($validated['body'] ?? '')) ?: null;
+        $uploads = $this->uploads($request, $user, $validated);
+        if ($body === null && $uploads === []) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['body' => 'Write a message or add a photo, voice message or file.']);
+        }
+
+        $message = $this->send($conversation, $user, $body, null, $uploads);
 
         if ($request->expectsJson()) {
             return response()->json(['id' => $message->id, 'html' => $this->render(collect([$message]), $user)], 201);
@@ -98,7 +123,7 @@ class MessageController extends Controller
         abort_unless($conversation->membership($user), 404);
 
         $messages = $conversation->messages()
-            ->with(['user', 'post.photos', 'post.book', 'post.user'])
+            ->with(['user', 'attachments', 'post.photos', 'post.book', 'post.user'])
             ->where('id', '>', (int) $request->query('after', 0))
             ->oldest('id')
             ->take(50)
@@ -112,7 +137,49 @@ class MessageController extends Controller
             'last_id' => $messages->last()?->id,
             'html' => $messages->isEmpty() ? '' : $this->render($messages, $user),
             'unread' => $user->unreadConversationCount() + $user->messageRequestCount(),
+            'seen_id' => $this->seenMessageId($conversation, $user),
         ]);
+    }
+
+    /** The conversation list, so it can refresh itself while the page is open. */
+    public function list(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $tab = $request->query('tab') === 'requests' ? 'requests' : 'inbox';
+
+        return response()->json([
+            'html' => view('messages.partials.list', [
+                'conversations' => $this->inbox($user, $tab),
+                'tab' => $tab,
+                'activeId' => (int) $request->query('active'),
+                'me' => $user,
+            ])->render(),
+            'requests' => $user->messageRequestCount(),
+            'unread' => $user->unreadConversationCount() + $user->messageRequestCount(),
+        ]);
+    }
+
+    /** Just the number for the top-bar badge (checked now and then on every page). */
+    public function unread(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return response()->json(['unread' => $user->unreadConversationCount() + $user->messageRequestCount()]);
+    }
+
+    /** A photo, voice message or file — only for the two people in the chat. */
+    public function attachment(Request $request, MessageAttachment $attachment)
+    {
+        $conversation = $attachment->message->conversation;
+        abort_unless($conversation->hasMember($request->user()), 404);
+        abort_unless(Storage::disk('local')->exists($attachment->path), 404);
+
+        $headers = ['X-Content-Type-Options' => 'nosniff', 'Cache-Control' => 'private, max-age=86400'];
+        if ($attachment->type === 'file') {
+            return Storage::disk('local')->download($attachment->path, $attachment->original_name ?: 'file', $headers);
+        }
+
+        return response()->file(Storage::disk('local')->path($attachment->path), $headers + ['Content-Type' => $attachment->mime ?: 'application/octet-stream']);
     }
 
     public function accept(Request $request, Conversation $conversation): RedirectResponse
@@ -180,9 +247,12 @@ class MessageController extends Controller
         ]));
     }
 
-    private function send(Conversation $conversation, User $sender, ?string $body, ?int $postId = null): Message
+    private function send(Conversation $conversation, User $sender, ?string $body, ?int $postId = null, array $uploads = []): Message
     {
         $message = $conversation->messages()->create(['user_id' => $sender->id, 'body' => $body, 'post_id' => $postId]);
+        foreach ($uploads as $upload) {
+            $message->attachments()->create($upload);
+        }
         $conversation->forceFill(['last_message_at' => $message->created_at])->save();
         // Writing in a chat accepts it (e.g. replying to a request) and marks it read.
         $conversation->users()->updateExistingPivot($sender->id, [
@@ -190,7 +260,53 @@ class MessageController extends Controller
             'accepted_at' => $conversation->membership($sender)?->accepted_at ?? now(),
         ]);
 
-        return $message->load(['user', 'post.photos', 'post.book', 'post.user']);
+        return $message->load(['user', 'attachments', 'post.photos', 'post.book', 'post.user']);
+    }
+
+    /** Store the photos, voice message and files of a new message; returns attachment rows. */
+    private function uploads(Request $request, User $user, array $validated): array
+    {
+        $stored = [];
+        $store = function (UploadedFile $file, string $type, array $extra = []) use (&$stored, $user) {
+            $path = $file->store('message-attachments/' . $user->id, 'local');
+            if ($path === false) {
+                throw new \RuntimeException('Failed to store a message attachment.');
+            }
+            $name = basename(str_replace('\\', '/', $file->getClientOriginalName()));
+            $stored[] = [
+                'type' => $type,
+                'path' => $path,
+                'original_name' => mb_substr(preg_replace('/[\x00-\x1F\x7F]/u', '', $name) ?: $type, 0, 255),
+                'mime' => $file->getMimeType(),
+                'size' => $file->getSize(),
+            ] + $extra;
+        };
+
+        foreach ($request->file('photos', []) as $photo) {
+            [$width, $height] = @getimagesize($photo->getRealPath()) ?: [null, null];
+            $store($photo, 'image', ['width' => $width, 'height' => $height]);
+        }
+        if ($voice = $request->file('voice')) {
+            $store($voice, 'audio', ['duration' => $validated['voice_duration'] ?? null]);
+        }
+        foreach ($request->file('files', []) as $file) {
+            $store($file, 'file');
+        }
+
+        return $stored;
+    }
+
+    /** The newest message of mine the other reader has already seen (for "Seen"). */
+    private function seenMessageId(Conversation $conversation, User $user): ?int
+    {
+        $other = $conversation->users->firstWhere('id', '!=', $user->id);
+        $readAt = $other?->pivot->last_read_at;
+        if (! $readAt) {
+            return null;
+        }
+        $mine = $conversation->messages()->where('user_id', $user->id)->latest('id')->first();
+
+        return $mine && $mine->created_at->lte(\Illuminate\Support\Carbon::parse($readAt)) ? $mine->id : null;
     }
 
     private function markRead(Conversation $conversation, User $user): void
@@ -210,7 +326,7 @@ class MessageController extends Controller
             ->when($tab === 'requests', fn ($query) => $query->whereNull('conversation_user.accepted_at'))
             ->when($tab === 'inbox', fn ($query) => $query->whereNotNull('conversation_user.accepted_at'))
             ->whereHas('messages')
-            ->with(['users', 'latestMessage'])
+            ->with(['users', 'latestMessage.attachments'])
             ->orderByDesc('last_message_at')
             ->get()
             ->each(function (Conversation $conversation) use ($user) {

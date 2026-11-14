@@ -77,8 +77,10 @@ class ProfileController extends Controller
             }
         }
 
-        // Photos the reader posted (the posts themselves go with the account).
+        // Photos the reader posted (the posts themselves go with the account),
+        // and files they sent in messages.
         Storage::disk('public')->deleteDirectory('post-photos/' . $user->id);
+        Storage::disk('local')->deleteDirectory('message-attachments/' . $user->id);
 
         Auth::logout();
 

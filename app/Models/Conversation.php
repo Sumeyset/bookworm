@@ -17,6 +17,14 @@ class Conversation extends Model
         return ['last_message_at' => 'datetime'];
     }
 
+    protected static function booted(): void
+    {
+        // Attachment files live on disk; remove them with the conversation.
+        static::deleting(function (Conversation $conversation): void {
+            MessageAttachment::deleteFilesFor(MessageAttachment::whereIn('message_id', $conversation->messages()->select('id')));
+        });
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->withPivot(['last_read_at', 'accepted_at'])->withTimestamps();

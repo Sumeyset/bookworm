@@ -28,6 +28,42 @@
                     <p class="dm-bubble dm-bubble--muted">This post was deleted.</p>
                 @endif
             @endif
+            @php
+                $images = $message->attachments->where('type', 'image')->values();
+                $audio = $message->attachments->firstWhere('type', 'audio');
+                $files = $message->attachments->where('type', 'file');
+            @endphp
+            @if ($images->isNotEmpty())
+                <div class="dm-photos dm-photos--{{ min($images->count(), 4) }}">
+                    @foreach ($images->take(4) as $image)
+                        <button type="button" class="dm-photos__item" data-dm-view="{{ $image->url() }}" data-dm-gallery="{{ $images->map->url()->implode('|') }}" data-dm-index="{{ $loop->index }}" aria-label="Open photo {{ $loop->iteration }} of {{ $images->count() }}">
+                            <img src="{{ $image->url() }}" alt="" loading="lazy" decoding="async" @if ($images->count() === 1 && $image->width && $image->height) width="{{ $image->width }}" height="{{ $image->height }}" @endif>
+                            @if ($loop->last && $images->count() > 4)<span class="dm-photos__more">+{{ $images->count() - 4 }}</span>@endif
+                        </button>
+                    @endforeach
+                </div>
+            @endif
+            @if ($audio)
+                <div class="dm-voice" data-dm-voice data-src="{{ $audio->url() }}" data-duration="{{ $audio->duration }}">
+                    <button type="button" class="dm-voice__play" data-dm-voice-play aria-label="Play voice message">
+                        <svg class="dm-voice__icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="dm-voice__icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+                    </button>
+                    <span class="dm-voice__wave" data-dm-voice-wave aria-hidden="true">
+                        @foreach (range(1, 28) as $bar)<i style="--h: {{ 25 + (crc32($audio->id . '-' . $bar) % 70) }}%"></i>@endforeach
+                    </span>
+                    <span class="dm-voice__time" data-dm-voice-time>{{ $audio->durationLabel() }}</span>
+                </div>
+            @endif
+            @foreach ($files as $file)
+                <a href="{{ $file->url() }}" class="dm-file" download>
+                    <span class="dm-file__icon" aria-hidden="true">{{ Str::upper(Str::limit(pathinfo($file->original_name, PATHINFO_EXTENSION) ?: 'FILE', 4, '')) }}</span>
+                    <span class="min-w-0">
+                        <span class="dm-file__name">{{ $file->original_name }}</span>
+                        <span class="dm-file__meta">{{ $file->sizeLabel() }} · Download</span>
+                    </span>
+                </a>
+            @endforeach
             @if (filled($message->body))
                 <p class="dm-bubble" title="{{ $message->created_at->format('j M Y, H:i') }}">{{ $message->body }}</p>
             @endif

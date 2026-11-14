@@ -69,6 +69,9 @@ Route::middleware('auth')->group(function () {
     // Direct messages
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/contacts', [MessageController::class, 'contacts'])->name('messages.contacts');
+    Route::get('/messages/list', [MessageController::class, 'list'])->middleware('throttle:120,1')->name('messages.list');
+    Route::get('/messages/unread', [MessageController::class, 'unread'])->middleware('throttle:60,1')->name('messages.unread');
+    Route::get('/messages/attachments/{attachment}', [MessageController::class, 'attachment'])->name('messages.attachment');
     Route::get('/messages/to/{user:username}', [MessageController::class, 'start'])->name('messages.start');
     Route::get('/messages/{conversation}', [MessageController::class, 'show'])->whereNumber('conversation')->name('messages.show');
     Route::post('/messages/{conversation}', [MessageController::class, 'store'])->whereNumber('conversation')->middleware('throttle:60,1')->name('messages.store');
