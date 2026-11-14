@@ -146,7 +146,7 @@ test('a user can read a private PDF and save and remove text highlights', functi
     $this->actingAs($user)
         ->get(route('books.pdfs.reader', [$book, $pdf]))
         ->assertOk()
-        ->assertSee('Highlight selection')
+        ->assertSee('Reading settings')
         ->assertSee('Saved highlights');
 
     $fileResponse = $this->get(route('books.pdfs.file', [$book, $pdf]));
@@ -168,7 +168,13 @@ test('a user can read a private PDF and save and remove text highlights', functi
     $this->getJson(route('books.pdfs.highlights.index', [$book, $pdf]))
         ->assertOk()
         ->assertJsonCount(1)
-        ->assertJsonPath('0.text', 'A selected sentence');
+        ->assertJsonPath('0.text', 'A selected sentence')
+        ->assertJsonPath('0.quoted', false);
+
+    $this->postJson(route('quotes.store', [$pdf, $highlightId]))->assertCreated();
+
+    $this->getJson(route('books.pdfs.highlights.index', [$book, $pdf]))
+        ->assertJsonPath('0.quoted', true);
 
     $this->deleteJson(route('books.pdfs.highlights.destroy', [$book, $pdf, $highlightId]))
         ->assertOk()
