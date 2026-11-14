@@ -12,6 +12,7 @@ import '@fontsource/eb-garamond/600.css';
 import '@fontsource/atkinson-hyperlegible/400.css';
 import '@fontsource/atkinson-hyperlegible/400-italic.css';
 import '@fontsource/atkinson-hyperlegible/700.css';
+import { CARD_FONTS, CARD_STYLES, buildQuoteCard } from './quote-card.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -321,7 +322,9 @@ function initializeReader(reader) {
     /* ---------------- settings ---------------- */
 
     function applySettings() {
+        if (!$(`[data-setting="theme"][data-value="${settings.theme}"]`)) settings.theme = defaultSettings().theme;
         reader.dataset.theme = settings.theme;
+        reader.dataset.tone = $(`[data-setting="theme"][data-value="${settings.theme}"]`)?.dataset.tone || 'light';
         reader.dataset.align = settings.align;
         reader.dataset.view = settings.view;
         reader.style.setProperty('--reader-font', FONTS[settings.font] || FONTS.literata);
@@ -1070,8 +1073,13 @@ function initializeReader(reader) {
         const action = button.dataset.action;
         const target = toolbarTarget;
 
-        // Sharing is not built yet; the button is a placeholder for now.
-        if (action === 'share') return;
+        if (action === 'share') {
+            openShare(target.kind === 'selection'
+                ? { text: target.payload.text, page: target.payload.page_number, payload: target.payload }
+                : { text: target.highlight.text, page: target.highlight.page_number, highlight: target.highlight });
+            hideToolbar();
+            return;
+        }
 
         if (action === 'copy') {
             const text = target.kind === 'selection' ? target.payload.text : target.highlight.text;
@@ -1204,6 +1212,11 @@ function initializeReader(reader) {
 
     document.addEventListener('keydown', (event) => {
         const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
+        if (event.key === 'Escape' && !shareSheet.hidden) {
+            closeShare();
+            return;
+        }
+        if (!shareSheet.hidden) return;
         if (event.key === 'Escape') {
             hideToolbar();
             closePanels();
@@ -1220,6 +1233,168 @@ function initializeReader(reader) {
     });
 
     window.addEventListener('scroll', () => { if (toolbarTarget?.kind === 'highlight') hideToolbar(); }, { passive: true });
+
+    /* ---------------- share a quote to the feed ---------------- */
+
+    const shareSheet = $('[data-share-sheet]');
+    const sharePreview = $('[data-share-preview]');
+    const shareDesigns = $('[data-share-designs]');
+    const shareFonts = $('[data-share-fonts]');
+    const shareCaption = $('[data-share-caption]');
+    const sharePost = $('[data-share-post]');
+    const shareForm = $('[data-share-form]');
+    const shareDone = $('[data-share-done]');
+    let share = null; // { text, page, highlight?, payload?, design, font, postUrl?, shareUrl? }
+    let shareReturnFocus = null;
+
+    const shareMeta = (page) => [bookAuthor, page ? `p. ${page}` : null].filter(Boolean).join(' · ');
+
+    function lastShareChoice() {
+        try {
+            return { design: 'wine', font: 'serif', ...JSON.parse(localStorage.getItem('bookworm-share-card') || '{}') };
+        } catch {
+            return { design: 'wine', font: 'serif' };
+        }
+    }
+
+    function storeShareChoice() {
+        try {
+            localStorage.setItem('bookworm-share-card', JSON.stringify({ design: share.design, font: share.font }));
+        } catch {
+            // Storage blocked: the choice just won't be remembered.
+        }
+    }
+
+    function renderSharePreview() {
+        sharePreview.replaceChildren(buildQuoteCard({
+            text: share.text,
+            design: share.design,
+            font: share.font,
+            title: bookTitle,
+            meta: shareMeta(share.page),
+        }));
+        shareDesigns.querySelectorAll('[data-design]').forEach((button) => {
+            button.setAttribute('aria-checked', String(button.dataset.design === share.design));
+        });
+        shareFonts.querySelectorAll('[data-font]').forEach((button) => {
+            button.setAttribute('aria-checked', String(button.dataset.font === share.font));
+        });
+    }
+
+    CARD_STYLES.forEach(({ value, label }) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'qcard-swatch';
+        button.setAttribute('role', 'radio');
+        button.setAttribute('aria-label', label);
+        button.title = label;
+        button.dataset.design = value;
+        const sample = document.createElement('span');
+        sample.className = `qcard qcard--${value}`;
+        sample.setAttribute('aria-hidden', 'true');
+        button.append(sample);
+        button.addEventListener('click', () => {
+            share.design = value;
+            storeShareChoice();
+            renderSharePreview();
+        });
+        shareDesigns.append(button);
+    });
+
+    CARD_FONTS.forEach(({ value, label }) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'reader-share__font';
+        button.setAttribute('role', 'radio');
+        button.dataset.font = value;
+        button.textContent = label;
+        button.style.fontFamily = {
+            serif: 'Lora, Georgia, serif',
+            classic: "'EB Garamond', Georgia, serif",
+            hand: 'Caveat, cursive',
+            sans: 'Figtree, system-ui, sans-serif',
+            mono: "'Courier New', monospace",
+        }[value];
+        button.addEventListener('click', () => {
+            share.font = value;
+            storeShareChoice();
+            renderSharePreview();
+        });
+        shareFonts.append(button);
+    });
+
+    function openShare(target) {
+        share = { ...lastShareChoice(), ...target };
+        shareReturnFocus = document.activeElement;
+        shareCaption.value = '';
+        shareForm.hidden = false;
+        shareDone.hidden = true;
+        sharePost.disabled = false;
+        sharePost.textContent = 'Post to feed';
+        renderSharePreview();
+        shareSheet.hidden = false;
+        window.getSelection()?.removeAllRanges();
+        shareCaption.focus({ preventScroll: true });
+    }
+
+    function closeShare() {
+        shareSheet.hidden = true;
+        share = null;
+        shareReturnFocus?.focus?.({ preventScroll: true });
+    }
+
+    $$('[data-share-close]').forEach((button) => button.addEventListener('click', closeShare));
+
+    $('[data-share-copy]').addEventListener('click', () => copyText(quoteWithCredit(share.text, share.page)));
+
+    $('[data-share-link]').addEventListener('click', async () => {
+        const url = new URL(share.shareUrl || share.postUrl, window.location.origin).toString();
+        try {
+            await navigator.clipboard.writeText(url);
+            announce('Link copied.');
+        } catch {
+            window.prompt('Copy this link', url);
+        }
+    });
+
+    sharePost.addEventListener('click', async () => {
+        if (!share) return;
+        sharePost.disabled = true;
+        sharePost.textContent = 'Posting…';
+        try {
+            // 1. keep the text as a highlight, 2. save it as a quote, 3. post the card.
+            let highlight = share.highlight;
+            if (!highlight) {
+                highlight = await saveHighlight(share.payload);
+                share.highlight = highlight;
+            }
+            const quote = await requestJson(reader.dataset.saveQuoteUrl.replace('__HIGHLIGHT__', highlight.id), { method: 'POST' });
+            highlight.quoted = true;
+
+            const post = await requestJson(reader.dataset.postUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    type: 'quote',
+                    quote_card_id: quote.quote_card_id,
+                    body: shareCaption.value.trim() || null,
+                    card_style: share.design,
+                    card_font: share.font,
+                }),
+            });
+
+            share.postUrl = post.url;
+            share.shareUrl = post.share_url;
+            $('[data-share-view]').href = post.url;
+            shareForm.hidden = true;
+            shareDone.hidden = false;
+            redrawHighlights();
+            announce('Shared to the feed.');
+        } catch (error) {
+            sharePost.disabled = false;
+            sharePost.textContent = 'Post to feed';
+            announce(error.message, true);
+        }
+    });
 
     /* ---------------- highlights list ---------------- */
 
@@ -1286,10 +1461,12 @@ function initializeReader(reader) {
             const copyButton = listButton('Copy');
             copyButton.addEventListener('click', () => copyText(quoteWithCredit(highlight.text, highlight.page_number)));
 
-            // Share: placeholder only, wired up later.
             const shareButton = listButton('Share');
-            shareButton.dataset.shareHighlight = String(highlight.id);
-            shareButton.title = 'Sharing is coming soon';
+            shareButton.setAttribute('aria-label', `Share to the feed: ${highlight.text}`);
+            shareButton.addEventListener('click', () => {
+                closePanels();
+                openShare({ text: highlight.text, page: highlight.page_number, highlight });
+            });
 
             const deleteButton = listButton('Remove', 'reader-chip--danger');
             deleteButton.setAttribute('aria-label', `Remove highlight: ${highlight.text}`);

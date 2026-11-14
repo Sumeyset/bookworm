@@ -57,7 +57,7 @@ class FeedController extends Controller
             'nextBefore' => $nextBefore,
             'following' => $user->following()->withCount('reviews')->orderBy('name')->take(8)->get(),
             'shelfBooks' => $user->shelfItems()->with('book:id,title,author_name')->latest('updated_at')->get()->pluck('book')->filter()->unique('id')->values(),
-            'quoteCards' => $user->quoteCards()->with('highlight.bookPdf.book:id,title')->latest()->get(),
+            'quoteCards' => $user->quoteCards()->with('highlight.bookPdf.book:id,title,author_name')->latest()->get(),
         ]);
     }
 }

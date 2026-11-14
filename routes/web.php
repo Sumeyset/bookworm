@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
 
     // Posts, likes and replies
     Route::post('/posts', [PostController::class, 'store'])->middleware('throttle:posting')->name('posts.store');
+    Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::post('/react/{type}/{id}/like', [ReactionController::class, 'like'])->whereIn('type', ['post', 'review'])->whereNumber('id')->middleware('throttle:reactions')->name('reactions.like');
     Route::post('/react/{type}/{id}/comments', [ReactionController::class, 'comment'])->whereIn('type', ['post', 'review'])->whereNumber('id')->middleware('throttle:posting')->name('reactions.comment');

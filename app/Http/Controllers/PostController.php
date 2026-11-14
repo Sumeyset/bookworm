@@ -4,13 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\QuoteCard;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class PostController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function show(Request $request, Post $post): View
+    {
+        $post = Post::query()->whereKey($post->id)->with(['user', 'book'])->withReactions($request->user())->firstOrFail();
+
+        return view('feed.show', ['item' => $post]);
+    }
+
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $user = $request->user();
         $validated = $request->validate([
@@ -20,11 +29,19 @@ class PostController extends Controller
             'quote_card_id' => ['nullable', 'integer', Rule::exists('quote_cards', 'id')->where('user_id', $user->id)],
             'quote_text' => ['nullable', 'string', 'max:1000'],
             'quote_page' => ['nullable', 'integer', 'min:1', 'max:100000'],
+            'card_style' => ['nullable', 'string', Rule::in(Post::CARD_STYLES)],
+            'card_font' => ['nullable', 'string', Rule::in(Post::CARD_FONTS)],
         ], [
             'body.required_if' => 'Write something to post.',
         ]);
 
-        $post = new Post(['user_id' => $user->id, 'type' => $validated['type'], 'body' => trim((string) ($validated['body'] ?? '')) ?: null]);
+        $post = new Post([
+            'user_id' => $user->id,
+            'type' => $validated['type'],
+            'body' => trim((string) ($validated['body'] ?? '')) ?: null,
+            'card_style' => $validated['card_style'] ?? null,
+            'card_font' => $validated['card_font'] ?? null,
+        ]);
 
         if ($validated['type'] === 'quote') {
             if (! empty($validated['quote_card_id'])) {
@@ -51,6 +68,14 @@ class PostController extends Controller
         }
 
         $post->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'id' => $post->id,
+                'url' => route('posts.show', $post),
+                'share_url' => $post->quoteCard ? route('quotes.public', $post->quoteCard->share_token) : null,
+            ], 201);
+        }
 
         return to_route('feed.index')->with('status', $post->isQuote() ? 'Your quote is on the feed.' : 'Posted to your reading circle.');
     }

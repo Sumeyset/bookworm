@@ -15,6 +15,7 @@ export default defineConfig({
             //  - reader.css         → reader styles, linked in <head> so the page never shows unstyled
             input: [
                 'resources/css/app.css',
+                'resources/css/posts.css',
                 'resources/js/app.js',
                 'resources/js/tree-shelf.js',
                 'resources/js/pdf-reader.js',

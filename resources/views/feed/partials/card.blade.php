@@ -1,64 +1,141 @@
-{{-- One feed item: a post, a shared quote, or a review. --}}
+{{-- One feed item, Instagram style: a post, a shared quote, or a review. --}}
 @php
     $isReview = $item instanceof \App\Models\Review;
     $isQuote = ! $isReview && $item->isQuote();
-    $verb = $isReview ? ($item->body ? 'reviewed' : 'rated') : ($isQuote ? 'shared a quote' : 'posted');
+    $hasCard = ! $isReview && $item->hasCard();
+    $type = $item->getMorphClass();
+    $key = $type . '-' . $item->id;
+    $permalink = $isReview ? route('books.show', $item->book) : route('posts.show', $item);
+    $verb = $isReview ? ($item->body ? 'reviewed' : 'rated') : null;
+    $caption = $isReview ? $item->body : (($isQuote || ! $hasCard) ? $item->body : null);
+    $comments = $item->comments;
+    $creditMeta = collect([$item->book?->author_name, ! $isReview && $item->quote_page ? 'p. ' . $item->quote_page : null])->filter()->implode(' · ');
 @endphp
-<article id="{{ $item->getMorphClass() }}-{{ $item->id }}" class="bw-card scroll-mt-28 overflow-hidden">
-    <header class="flex items-center gap-3 px-5 pt-4">
-        <a href="{{ route('users.show', $item->user->username) }}" class="shrink-0"><x-avatar :src="$item->user->profile_photo_url" :name="$item->user->name" size="sm" /></a>
-        <p class="min-w-0 flex-1 truncate text-sm text-tan dark:text-[#c7a491]">
-            <a href="{{ route('users.show', $item->user->username) }}" class="focus-ring rounded-sm font-semibold text-ink hover:text-burgundy dark:text-[#F4E9E2] dark:hover:text-[#E9A2AE]">{{ $item->user->name }}</a>
-            {{ $verb }}
-        </p>
-        <time datetime="{{ $item->created_at->toIso8601String() }}" class="shrink-0 text-xs text-tan">{{ $item->created_at->diffForHumans(short: true) }}</time>
-        @if (! $isReview && $item->user_id === auth()->id())
-            <form method="POST" action="{{ route('posts.destroy', $item) }}" onsubmit="return confirm('Delete this post?')">
-                @csrf @method('DELETE')
-                <button class="focus-ring rounded-full p-1 text-tan hover:bg-parchment hover:text-burgundy dark:hover:bg-white/5" aria-label="Delete post">
-                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7 3h6l1 2h3v2H3V5h3l1-2Zm-2 6h10l-1 8H6L5 9Z"/></svg>
-                </button>
-            </form>
-        @endif
+<article id="{{ $key }}" class="ig-post scroll-mt-28" x-data="{ menu: false, all: false, more: false }">
+    {{-- Header --}}
+    <header class="ig-post__head">
+        <a href="{{ route('users.show', $item->user->username) }}" class="ig-ring focus-ring" aria-label="{{ $item->user->name }}’s profile">
+            <x-avatar :src="$item->user->profile_photo_url" :name="$item->user->name" size="sm" />
+        </a>
+        <div class="min-w-0 flex-1 leading-tight">
+            <p class="truncate text-sm">
+                <a href="{{ route('users.show', $item->user->username) }}" class="font-semibold text-ink hover:underline dark:text-[#F4E9E2]">{{ $item->user->username ?? $item->user->name }}</a>
+                @if ($verb)<span class="text-tan"> {{ $verb }}</span>@endif
+                <span class="text-tan"> · <time datetime="{{ $item->created_at->toIso8601String() }}">{{ $item->created_at->diffForHumans(short: true) }}</time></span>
+            </p>
+            @if ($item->book)
+                <a href="{{ route('books.show', $item->book) }}" class="block truncate text-xs text-walnut hover:underline dark:text-[#d4c2b9]">{{ $item->book->title }}</a>
+            @endif
+        </div>
+        <div class="relative">
+            <button type="button" @click="menu = !menu" @click.outside="menu = false" class="ig-icon !h-9 !w-9" :aria-expanded="menu" aria-label="More options">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg>
+            </button>
+            <div x-show="menu" x-cloak x-transition.origin.top.right class="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-2xl border border-warmborder bg-paper py-1 text-sm shadow-xl dark:border-[#4B3035] dark:bg-raised">
+                @unless ($isReview)
+                    <a href="{{ $permalink }}" class="block px-4 py-2.5 hover:bg-parchment dark:hover:bg-white/5">Go to post</a>
+                @endunless
+                <button type="button" data-share-url="{{ $permalink }}" data-share-title="{{ $item->book?->title ?? 'Bookworm' }}" @click="menu = false" class="block w-full px-4 py-2.5 text-left hover:bg-parchment dark:hover:bg-white/5">Copy link</button>
+                @if (! $isReview && $item->user_id === auth()->id())
+                    <form method="POST" action="{{ route('posts.destroy', $item) }}" onsubmit="return confirm('Delete this post?')">
+                        @csrf @method('DELETE')
+                        <button class="block w-full px-4 py-2.5 text-left font-semibold text-red-700 hover:bg-parchment dark:text-red-300 dark:hover:bg-white/5">Delete</button>
+                    </form>
+                @endif
+            </div>
+        </div>
     </header>
 
-    <div class="px-5 pb-4 pt-3">
-        @if ($isQuote)
-            <figure class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#4A1220] via-[#6D1A2B] to-[#8B2A3D] px-6 py-7 text-[#FFF8EF] shadow-inner">
-                <span class="pointer-events-none absolute -left-1 -top-6 font-display text-[9rem] leading-none text-white/10" aria-hidden="true">“</span>
-                <blockquote class="relative font-display text-3xl font-bold leading-snug">{{ $item->quote_text }}</blockquote>
-                <figcaption class="relative mt-4 text-sm text-[#F1D9C4]">
-                    — {{ $item->book?->title ?? 'Unknown book' }}@if ($item->book?->author_name), {{ $item->book->author_name }}@endif @if ($item->quote_page)· p. {{ $item->quote_page }}@endif
-                </figcaption>
-            </figure>
-            @if ($item->body)
-                <p class="mt-3 whitespace-pre-line break-words text-[15px] leading-7 text-ink dark:text-[#F4E9E2]">{{ $item->body }}</p>
+    {{-- Media --}}
+    @if ($hasCard)
+        <div class="ig-post__media" data-double-like>
+            <x-quote-card
+                :text="$isQuote ? $item->quote_text : $item->body"
+                :design="$item->cardStyle()"
+                :font="$item->cardFont()"
+                :title="$isQuote ? ($item->book?->title ?? null) : null"
+                :meta="$isQuote ? $creditMeta : null"
+                :thought="! $isQuote" />
+            <svg class="ig-heart-burst" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.8-4.8-9.7-9.6C.9 7.9 3 4 6.9 4c2.1 0 3.8 1.2 5.1 3.1C13.3 5.2 15 4 17.1 4 21 4 23.1 7.9 21.7 11.4 19.8 16.2 12 21 12 21Z"/></svg>
+        </div>
+    @elseif ($isReview)
+        <div class="ig-post__media relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-[#2a1a1d]" data-double-like>
+            @if ($item->book->cover_url)
+                <img src="{{ $item->book->cover_url }}" alt="" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-2xl" loading="lazy" aria-hidden="true">
             @endif
-        @elseif ($isReview)
-            <div class="flex gap-4">
-                <a href="{{ route('books.show', $item->book) }}" class="shrink-0" tabindex="-1" aria-hidden="true"><x-book-cover :book="$item->book" class="w-20 sm:w-24" /></a>
-                <div class="min-w-0">
-                    <h2 class="font-serif text-2xl font-semibold leading-tight text-ink dark:text-[#F4E9E2]"><a href="{{ route('books.show', $item->book) }}" class="hover:text-burgundy dark:hover:text-[#E9A2AE]">{{ $item->book->title }}</a></h2>
-                    <p class="mt-1 text-sm text-tan">{{ $item->book->author_name ?? 'Unknown author' }}</p>
-                    <div class="mt-2"><x-star-display :rating="$item->rating" /></div>
-                    @if ($item->body)
-                        <blockquote class="mt-3 border-l-2 border-gold/60 pl-4 font-serif text-lg italic leading-8 text-walnut dark:text-[#e3d3ca]">{{ $item->body }}</blockquote>
-                    @endif
-                </div>
+            <div class="relative flex flex-col items-center gap-3 py-6">
+                <x-book-cover :book="$item->book" class="w-28 shadow-2xl sm:w-32" />
+                <span class="rounded-full bg-black/35 px-3 py-1 backdrop-blur"><x-star-display :rating="$item->rating" /></span>
             </div>
-        @else
-            <p class="whitespace-pre-line break-words text-[17px] leading-8 text-ink dark:text-[#F4E9E2]">{{ $item->body }}</p>
-            @if ($item->book)
-                <a href="{{ route('books.show', $item->book) }}" class="mt-4 flex items-center gap-3 rounded-2xl border border-warmborder bg-parchment/50 p-3 transition hover:border-burgundy/30 dark:border-[#4B3035] dark:bg-white/5">
-                    <x-book-cover :book="$item->book" class="w-12" />
-                    <span class="min-w-0">
-                        <span class="block truncate font-serif text-lg font-semibold text-ink dark:text-[#F4E9E2]">{{ $item->book->title }}</span>
-                        <span class="block truncate text-xs text-tan">{{ $item->book->author_name ?? 'Unknown author' }}</span>
-                    </span>
-                </a>
-            @endif
+            <svg class="ig-heart-burst" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.8-4.8-9.7-9.6C.9 7.9 3 4 6.9 4c2.1 0 3.8 1.2 5.1 3.1C13.3 5.2 15 4 17.1 4 21 4 23.1 7.9 21.7 11.4 19.8 16.2 12 21 12 21Z"/></svg>
+        </div>
+    @endif
+
+    {{-- Actions --}}
+    <div class="ig-actions">
+        <button type="button" class="ig-icon" data-like-url="{{ route('reactions.like', [$type, $item->id]) }}" data-like-key="{{ $key }}" aria-pressed="{{ $item->liked_by_viewer ? 'true' : 'false' }}" aria-label="Like">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2Z"/></svg>
+        </button>
+        <button type="button" class="ig-icon" @click="all = true; $nextTick(() => $refs.reply.focus())" aria-label="Reply">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.5L3.5 20.5l1.4-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/></svg>
+        </button>
+        <button type="button" class="ig-icon" data-share-url="{{ $permalink }}" data-share-title="{{ $item->book?->title ?? 'Bookworm' }}" aria-label="Share">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 3.5 10.6 13.4M21.5 3.5 14.6 21l-4-7.6-7.6-4 18.5-5.9Z"/></svg>
+        </button>
+        @if ($item->book)
+            <a href="{{ route('books.show', $item->book) }}" class="ig-icon ml-auto" aria-label="Open {{ $item->book->title }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15ZM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>
+            </a>
         @endif
     </div>
 
-    @include('feed.partials.reactions', ['item' => $item])
+    <div class="ig-body text-ink dark:text-[#F4E9E2]">
+        <p class="ig-likes"><span data-like-total="{{ $key }}" data-count="{{ $item->likes_count }}">{{ $item->likes_count }} {{ Str::plural('like', $item->likes_count) }}</span></p>
+
+        @if (! $isReview && ! $hasCard)
+            {{-- A plain thought: the words are the post. --}}
+            <p class="mt-1 whitespace-pre-line break-words text-[17px] leading-7">{{ $item->body }}</p>
+        @elseif ($caption)
+            <p class="ig-caption" :class="more ? '' : 'is-clamped'">
+                <a href="{{ route('users.show', $item->user->username) }}" class="font-semibold hover:underline">{{ $item->user->username ?? $item->user->name }}</a>
+                @if ($isReview)<span class="font-semibold">{{ $item->book->title }} ·</span>@endif
+                {{ $caption }}
+            </p>
+            @if (mb_strlen($caption) > 160)
+                <button type="button" x-show="!more" @click="more = true" class="text-sm text-tan hover:underline">more</button>
+            @endif
+        @endif
+
+        {{-- Replies --}}
+        @if ($comments->count() > 2)
+            <button type="button" x-show="!all" @click="all = true" class="mt-1 text-sm text-tan hover:underline">View all {{ $comments->count() }} replies</button>
+        @endif
+        @if ($comments->isNotEmpty())
+            <ul class="mt-1 space-y-0.5 text-sm">
+                @foreach ($comments as $index => $comment)
+                    <li class="group flex gap-1.5" @if ($index < $comments->count() - 2) x-show="all" x-cloak @endif>
+                        <p class="min-w-0 flex-1 break-words">
+                            <a href="{{ route('users.show', $comment->user->username) }}" class="font-semibold hover:underline">{{ $comment->user->username ?? $comment->user->name }}</a>
+                            {{ $comment->body }}
+                        </p>
+                        @if ($comment->user_id === auth()->id())
+                            <form method="POST" action="{{ route('comments.destroy', $comment) }}" class="shrink-0 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                                @csrf @method('DELETE')
+                                <button class="text-xs text-tan hover:text-burgundy" aria-label="Delete reply">Delete</button>
+                            </form>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+
+        <p class="ig-time"><time datetime="{{ $item->created_at->toIso8601String() }}">{{ $item->created_at->diffForHumans() }}</time></p>
+
+        <form method="POST" action="{{ route('reactions.comment', [$type, $item->id]) }}" class="mt-2 flex items-center gap-2 border-t border-warmborder/70 pt-2 dark:border-[#4B3035]">
+            @csrf
+            <label class="sr-only" for="reply-{{ $key }}">Add a reply</label>
+            <input x-ref="reply" id="reply-{{ $key }}" name="body" maxlength="1000" required autocomplete="off" placeholder="Add a reply…" class="min-w-0 flex-1 border-0 bg-transparent px-0 py-1.5 text-sm placeholder:text-tan/70 focus:ring-0">
+            <button type="submit" class="text-sm font-semibold text-burgundy hover:text-burgundy-hover dark:text-[#E9A2AE]">Post</button>
+        </form>
+    </div>
 </article>

@@ -14,6 +14,7 @@
               data-initial-page="{{ $initialPage }}"
               data-book-title="{{ $book->title }}"
               data-book-author="{{ $book->author_name }}"
+              data-post-url="{{ route('posts.store') }}"
               data-delete-highlight-url="{{ route('books.pdfs.highlights.index', [$book, $bookPdf], false) }}/__HIGHLIGHT__">
 
             {{-- Top bar --}}
@@ -157,14 +158,38 @@
                     </div>
                 </div>
 
+                @php
+                    // name => [label, desk, page, ink, tone]
+                    $readerThemes = [
+                        'paper' => ['Paper', '#efe6da', '#fffdf8', '#2b1f1d', 'light'],
+                        'sepia' => ['Sepia', '#e6d7bb', '#f6ecd6', '#4a3523', 'light'],
+                        'parchment' => ['Old book', 'linear-gradient(135deg,#3b2418,#5a3a2e)', 'radial-gradient(ellipse at center,#f8eed6 50%,#ead6ac)', '#3d2a17', 'light'],
+                        'linen' => ['Linen', '#e9e6df', '#fbfaf7', '#2d3138', 'light'],
+                        'sage' => ['Sage', '#d5e0d2', '#eef3ea', '#24332b', 'light'],
+                        'rose' => ['Rose', '#f0d9dd', '#fff7f7', '#4a2230', 'light'],
+                        'mist' => ['Mist', '#d6e2ea', '#f4f8fb', '#1f3447', 'light'],
+                        'contrast' => ['High contrast', '#ffffff', '#ffffff', '#000000', 'light'],
+                        'night' => ['Night', '#110c0d', '#1e1718', '#e8dcd3', 'dark'],
+                        'midnight' => ['Midnight', 'radial-gradient(circle at 70% 0%,#1d2a57,#0b1024)', '#121a33', '#d6b778', 'dark'],
+                        'dusk' => ['Dusk', '#1b1424', '#241a30', '#e8dcef', 'dark'],
+                        'forest' => ['Forest', '#0e1a14', '#152820', '#e4ecdf', 'dark'],
+                        'candle' => ['Candlelight', 'radial-gradient(circle at 50% 0%,#3d2512,#140b06)', '#1f140c', '#f0c98f', 'dark'],
+                        'black' => ['Black', '#000000', '#000000', '#d6d6d6', 'dark'],
+                    ];
+                @endphp
                 <div class="reader-setting">
-                    <p class="reader-setting__label">Theme</p>
-                    <div class="reader-themes" role="radiogroup" aria-label="Theme">
-                        <button type="button" role="radio" data-setting="theme" data-value="paper" class="reader-swatch reader-swatch--paper">Paper</button>
-                        <button type="button" role="radio" data-setting="theme" data-value="sepia" class="reader-swatch reader-swatch--sepia">Sepia</button>
-                        <button type="button" role="radio" data-setting="theme" data-value="sage" class="reader-swatch reader-swatch--sage">Sage</button>
-                        <button type="button" role="radio" data-setting="theme" data-value="night" class="reader-swatch reader-swatch--night">Night</button>
-                    </div>
+                    @foreach (['light' => 'Light themes', 'dark' => 'Dark themes'] as $tone => $heading)
+                        <p class="reader-setting__label">{{ $heading }}</p>
+                        <div class="reader-themes" role="radiogroup" aria-label="{{ $heading }}">
+                            @foreach ($readerThemes as $value => [$label, $desk, $page, $ink, $themeTone])
+                                @continue($themeTone !== $tone)
+                                <button type="button" role="radio" class="reader-theme" data-setting="theme" data-value="{{ $value }}" data-tone="{{ $themeTone }}">
+                                    <span class="reader-theme__sample" style="background: {{ $desk }}" aria-hidden="true"><span style="background: {{ $page }}; color: {{ $ink }}">Aa</span></span>
+                                    {{ $label }}
+                                </button>
+                            @endforeach
+                        </div>
+                    @endforeach
                 </div>
 
                 <button type="button" class="reader-link" data-reset-settings>Reset to defaults</button>
@@ -188,9 +213,50 @@
                 <button type="button" data-action="highlight"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M9 11l-5 5v4h4l5-5M14 6l4 4M12 8l6-6 4 4-6 6z"/></svg><span>Highlight</span></button>
                 <button type="button" data-action="quote"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg><span data-quote-label>Quote</span></button>
                 <button type="button" data-action="copy"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg><span>Copy</span></button>
-                {{-- Share: placeholder only, wired up later. --}}
-                <button type="button" data-action="share" data-share-highlight title="Sharing is coming soon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span>Share</span></button>
+                <button type="button" data-action="share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span>Share</span></button>
                 <button type="button" data-action="remove" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg><span>Remove</span></button>
+            </div>
+
+            {{-- Share a quote to the feed --}}
+            <div class="reader-share" data-share-sheet hidden>
+                <div class="reader-share__backdrop" data-share-close aria-hidden="true"></div>
+                <section class="reader-share__panel" role="dialog" aria-modal="true" aria-labelledby="reader-share-title">
+                    <header class="reader-share__head">
+                        <h2 id="reader-share-title">Share this quote</h2>
+                        <button type="button" class="reader-btn reader-btn--icon" data-share-close aria-label="Close">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                        </button>
+                    </header>
+                    <div class="reader-share__body">
+                        <div class="reader-share__preview" data-share-preview></div>
+                        <div class="reader-share__controls" data-share-form>
+                            <div>
+                                <p class="reader-setting__label">Design</p>
+                                <div class="reader-share__swatches" role="radiogroup" aria-label="Card design" data-share-designs></div>
+                            </div>
+                            <div>
+                                <p class="reader-setting__label">Typeface</p>
+                                <div class="reader-share__fonts" role="radiogroup" aria-label="Typeface" data-share-fonts></div>
+                            </div>
+                            <div>
+                                <label class="reader-setting__label" for="reader-share-caption">Caption</label>
+                                <textarea id="reader-share-caption" data-share-caption rows="3" maxlength="2000" placeholder="Why did this line stay with you? (optional)"></textarea>
+                            </div>
+                            <div class="reader-share__actions">
+                                <button type="button" class="reader-share__primary" data-share-post>Post to feed</button>
+                                <button type="button" class="reader-share__secondary" data-share-copy>Copy text</button>
+                            </div>
+                        </div>
+                        <div class="reader-share__done" data-share-done hidden>
+                            <p class="reader-share__done-title">It’s on the feed.</p>
+                            <p class="reader-share__done-text">Your reading circle can now like and reply to it.</p>
+                            <div class="reader-share__actions">
+                                <a class="reader-share__primary" data-share-view href="#">View post</a>
+                                <button type="button" class="reader-share__secondary" data-share-link>Copy link</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>

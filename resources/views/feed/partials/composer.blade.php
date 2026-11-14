@@ -1,0 +1,191 @@
+{{--
+    "Create new post" flow, Instagram style: 1) choose → 2) write → 3) design & caption → share.
+    Logic: Alpine.data('composer') in resources/js/app.js. Expects $quoteCards and $shelfBooks.
+--}}
+@php
+    $composerCards = $quoteCards->map(fn ($card) => [
+        'id' => $card->id,
+        'text' => $card->highlight->text,
+        'title' => $card->highlight->bookPdf->book->title ?? '',
+        'author' => $card->highlight->bookPdf->book->author_name ?? '',
+        'page' => $card->highlight->page_number,
+    ])->values();
+    $composerBooks = $shelfBooks->map(fn ($book) => ['id' => $book->id, 'title' => $book->title, 'author' => $book->author_name])->values();
+    $composerOld = $errors->any() ? [
+        'kind' => old('type') === 'quote' ? 'quote' : 'thought',
+        'quoteText' => old('quote_text', ''),
+        'cardId' => old('quote_card_id') ? (int) old('quote_card_id') : null,
+        'bookId' => old('book_id') ? (int) old('book_id') : null,
+        'page' => old('quote_page', ''),
+        'body' => old('body', ''),
+        'design' => old('card_style'),
+        'font' => old('card_font'),
+    ] : null;
+@endphp
+<div x-data="composer(@js(['cards' => $composerCards, 'books' => $composerBooks, 'old' => $composerOld]))"
+     x-on:open-composer.window="open($event.detail)"
+     x-on:keydown.escape.window="close()"
+     x-cloak>
+    <div x-show="isOpen" x-transition.opacity class="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm" @click="close()" aria-hidden="true"></div>
+
+    <section x-show="isOpen" x-transition.scale.95 role="dialog" aria-modal="true" aria-labelledby="composer-title"
+             class="fixed inset-x-2 bottom-2 top-16 z-[71] mx-auto flex max-w-4xl flex-col overflow-hidden rounded-3xl bg-paper shadow-2xl dark:bg-raised sm:inset-x-6 sm:bottom-8 sm:top-24"
+             :class="step < 3 ? 'max-w-xl' : 'max-w-4xl'">
+        <form method="POST" action="{{ route('posts.store') }}" class="flex min-h-0 flex-1 flex-col" @submit="submitting = true">
+            @csrf
+            <input type="hidden" name="type" :value="kind === 'quote' ? 'quote' : 'post'">
+            <input type="hidden" name="quote_card_id" :value="kind === 'quote' && source === 'saved' ? cardId : ''" :disabled="!(kind === 'quote' && source === 'saved')">
+            <input type="hidden" name="quote_text" :value="quoteText" :disabled="!(kind === 'quote' && source === 'typed')">
+            <input type="hidden" name="quote_page" :value="page" :disabled="!(kind === 'quote' && source === 'typed') || !page">
+            <input type="hidden" name="book_id" :value="bookId ?? ''" :disabled="!bookId || (kind === 'quote' && source === 'saved')">
+            <input type="hidden" name="body" :value="kind === 'quote' ? caption : thought">
+            <input type="hidden" name="card_style" :value="design" :disabled="kind === 'thought' && !onCard">
+            <input type="hidden" name="card_font" :value="font" :disabled="kind === 'thought' && !onCard">
+
+            {{-- Header --}}
+            <header class="flex items-center gap-2 border-b border-warmborder px-3 py-2.5 dark:border-[#4B3035]">
+                <button type="button" class="ig-icon !h-10 !w-10" @click="step > 1 ? step-- : close()" :aria-label="step > 1 ? 'Back' : 'Close'">
+                    <svg x-show="step > 1" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                    <svg x-show="step === 1" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+                <h2 id="composer-title" class="flex-1 text-center font-semibold text-ink dark:text-[#F4E9E2]" x-text="['Create new post', kind === 'quote' ? 'Your quote' : 'Your thought', 'Design & share'][step - 1]"></h2>
+                <button type="button" x-show="step === 2" @click="next()" :disabled="!canContinue()" class="min-h-10 rounded-full px-3 text-sm font-semibold text-burgundy disabled:opacity-40 dark:text-[#E9A2AE]">Next</button>
+                <button type="submit" x-show="step === 3" :disabled="submitting" class="min-h-10 rounded-full bg-burgundy px-4 text-sm font-semibold text-[#FFF8EF] disabled:opacity-50 dark:bg-burgundy-dark">Share</button>
+                <span x-show="step === 1" class="w-10" aria-hidden="true"></span>
+            </header>
+
+            @if ($errors->any())
+                <div class="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200" role="alert">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
+            {{-- Step 1: choose --}}
+            <div x-show="step === 1" class="grid flex-1 content-center gap-4 overflow-y-auto p-6 sm:grid-cols-2">
+                <button type="button" @click="choose('quote')" class="group focus-ring rounded-3xl border border-warmborder p-4 text-left transition hover:-translate-y-0.5 hover:border-burgundy/50 hover:shadow-lg dark:border-[#4B3035]">
+                    <div class="mx-auto w-40 overflow-hidden rounded-xl shadow-md">
+                        <x-quote-card text="So it goes." design="wine" font="serif" title="A favourite book" meta="p. 42" />
+                    </div>
+                    <p class="mt-4 font-serif text-xl font-semibold text-ink dark:text-[#F4E9E2]">Quote card</p>
+                    <p class="mt-1 text-sm text-tan">Type a line or pick one of your highlights, then design its card.</p>
+                </button>
+                <button type="button" @click="choose('thought')" class="group focus-ring rounded-3xl border border-warmborder p-4 text-left transition hover:-translate-y-0.5 hover:border-burgundy/50 hover:shadow-lg dark:border-[#4B3035]">
+                    <div class="mx-auto w-40 overflow-hidden rounded-xl shadow-md">
+                        <x-quote-card text="Stayed up way too late finishing this one." design="sunset" font="sans" :thought="true" />
+                    </div>
+                    <p class="mt-4 font-serif text-xl font-semibold text-ink dark:text-[#F4E9E2]">Thought</p>
+                    <p class="mt-1 text-sm text-tan">Share what you’re reading or feeling — as text, or on a card.</p>
+                </button>
+            </div>
+
+            {{-- Step 2: write --}}
+            <div x-show="step === 2" class="flex-1 space-y-4 overflow-y-auto p-5">
+                <template x-if="kind === 'quote'">
+                    <div class="space-y-4">
+                        <div class="flex gap-2 text-sm" x-show="cards.length">
+                            <button type="button" @click="source = 'typed'" class="bw-chip" :class="source === 'typed' && '!border-burgundy !bg-burgundy !text-[#FFF8EF]'">Type a quote</button>
+                            <button type="button" @click="source = 'saved'" class="bw-chip" :class="source === 'saved' && '!border-burgundy !bg-burgundy !text-[#FFF8EF]'">From my highlights (<span x-text="cards.length"></span>)</button>
+                        </div>
+
+                        <div x-show="source === 'typed'" class="space-y-3">
+                            <label for="composer-quote" class="sr-only">Quote</label>
+                            <textarea id="composer-quote" x-model="quoteText" x-ref="quote" rows="5" maxlength="1000" placeholder="“Type the line that stayed with you…”" class="bw-input w-full font-serif text-xl leading-snug"></textarea>
+                            <div class="flex flex-wrap gap-2">
+                                <label for="composer-quote-book" class="sr-only">Book</label>
+                                <select id="composer-quote-book" x-model.number="bookId" class="bw-input min-w-0 flex-1 text-sm">
+                                    <option value="">From which book?</option>
+                                    <template x-for="book in books" :key="book.id"><option :value="book.id" x-text="book.title + (book.author ? ' — ' + book.author : '')" :selected="book.id === bookId"></option></template>
+                                </select>
+                                <label for="composer-page" class="sr-only">Page</label>
+                                <input id="composer-page" type="number" min="1" x-model="page" placeholder="Page" class="bw-input w-24 text-sm">
+                            </div>
+                        </div>
+
+                        <ul x-show="source === 'saved'" class="grid gap-2">
+                            <template x-for="card in cards" :key="card.id">
+                                <li>
+                                    <button type="button" @click="cardId = card.id" class="w-full rounded-2xl border p-3 text-left transition" :class="cardId === card.id ? 'border-burgundy bg-rosetint/60 dark:bg-white/10' : 'border-warmborder hover:border-burgundy/40 dark:border-[#4B3035]'" :aria-pressed="cardId === card.id">
+                                        <span class="line-clamp-3 font-serif text-base text-ink dark:text-[#F4E9E2]" x-text="'“' + card.text + '”'"></span>
+                                        <span class="mt-1 block truncate text-xs text-tan" x-text="card.title + ' · p. ' + card.page"></span>
+                                    </button>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+
+                <template x-if="kind === 'thought'">
+                    <div>
+                        <label for="composer-thought" class="sr-only">Your thought</label>
+                        <textarea id="composer-thought" x-model="thought" x-ref="thought" rows="7" maxlength="2000" placeholder="What are you reading, thinking, or loving lately?" class="bw-input w-full text-lg leading-8"></textarea>
+                        <p class="mt-1 text-right text-xs text-tan"><span x-text="thought.length"></span>/2000</p>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Step 3: design & caption --}}
+            <div x-show="step === 3" class="grid min-h-0 flex-1 overflow-y-auto md:grid-cols-[minmax(0,1fr)_20rem] md:overflow-hidden">
+                <div class="flex items-center justify-center bg-parchment/50 p-5 dark:bg-black/20 md:overflow-y-auto">
+                    <div class="w-full max-w-sm overflow-hidden rounded-2xl shadow-xl" x-show="kind === 'quote' || onCard">
+                        <figure class="qcard" :class="cardClasses()">
+                            <div class="qcard__inner">
+                                <span class="qcard__mark" aria-hidden="true">“</span>
+                                <blockquote class="qcard__text" x-text="previewText()"></blockquote>
+                                <template x-if="kind === 'quote' && (credit().title || credit().meta)">
+                                    <figcaption class="qcard__credit">
+                                        <span class="qcard__title" x-text="credit().title" x-show="credit().title"></span>
+                                        <span class="qcard__meta" x-text="credit().meta" x-show="credit().meta"></span>
+                                    </figcaption>
+                                </template>
+                            </div>
+                            <span class="qcard__brand" aria-hidden="true">Bookworm</span>
+                        </figure>
+                    </div>
+                    <div x-show="kind === 'thought' && !onCard" class="w-full max-w-sm rounded-2xl bg-paper p-5 text-[17px] leading-7 text-ink shadow-xl dark:bg-raised dark:text-[#F4E9E2]">
+                        <p class="whitespace-pre-line break-words" x-text="thought"></p>
+                    </div>
+                </div>
+
+                <div class="space-y-5 border-t border-warmborder p-5 dark:border-[#4B3035] md:overflow-y-auto md:border-l md:border-t-0">
+                    <label x-show="kind === 'thought'" class="flex items-center justify-between gap-3 text-sm font-semibold text-ink dark:text-[#F4E9E2]">
+                        Put it on a card
+                        <input type="checkbox" x-model="onCard" class="h-5 w-5 rounded border-warmborder text-burgundy focus:ring-burgundy">
+                    </label>
+
+                    <div x-show="kind === 'quote' || onCard">
+                        <p class="eyebrow">Design</p>
+                        <div class="mt-2 flex flex-wrap gap-2.5" role="radiogroup" aria-label="Card design">
+                            @foreach (\App\Models\Post::CARD_STYLES as $style)
+                                <button type="button" role="radio" class="qcard-swatch focus-ring" :aria-checked="design === '{{ $style }}'" @click="design = '{{ $style }}'" aria-label="{{ ucfirst($style) }}" title="{{ ucfirst($style) }}">
+                                    <span class="qcard qcard--{{ $style }}" aria-hidden="true"></span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div x-show="kind === 'quote' || onCard">
+                        <p class="eyebrow">Typeface</p>
+                        <div class="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Typeface">
+                            @foreach (['serif' => ['Serif', 'Lora, Georgia, serif'], 'classic' => ['Classic', '\'EB Garamond\', Georgia, serif'], 'hand' => ['Handwritten', 'Caveat, cursive'], 'sans' => ['Modern', 'Figtree, sans-serif'], 'mono' => ['Typewriter', '\'Courier New\', monospace']] as $value => [$label, $family])
+                                <button type="button" role="radio" class="bw-chip" :class="font === '{{ $value }}' && '!border-burgundy !bg-burgundy !text-[#FFF8EF]'" :aria-checked="font === '{{ $value }}'" @click="font = '{{ $value }}'" style="font-family: {{ $family }}">{{ $label }}</button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div x-show="kind === 'quote'">
+                        <label for="composer-caption" class="eyebrow">Caption</label>
+                        <textarea id="composer-caption" x-model="caption" rows="4" maxlength="2000" placeholder="Why did this line stay with you? (optional)" class="bw-input mt-2 w-full text-sm leading-6"></textarea>
+                    </div>
+
+                    <div x-show="kind === 'thought'">
+                        <label for="composer-book" class="eyebrow">Book</label>
+                        <select id="composer-book" x-model.number="bookId" class="bw-input mt-2 w-full text-sm">
+                            <option value="">📖 Attach a book (optional)</option>
+                            <template x-for="book in books" :key="book.id"><option :value="book.id" x-text="book.title" :selected="book.id === bookId"></option></template>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>

@@ -4,77 +4,29 @@
         <x-page-header eyebrow="Notes from your reading circle" title="Reading feed" subtitle="Share a thought, pass along a quote, and see what your reading circle is loving." />
     </x-slot>
 
-    <div class="page-section grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <div class="min-w-0 space-y-5">
-            {{-- Composer --}}
-            <section id="composer" class="bw-card scroll-mt-28 overflow-hidden" aria-label="Create a post"
-                     x-data="{ tab: @js(old('type', 'post')), source: @js(old('quote_card_id') ? 'saved' : 'typed') }">
-                <div class="flex border-b border-warmborder/70 dark:border-[#4B3035]" role="tablist">
-                    <button type="button" role="tab" :aria-selected="tab === 'post'" @click="tab = 'post'" class="bw-tab" :class="tab === 'post' && 'is-active'">✍️ Write a post</button>
-                    <button type="button" role="tab" :aria-selected="tab === 'quote'" @click="tab = 'quote'" class="bw-tab" :class="tab === 'quote' && 'is-active'">❝ Share a quote</button>
+    <div class="page-section grid justify-center gap-8 lg:grid-cols-[minmax(0,30rem)_20rem]">
+        <div class="mx-auto w-full min-w-0 max-w-[30rem] space-y-5">
+            {{-- Create a post --}}
+            <section id="composer" class="bw-card scroll-mt-28 p-4" aria-label="Create a post">
+                <div class="flex items-center gap-3">
+                    <x-avatar :src="auth()->user()->profile_photo_url" :name="auth()->user()->name" size="sm" />
+                    <button type="button" data-open-composer="thought" class="focus-ring min-h-11 flex-1 rounded-full border border-warmborder bg-parchment/40 px-4 text-left text-sm text-tan transition hover:border-burgundy/40 dark:border-[#4B3035] dark:bg-white/5">
+                        What are you reading, {{ Str::before(auth()->user()->name, ' ') }}?
+                    </button>
                 </div>
-                <form method="POST" action="{{ route('posts.store') }}" class="space-y-3 p-5">
-                    @csrf
-                    <input type="hidden" name="type" :value="tab">
-                    <div class="flex gap-3">
-                        <x-avatar :src="auth()->user()->profile_photo_url" :name="auth()->user()->name" size="sm" />
-                        <div class="min-w-0 flex-1 space-y-3">
-                            <template x-if="tab === 'quote'">
-                                <div class="space-y-3">
-                                    @if ($quoteCards->isNotEmpty())
-                                        <div class="flex gap-2 text-sm">
-                                            <button type="button" @click="source = 'typed'" class="bw-chip" :class="source === 'typed' && '!border-burgundy !bg-burgundy !text-[#FFF8EF]'">Type a quote</button>
-                                            <button type="button" @click="source = 'saved'" class="bw-chip" :class="source === 'saved' && '!border-burgundy !bg-burgundy !text-[#FFF8EF]'">From my highlights ({{ $quoteCards->count() }})</button>
-                                        </div>
-                                    @endif
-                                    <div x-show="source === 'saved'" class="space-y-2">
-                                        <label for="composer-card" class="sr-only">Choose a saved quote</label>
-                                        <select id="composer-card" name="quote_card_id" class="bw-input w-full text-sm" :disabled="source !== 'saved'">
-                                            <option value="">Choose one of your saved quotes…</option>
-                                            @foreach ($quoteCards as $card)
-                                                <option value="{{ $card->id }}" @selected(old('quote_card_id') == $card->id)>“{{ Str::limit($card->highlight->text, 70) }}” — {{ $card->highlight->bookPdf->book->title ?? '' }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div x-show="source === 'typed'" class="space-y-2">
-                                        <label for="composer-quote" class="sr-only">Quote</label>
-                                        <textarea id="composer-quote" name="quote_text" rows="3" maxlength="1000" :disabled="source !== 'typed'" placeholder="“Type the line that stayed with you…”" class="bw-input w-full font-display text-2xl leading-snug">{{ old('quote_text') }}</textarea>
-                                        <div class="flex flex-wrap gap-2">
-                                            <label for="composer-quote-book" class="sr-only">Book</label>
-                                            <select id="composer-quote-book" name="book_id" :disabled="source !== 'typed'" class="bw-input min-w-0 flex-1 text-sm">
-                                                <option value="">From which book?</option>
-                                                @foreach ($shelfBooks as $book)
-                                                    <option value="{{ $book->id }}" @selected(old('book_id') == $book->id)>{{ $book->title }}{{ $book->author_name ? ' — ' . $book->author_name : '' }}</option>
-                                                @endforeach
-                                            </select>
-                                            <label for="composer-page" class="sr-only">Page</label>
-                                            <input id="composer-page" type="number" name="quote_page" min="1" :disabled="source !== 'typed'" value="{{ old('quote_page') }}" placeholder="Page" class="bw-input w-24 text-sm">
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <label for="composer-body" class="sr-only">Your post</label>
-                            <textarea id="composer-body" name="body" rows="3" maxlength="2000" :placeholder="tab === 'quote' ? 'Add a thought about it (optional)…' : 'What are you reading, thinking, or loving lately?'" class="bw-input w-full text-[15px] leading-7">{{ old('body') }}</textarea>
-
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <template x-if="tab === 'post'">
-                                    <div class="min-w-0 flex-1">
-                                        <label for="composer-book" class="sr-only">Attach a book</label>
-                                        <select id="composer-book" name="book_id" class="bw-input w-full max-w-xs text-sm">
-                                            <option value="">📖 Attach a book (optional)</option>
-                                            @foreach ($shelfBooks as $book)
-                                                <option value="{{ $book->id }}" @selected(old('book_id') == $book->id)>{{ $book->title }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </template>
-                                <button type="submit" class="btn-primary ml-auto" x-text="tab === 'quote' ? 'Share quote' : 'Post'">Post</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                    <button type="button" data-open-composer="quote" class="focus-ring flex min-h-11 items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-walnut transition hover:bg-parchment dark:text-[#e3d3ca] dark:hover:bg-white/5">
+                        <span class="flex h-7 w-6 items-center justify-center rounded-md bg-gradient-to-br from-[#4A1220] to-[#8B2A3D] font-serif text-lg leading-none text-[#FFF8EF]" aria-hidden="true">“</span>
+                        Quote card
+                    </button>
+                    <button type="button" data-open-composer="thought" class="focus-ring flex min-h-11 items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-walnut transition hover:bg-parchment dark:text-[#e3d3ca] dark:hover:bg-white/5">
+                        <span class="flex h-7 w-6 items-center justify-center rounded-md bg-gradient-to-br from-[#ffcf9f] via-[#f58f7c] to-[#6c3b85] text-xs text-white" aria-hidden="true">Aa</span>
+                        Thought
+                    </button>
+                </div>
             </section>
+
+            @include('feed.partials.composer')
 
             {{-- Scope tabs --}}
             <nav class="flex items-center gap-2" aria-label="Feed filter">

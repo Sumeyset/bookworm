@@ -1,0 +1,420 @@
+/*
+ * Quote cards and Instagram-style feed posts.
+ * Card designs are shared by the feed, the quote wall and the reader's share sheet.
+ * Keep the style and font names in sync with App\Models\Post::CARD_STYLES / CARD_FONTS.
+ */
+@import '@fontsource/eb-garamond/400.css';
+@import '@fontsource/eb-garamond/400-italic.css';
+
+/* ---------------------------------------------------------------- */
+/* Quote card                                                       */
+/* ---------------------------------------------------------------- */
+
+.qcard {
+    --qc-bg: linear-gradient(150deg, #4a1220 0%, #6d1a2b 55%, #8b2a3d 100%);
+    --qc-ink: #fff8ef;
+    --qc-soft: rgb(241 217 196 / 85%);
+    --qc-mark: rgb(255 255 255 / 12%);
+    --qc-rule: rgb(242 195 139 / 55%);
+    --qc-font: Lora, Georgia, serif;
+    --qc-scale: 1;
+
+    position: relative;
+    display: flex;
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--qc-bg);
+    color: var(--qc-ink);
+    container-type: inline-size;
+    isolation: isolate;
+}
+
+.qcard::before {
+    /* soft paper grain over every design */
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    opacity: .35;
+    pointer-events: none;
+}
+
+.qcard__inner {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    padding: 11cqw 10cqw 13cqw;
+}
+
+.qcard__mark {
+    position: absolute;
+    top: -3cqw;
+    left: 4cqw;
+    color: var(--qc-mark);
+    font-family: Georgia, serif;
+    font-size: 48cqw;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.qcard__text {
+    position: relative;
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    font-family: var(--qc-font);
+    font-size: calc(6.2cqw * var(--qc-scale));
+    line-height: 1.38;
+    overflow-wrap: break-word;
+    white-space: pre-line;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 16;
+}
+
+.qcard--len-s .qcard__text { font-size: calc(8.4cqw * var(--qc-scale)); line-height: 1.25; }
+.qcard--len-m .qcard__text { font-size: calc(6.4cqw * var(--qc-scale)); }
+.qcard--len-l .qcard__text { font-size: calc(5.1cqw * var(--qc-scale)); }
+.qcard--len-xl .qcard__text { font-size: calc(4.2cqw * var(--qc-scale)); }
+.qcard--len-xxl .qcard__text { font-size: calc(3.5cqw * var(--qc-scale)); line-height: 1.42; }
+
+.qcard__credit {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: .6cqw;
+    margin-top: 6cqw;
+    padding-top: 4cqw;
+    border-top: 1px solid var(--qc-rule);
+    font-family: Figtree, system-ui, sans-serif;
+}
+
+.qcard__title {
+    font-family: var(--qc-font);
+    font-size: 4cqw;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.qcard__meta {
+    color: var(--qc-soft);
+    font-size: 3cqw;
+    letter-spacing: .02em;
+}
+
+.qcard__brand {
+    position: absolute;
+    right: 6cqw;
+    bottom: 5cqw;
+    color: var(--qc-soft);
+    font-family: Georgia, serif;
+    font-size: 3cqw;
+    font-weight: 700;
+    letter-spacing: .04em;
+    opacity: .8;
+}
+
+/* Thought cards: no quote mark, centred text */
+.qcard--thought .qcard__inner { text-align: center; }
+.qcard--thought .qcard__mark { display: none; }
+
+/* --- fonts --- */
+.qcard--f-serif { --qc-font: Lora, Georgia, serif; }
+.qcard--f-classic { --qc-font: "EB Garamond", Garamond, Georgia, serif; --qc-scale: 1.1; }
+.qcard--f-classic .qcard__text { font-style: italic; }
+.qcard--f-hand { --qc-font: Caveat, cursive; --qc-scale: 1.32; }
+.qcard--f-hand .qcard__text { font-weight: 700; line-height: 1.15; }
+.qcard--f-sans { --qc-font: Figtree, system-ui, sans-serif; --qc-scale: .95; }
+.qcard--f-sans .qcard__text { font-weight: 600; letter-spacing: -.01em; }
+.qcard--f-mono { --qc-font: "Courier New", Courier, monospace; --qc-scale: .9; }
+
+/* --- designs --- */
+.qcard--wine {
+    --qc-bg: linear-gradient(150deg, #4a1220 0%, #6d1a2b 55%, #8b2a3d 100%);
+}
+
+.qcard--paper {
+    --qc-bg: radial-gradient(120% 90% at 20% 0%, #fffdf7 0%, #f7efe2 60%, #efe2cd 100%);
+    --qc-ink: #2a1a1d;
+    --qc-soft: #8a6a55;
+    --qc-mark: rgb(109 26 43 / 12%);
+    --qc-rule: rgb(184 137 59 / 45%);
+}
+
+.qcard--paper::after {
+    /* deckled inner border */
+    content: "";
+    position: absolute;
+    inset: 3.5cqw;
+    border: 1px solid rgb(184 137 59 / 35%);
+    pointer-events: none;
+}
+
+.qcard--midnight {
+    --qc-bg: radial-gradient(110% 80% at 80% 10%, #2b3a6b 0%, #141b38 55%, #0b0f22 100%);
+    --qc-ink: #f3ecdc;
+    --qc-soft: #d6b778;
+    --qc-mark: rgb(214 183 120 / 16%);
+    --qc-rule: rgb(214 183 120 / 50%);
+}
+
+.qcard--midnight::after {
+    /* a few stars */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(1.5px 1.5px at 18% 22%, #fff8 50%, transparent 51%),
+        radial-gradient(1px 1px at 72% 14%, #fff9 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 86% 38%, #fff6 50%, transparent 51%),
+        radial-gradient(1px 1px at 30% 82%, #fff7 50%, transparent 51%),
+        radial-gradient(1px 1px at 62% 90%, #fff5 50%, transparent 51%);
+    pointer-events: none;
+}
+
+.qcard--sage {
+    --qc-bg: linear-gradient(160deg, #e7eedf 0%, #cfdcc6 100%);
+    --qc-ink: #1f3328;
+    --qc-soft: #4f6b58;
+    --qc-mark: rgb(47 93 72 / 14%);
+    --qc-rule: rgb(47 93 72 / 35%);
+}
+
+.qcard--sunset {
+    --qc-bg: linear-gradient(165deg, #ffcf9f 0%, #f58f7c 40%, #c2547a 75%, #6c3b85 100%);
+    --qc-ink: #fffaf3;
+    --qc-soft: rgb(255 244 232 / 88%);
+    --qc-mark: rgb(255 255 255 / 18%);
+    --qc-rule: rgb(255 255 255 / 45%);
+}
+
+.qcard--sunset .qcard__text { text-shadow: 0 1px 12px rgb(80 20 50 / 25%); }
+
+.qcard--noir {
+    --qc-bg: #0d0d0d;
+    --qc-ink: #fafafa;
+    --qc-soft: #a3a3a3;
+    --qc-mark: rgb(255 255 255 / 9%);
+    --qc-rule: rgb(255 255 255 / 30%);
+}
+
+.qcard--blush {
+    --qc-bg: linear-gradient(170deg, #fdeef0 0%, #f6d5db 100%);
+    --qc-ink: #5a1527;
+    --qc-soft: #a0566a;
+    --qc-mark: rgb(160 86 106 / 16%);
+    --qc-rule: rgb(160 86 106 / 35%);
+}
+
+.qcard--ocean {
+    --qc-bg: linear-gradient(160deg, #1f6f78 0%, #164e63 50%, #0f2e45 100%);
+    --qc-ink: #effaf8;
+    --qc-soft: #a7d7d1;
+    --qc-mark: rgb(167 215 209 / 16%);
+    --qc-rule: rgb(167 215 209 / 45%);
+}
+
+/* Small swatch used in pickers */
+.qcard-swatch {
+    position: relative;
+    display: block;
+    width: 3rem;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: .55rem;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 8%);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.qcard-swatch > .qcard {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    height: 100%;
+}
+
+.qcard-swatch[aria-checked="true"] {
+    box-shadow: 0 0 0 2px var(--swatch-ring, #fff), 0 0 0 4px #b8893b;
+    transform: translateY(-2px);
+}
+
+/* ---------------------------------------------------------------- */
+/* Instagram-style feed post                                        */
+/* ---------------------------------------------------------------- */
+
+.ig-post {
+    overflow: hidden;
+    border: 1px solid rgb(230 217 208 / 90%);
+    border-radius: 1.25rem;
+    background: #fffdf9;
+}
+
+.dark .ig-post {
+    border-color: #4b3035;
+    background: #22131a;
+}
+
+.ig-post__head {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .75rem .9rem;
+}
+
+.ig-ring {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 2px;
+    border-radius: 999px;
+    background: conic-gradient(from 210deg, #b8893b, #e9a2ae, #6d1a2b, #b8893b);
+}
+
+.ig-ring > * {
+    border: 2px solid #fffdf9;
+    border-radius: 999px;
+}
+
+.dark .ig-ring > * {
+    border-color: #22131a;
+}
+
+.ig-post__media {
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+.ig-post__media .qcard {
+    border-radius: 0;
+}
+
+.ig-heart-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30%;
+    color: #fff;
+    filter: drop-shadow(0 6px 18px rgb(0 0 0 / 35%));
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.2);
+    pointer-events: none;
+}
+
+.ig-heart-burst.is-on {
+    animation: ig-burst .9s cubic-bezier(.2, .8, .3, 1.2) forwards;
+}
+
+@keyframes ig-burst {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+    15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    30% { transform: translate(-50%, -50%) scale(.95); }
+    45% { transform: translate(-50%, -50%) scale(1); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+}
+
+.ig-actions {
+    display: flex;
+    align-items: center;
+    gap: .15rem;
+    padding: .45rem .55rem 0;
+}
+
+.ig-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 999px;
+    color: #2a1a1d;
+    transition: transform .12s ease, color .15s ease;
+}
+
+.dark .ig-icon {
+    color: #f4e9e2;
+}
+
+.ig-icon:hover {
+    color: #6d1a2b;
+}
+
+.dark .ig-icon:hover {
+    color: #e9a2ae;
+}
+
+.ig-icon:active {
+    transform: scale(.88);
+}
+
+.ig-icon svg {
+    width: 1.55rem;
+    height: 1.55rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.ig-icon[aria-pressed="true"] {
+    color: #e0245e;
+}
+
+.ig-icon[aria-pressed="true"] svg {
+    fill: currentColor;
+}
+
+.ig-icon.is-popping svg {
+    animation: ig-pop .4s ease;
+}
+
+@keyframes ig-pop {
+    40% { transform: scale(1.3); }
+}
+
+.ig-body {
+    padding: .2rem 1rem 1rem;
+    font-size: .92rem;
+    line-height: 1.5;
+}
+
+.ig-likes {
+    font-weight: 700;
+}
+
+.ig-caption {
+    margin-top: .25rem;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+.ig-caption.is-clamped {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.ig-time {
+    margin-top: .45rem;
+    color: #8a6a55;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ig-heart-burst.is-on,
+    .ig-icon.is-popping svg {
+        animation: none;
+    }
+}

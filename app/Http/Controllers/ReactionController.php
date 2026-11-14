@@ -72,6 +72,10 @@ class ReactionController extends Controller
 
     private function url(Model $item): string
     {
+        if ($item instanceof Post) {
+            return route('posts.show', $item);
+        }
+
         return route('feed.index') . '#' . $item->getMorphClass() . '-' . $item->getKey();
     }
 }

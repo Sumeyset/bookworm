@@ -17,7 +17,7 @@ class QuoteController extends Controller
         abort_unless($bookPdf->user_id === $request->user()->id, 404);
         abort_unless($highlight->book_pdf_id === $bookPdf->id && $highlight->user_id === $request->user()->id, 404);
 
-        QuoteCard::firstOrCreate(
+        $card = QuoteCard::firstOrCreate(
             ['book_pdf_highlight_id' => $highlight->id],
             [
                 'user_id' => $request->user()->id,
@@ -26,7 +26,7 @@ class QuoteController extends Controller
         );
 
         if ($request->expectsJson()) {
-            return response()->json(['saved' => true], 201);
+            return response()->json(['saved' => true, 'quote_card_id' => $card->id], 201);
         }
 
         return back()->with('status', 'Saved to your quote collection.');

@@ -170,15 +170,28 @@ document.addEventListener('error', (event) => {
     img.replaceWith(span);
 }, true);
 
-// Likes on posts and reviews (no page reload).
-document.addEventListener('click', async (event) => {
-    const button = event.target.closest('[data-like-url]');
-    if (!button) return;
-    event.preventDefault();
-    const count = button.querySelector('[data-like-count]');
+// Likes on posts and reviews (no page reload). Works for the old pill buttons
+// (count inside) and the Instagram-style heart (count in "N likes" below).
+const setLikeCount = (button, count) => {
+    const inner = button.querySelector('[data-like-count]');
+    if (inner) inner.textContent = String(count);
+    if (!button.dataset.likeKey) return;
+    document.querySelectorAll(`[data-like-total="${button.dataset.likeKey}"]`).forEach((total) => {
+        total.dataset.count = String(count);
+        total.textContent = `${count} ${count === 1 ? 'like' : 'likes'}`;
+    });
+};
+const likeCount = (button) => Number(
+    button.querySelector('[data-like-count]')?.textContent
+    ?? document.querySelector(`[data-like-total="${button.dataset.likeKey}"]`)?.dataset.count
+    ?? 0,
+);
+
+async function toggleLike(button) {
     const liked = button.getAttribute('aria-pressed') !== 'true';
+    const before = likeCount(button);
     button.setAttribute('aria-pressed', String(liked));
-    count.textContent = String(Number(count.textContent) + (liked ? 1 : -1));
+    setLikeCount(button, Math.max(0, before + (liked ? 1 : -1)));
     button.classList.add('is-popping');
     window.setTimeout(() => button.classList.remove('is-popping'), 400);
     try {
@@ -190,12 +203,196 @@ document.addEventListener('click', async (event) => {
         if (!response.ok) throw new Error();
         const data = await response.json();
         button.setAttribute('aria-pressed', String(data.liked));
-        count.textContent = String(data.count);
+        setLikeCount(button, data.count);
     } catch {
         button.setAttribute('aria-pressed', String(!liked));
-        count.textContent = String(Number(count.textContent) + (liked ? -1 : 1));
+        setLikeCount(button, before);
         window.bookwormToast?.('Couldn’t save that like. Please try again.', 'error');
     }
+}
+
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-like-url]');
+    if (!button) return;
+    event.preventDefault();
+    toggleLike(button);
 });
+
+// Double-tap (or double-click) a post's picture to like it, with a heart burst.
+const burst = (media) => {
+    const heart = media.querySelector('.ig-heart-burst');
+    if (!heart) return;
+    heart.classList.remove('is-on');
+    void heart.getBoundingClientRect();
+    heart.classList.add('is-on');
+};
+const likeFromMedia = (media) => {
+    burst(media);
+    const button = media.closest('article')?.querySelector('[data-like-url]');
+    if (button && button.getAttribute('aria-pressed') !== 'true') toggleLike(button);
+};
+let lastTap = { target: null, time: 0 };
+document.addEventListener('dblclick', (event) => {
+    const media = event.target.closest('[data-double-like]');
+    if (media) likeFromMedia(media);
+});
+document.addEventListener('pointerup', (event) => {
+    if (event.pointerType === 'mouse') return;
+    const media = event.target.closest('[data-double-like]');
+    if (!media) return;
+    const now = Date.now();
+    if (lastTap.target === media && now - lastTap.time < 320) {
+        likeFromMedia(media);
+        lastTap = { target: null, time: 0 };
+    } else {
+        lastTap = { target: media, time: now };
+    }
+});
+
+// Share a post: the phone's share sheet when there is one, otherwise copy the link.
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-share-url]');
+    if (!button) return;
+    event.preventDefault();
+    const url = new URL(button.dataset.shareUrl, window.location.origin).toString();
+    if (navigator.share && window.matchMedia('(pointer: coarse)').matches) {
+        try {
+            await navigator.share({ title: button.dataset.shareTitle || 'Bookworm', url });
+            return;
+        } catch (error) {
+            if (error?.name === 'AbortError') return;
+        }
+    }
+    try {
+        await navigator.clipboard.writeText(url);
+        window.bookwormToast?.('Link copied.');
+    } catch {
+        window.prompt('Copy this link', url);
+    }
+});
+
+// Open the "Create new post" flow from any [data-open-composer] button.
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-open-composer]');
+    if (!button) return;
+    event.preventDefault();
+    window.dispatchEvent(new CustomEvent('open-composer', {
+        detail: { kind: button.dataset.openComposer, cardId: Number(button.dataset.cardId) || null },
+    }));
+});
+
+const lengthClass = (text) => {
+    const length = [...String(text)].length;
+    if (length <= 80) return 's';
+    if (length <= 180) return 'm';
+    if (length <= 320) return 'l';
+    if (length <= 520) return 'xl';
+    return 'xxl';
+};
+
+// The Instagram-style composer: choose → write → design & caption → share.
+Alpine.data('composer', ({ cards = [], books = [], old = null } = {}) => ({
+    cards,
+    books,
+    isOpen: false,
+    step: 1,
+    kind: 'quote',
+    source: 'typed',
+    quoteText: '',
+    cardId: null,
+    bookId: null,
+    page: '',
+    caption: '',
+    thought: '',
+    onCard: false,
+    design: 'wine',
+    font: 'serif',
+    submitting: false,
+
+    init() {
+        if (old) {
+            this.kind = old.kind;
+            this.source = old.cardId ? 'saved' : 'typed';
+            this.quoteText = old.quoteText || '';
+            this.cardId = old.cardId;
+            this.bookId = old.bookId;
+            this.page = old.page || '';
+            if (old.kind === 'quote') this.caption = old.body || ''; else this.thought = old.body || '';
+            this.onCard = Boolean(old.design);
+            this.design = old.design || 'wine';
+            this.font = old.font || (old.kind === 'quote' ? 'serif' : 'sans');
+            this.isOpen = true;
+            this.step = 2;
+        }
+        const params = new URLSearchParams(window.location.search);
+        if (!old && params.get('compose')) {
+            this.open({ kind: params.get('compose') === 'quote' ? 'quote' : 'thought', cardId: Number(params.get('card')) || null });
+        }
+        this.$watch('isOpen', (open) => document.documentElement.classList.toggle('overflow-hidden', open));
+    },
+
+    open({ kind = null, cardId = null } = {}) {
+        this.isOpen = true;
+        this.submitting = false;
+        if (cardId && this.cards.some((card) => card.id === cardId)) {
+            this.kind = 'quote';
+            this.source = 'saved';
+            this.cardId = cardId;
+            this.design = 'wine';
+            this.font = 'serif';
+            this.step = 3;
+            return;
+        }
+        if (kind) this.choose(kind); else this.step = 1;
+    },
+
+    close() {
+        if (!this.isOpen) return;
+        this.isOpen = false;
+    },
+
+    choose(kind) {
+        this.kind = kind;
+        if (kind === 'thought') {
+            this.font = 'sans';
+            this.design = this.design === 'wine' ? 'sunset' : this.design;
+        } else {
+            this.font = 'serif';
+        }
+        this.step = 2;
+        this.$nextTick(() => (kind === 'quote' ? this.$refs.quote : this.$refs.thought)?.focus());
+    },
+
+    canContinue() {
+        if (this.kind === 'thought') return this.thought.trim().length > 0;
+        return this.source === 'saved' ? Boolean(this.cardId) : this.quoteText.trim().length > 0;
+    },
+
+    next() {
+        if (this.canContinue()) this.step = 3;
+    },
+
+    selectedCard() {
+        return this.cards.find((card) => card.id === this.cardId) || null;
+    },
+
+    previewText() {
+        if (this.kind === 'thought') return this.thought.trim();
+        return this.source === 'saved' ? (this.selectedCard()?.text ?? '') : this.quoteText.trim();
+    },
+
+    credit() {
+        if (this.source === 'saved') {
+            const card = this.selectedCard();
+            return { title: card?.title ?? '', meta: [card?.author, card?.page ? `p. ${card.page}` : null].filter(Boolean).join(' · ') };
+        }
+        const book = this.books.find((entry) => entry.id === this.bookId);
+        return { title: book?.title ?? '', meta: [book?.author, this.page ? `p. ${this.page}` : null].filter(Boolean).join(' · ') };
+    },
+
+    cardClasses() {
+        return `qcard--${this.design} qcard--f-${this.font} qcard--len-${lengthClass(this.previewText())}${this.kind === 'thought' ? ' qcard--thought' : ''}`;
+    },
+}));
 
 Alpine.start();
