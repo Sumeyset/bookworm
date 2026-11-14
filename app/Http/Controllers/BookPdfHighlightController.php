@@ -17,7 +17,9 @@ class BookPdfHighlightController extends Controller
         return response()->json(
             $bookPdf->highlights()
                 ->where('user_id', $request->user()->id)
+                ->withExists('quoteCard as quoted')
                 ->orderBy('page_number')
+                ->orderBy('id')
                 ->get(['id', 'page_number', 'text', 'rectangles']),
         );
     }
@@ -43,7 +45,7 @@ class BookPdfHighlightController extends Controller
         ]);
 
         return response()->json(
-            $highlight->only(['id', 'page_number', 'text', 'rectangles']),
+            [...$highlight->only(['id', 'page_number', 'text', 'rectangles']), 'quoted' => false],
             201,
         );
     }
