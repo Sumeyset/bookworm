@@ -81,15 +81,7 @@
 
 <p><i>The more you read, the bigger your tree gets.</i></p>
 
-<h2>📸 Screenshots</h2>
 
-<div align="center">
-  <img src="docs/screenshots/home.png" alt="Home page" width="80%" />
-  <br /><sub><b>Home page</b></sub>
-  <br /><br />
-  <img src="docs/screenshots/profile-tree.png" alt="Profile with bookshelf tree" width="80%" />
-  <br /><sub><b>Profile and bookshelf tree</b></sub>
-</div>
 
 <h2>🚀 Getting Started</h2>
 
