@@ -2,12 +2,14 @@
 @php
     $isReview = $item instanceof \App\Models\Review;
     $isQuote = ! $isReview && $item->isQuote();
-    $hasCard = ! $isReview && $item->hasCard();
+    $photos = $isReview ? collect() : $item->photos;
+    $hasPhotos = $photos->isNotEmpty();
+    $hasCard = ! $isReview && ! $hasPhotos && $item->hasCard();
     $type = $item->getMorphClass();
     $key = $type . '-' . $item->id;
     $permalink = $isReview ? route('books.show', $item->book) : route('posts.show', $item);
     $verb = $isReview ? ($item->body ? 'reviewed' : 'rated') : null;
-    $caption = $isReview ? $item->body : (($isQuote || ! $hasCard) ? $item->body : null);
+    $caption = $isReview ? $item->body : (($isQuote || $hasPhotos || ! $hasCard) ? $item->body : null);
     $comments = $item->comments;
     $creditMeta = collect([$item->book?->author_name, ! $isReview && $item->quote_page ? 'p. ' . $item->quote_page : null])->filter()->implode(' · ');
 @endphp
@@ -47,7 +49,25 @@
     </header>
 
     {{-- Media --}}
-    @if ($hasCard)
+    @if ($hasPhotos)
+        <div class="ig-post__media" data-double-like>
+            <div class="ig-carousel ig-ratio--{{ $item->photoRatio() }}" data-carousel>
+                <div class="ig-carousel__track" data-carousel-track>
+                    @foreach ($photos as $photo)
+                        <div class="ig-carousel__slide">
+                            <img src="{{ $photo->url() }}" alt="Photo {{ $loop->iteration }} of {{ $photos->count() }} by {{ $item->user->name }}" class="{{ $photo->filterClass() }}" style="object-position: {{ $photo->focus_x }}% {{ $photo->focus_y }}%" @if ($photo->width && $photo->height) width="{{ $photo->width }}" height="{{ $photo->height }}" @endif loading="lazy" decoding="async" draggable="false">
+                        </div>
+                    @endforeach
+                </div>
+                @if ($photos->count() > 1)
+                    <span class="ig-carousel__count" data-carousel-count>1/{{ $photos->count() }}</span>
+                    <button type="button" class="ig-carousel__arrow ig-carousel__arrow--prev" data-carousel-prev hidden aria-label="Previous photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+                    <button type="button" class="ig-carousel__arrow ig-carousel__arrow--next" data-carousel-next aria-label="Next photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+                @endif
+            </div>
+            <svg class="ig-heart-burst" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.8-4.8-9.7-9.6C.9 7.9 3 4 6.9 4c2.1 0 3.8 1.2 5.1 3.1C13.3 5.2 15 4 17.1 4 21 4 23.1 7.9 21.7 11.4 19.8 16.2 12 21 12 21Z"/></svg>
+        </div>
+    @elseif ($hasCard)
         <div class="ig-post__media" data-double-like>
             <x-quote-card
                 :text="$isQuote ? $item->quote_text : $item->body"
@@ -72,7 +92,12 @@
     @endif
 
     {{-- Actions --}}
-    <div class="ig-actions">
+    <div class="ig-actions {{ $photos->count() > 1 ? 'relative' : '' }}">
+        @if ($photos->count() > 1)
+            <div class="ig-dots pointer-events-none absolute inset-x-0 top-0" data-carousel-dots aria-hidden="true">
+                @foreach ($photos as $photo)<span @class(['is-active' => $loop->first])></span>@endforeach
+            </div>
+        @endif
         <button type="button" class="ig-icon" data-like-url="{{ route('reactions.like', [$type, $item->id]) }}" data-like-key="{{ $key }}" aria-pressed="{{ $item->liked_by_viewer ? 'true' : 'false' }}" aria-label="Like">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2Z"/></svg>
         </button>
@@ -92,15 +117,11 @@
     <div class="ig-body text-ink dark:text-[#F4E9E2]">
         <p class="ig-likes"><span data-like-total="{{ $key }}" data-count="{{ $item->likes_count }}">{{ $item->likes_count }} {{ Str::plural('like', $item->likes_count) }}</span></p>
 
-        @if (! $isReview && ! $hasCard)
+        @if (! $isReview && ! $hasCard && ! $hasPhotos)
             {{-- A plain thought: the words are the post. --}}
             <p class="mt-1 whitespace-pre-line break-words text-[17px] leading-7">{{ $item->body }}</p>
         @elseif ($caption)
-            <p class="ig-caption" :class="more ? '' : 'is-clamped'">
-                <a href="{{ route('users.show', $item->user->username) }}" class="font-semibold hover:underline">{{ $item->user->username ?? $item->user->name }}</a>
-                @if ($isReview)<span class="font-semibold">{{ $item->book->title }} ·</span>@endif
-                {{ $caption }}
-            </p>
+            <p class="ig-caption" :class="more ? '' : 'is-clamped'"><a href="{{ route('users.show', $item->user->username) }}" class="font-semibold hover:underline">{{ $item->user->username ?? $item->user->name }}</a>@if ($isReview) <span class="font-semibold">{{ $item->book->title }} ·</span>@endif {{ $caption }}</p>
             @if (mb_strlen($caption) > 160)
                 <button type="button" x-show="!more" @click="more = true" class="text-sm text-tan hover:underline">more</button>
             @endif

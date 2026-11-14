@@ -77,6 +77,9 @@ class ProfileController extends Controller
             }
         }
 
+        // Photos the reader posted (the posts themselves go with the account).
+        Storage::disk('public')->deleteDirectory('post-photos/' . $user->id);
+
         Auth::logout();
 
         $user->delete();

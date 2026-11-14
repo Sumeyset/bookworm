@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="title">Reading feed · Bookworm</x-slot>
     <x-slot name="header">
-        <x-page-header eyebrow="Notes from your reading circle" title="Reading feed" subtitle="Thoughts and quotes from your reading circle. What friends start, finish and rate shows up in your notifications." />
+        <x-page-header eyebrow="Notes from your reading circle" title="Reading feed" subtitle="Photos, thoughts and quotes from your reading circle. What friends start, finish and rate shows up in your notifications." />
     </x-slot>
 
     <div class="page-section grid justify-center gap-8 lg:grid-cols-[minmax(0,30rem)_20rem]">
@@ -14,10 +14,16 @@
                         What are you reading, {{ Str::before(auth()->user()->name, ' ') }}?
                     </button>
                 </div>
-                <div class="mt-3 grid grid-cols-2 gap-2">
+                <div class="mt-3 grid grid-cols-3 gap-1">
+                    <button type="button" data-open-composer="photo" class="focus-ring flex min-h-11 items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-walnut transition hover:bg-parchment dark:text-[#e3d3ca] dark:hover:bg-white/5">
+                        <span class="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-[#f58f7c] via-[#c2547a] to-[#6c3b85] text-white" aria-hidden="true">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="9" r="1.6"/><path d="m21 15-4.5-4.5L6 21"/></svg>
+                        </span>
+                        Photo
+                    </button>
                     <button type="button" data-open-composer="quote" class="focus-ring flex min-h-11 items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-walnut transition hover:bg-parchment dark:text-[#e3d3ca] dark:hover:bg-white/5">
                         <span class="flex h-7 w-6 items-center justify-center rounded-md bg-gradient-to-br from-[#4A1220] to-[#8B2A3D] font-serif text-lg leading-none text-[#FFF8EF]" aria-hidden="true">“</span>
-                        Quote card
+                        Quote
                     </button>
                     <button type="button" data-open-composer="thought" class="focus-ring flex min-h-11 items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-walnut transition hover:bg-parchment dark:text-[#e3d3ca] dark:hover:bg-white/5">
                         <span class="flex h-7 w-6 items-center justify-center rounded-md bg-gradient-to-br from-[#ffcf9f] via-[#f58f7c] to-[#6c3b85] text-xs text-white" aria-hidden="true">Aa</span>

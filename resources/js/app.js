@@ -232,6 +232,10 @@ const likeFromMedia = (media) => {
     if (button && button.getAttribute('aria-pressed') !== 'true') toggleLike(button);
 };
 let lastTap = { target: null, time: 0 };
+let tapStart = null;
+document.addEventListener('pointerdown', (event) => {
+    tapStart = { x: event.clientX, y: event.clientY };
+});
 document.addEventListener('dblclick', (event) => {
     const media = event.target.closest('[data-double-like]');
     if (media) likeFromMedia(media);
@@ -240,6 +244,11 @@ document.addEventListener('pointerup', (event) => {
     if (event.pointerType === 'mouse') return;
     const media = event.target.closest('[data-double-like]');
     if (!media) return;
+    // A swipe through photos isn't a tap.
+    if (tapStart && Math.hypot(event.clientX - tapStart.x, event.clientY - tapStart.y) > 12) {
+        lastTap = { target: null, time: 0 };
+        return;
+    }
     const now = Date.now();
     if (lastTap.target === media && now - lastTap.time < 320) {
         likeFromMedia(media);
@@ -290,13 +299,41 @@ const lengthClass = (text) => {
     return 'xxl';
 };
 
-// The Instagram-style composer: choose → write → design & caption → share.
-Alpine.data('composer', ({ cards = [], books = [], old = null } = {}) => ({
+// Shrink a photo before upload: max 2048px on the long side, as JPEG.
+// Keeps uploads small (and under PHP's upload limit) and drops location data.
+async function preparePhoto(file) {
+    const source = await createImageBitmap(file, { imageOrientation: 'from-image' }).catch(() => null);
+    if (!source) throw new Error(`“${file.name}” isn’t a photo we can open.`);
+    const scale = Math.min(1, 2048 / Math.max(source.width, source.height));
+    const width = Math.round(source.width * scale);
+    const height = Math.round(source.height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, width, height);
+    context.drawImage(source, 0, 0, width, height);
+    source.close?.();
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.88));
+    if (!blob) throw new Error(`“${file.name}” couldn’t be prepared.`);
+    const name = `${file.name.replace(/\.[^.]+$/, '') || 'photo'}.jpg`;
+    return { file: new File([blob], name, { type: 'image/jpeg' }), width, height };
+}
+
+let photoIds = 0;
+
+// The Instagram-style composer.
+//   photo:   choose → select → edit (frame & filter) → caption → share
+//   quote:   choose → write → design (& caption) → share
+//   thought: choose → write → design → share
+Alpine.data('composer', ({ cards = [], books = [], old = null, maxPhotos = 10 } = {}) => ({
     cards,
     books,
+    maxPhotos,
     isOpen: false,
-    step: 1,
-    kind: 'quote',
+    stage: 'choose',
+    kind: 'photo',
     source: 'typed',
     quoteText: '',
     cardId: null,
@@ -307,7 +344,41 @@ Alpine.data('composer', ({ cards = [], books = [], old = null } = {}) => ({
     onCard: false,
     design: 'wine',
     font: 'serif',
+    photos: [],
+    active: 0,
+    ratio: 'square',
+    processing: false,
+    dragOver: false,
+    dragging: null,
     submitting: false,
+
+    stages() {
+        return {
+            photo: ['choose', 'select', 'edit', 'caption'],
+            quote: ['choose', 'write', 'design'],
+            thought: ['choose', 'write', 'design'],
+        }[this.kind];
+    },
+
+    title() {
+        return {
+            choose: 'Create new post',
+            select: 'Choose photos',
+            edit: 'Frame & filter',
+            caption: 'New post',
+            write: this.kind === 'quote' ? 'Your quote' : 'Your thought',
+            design: 'Design & share',
+        }[this.stage];
+    },
+
+    wide() {
+        return ['edit', 'design'].includes(this.stage);
+    },
+
+    isLast() {
+        const stages = this.stages();
+        return this.stage === stages[stages.length - 1];
+    },
 
     init() {
         if (old) {
@@ -317,16 +388,18 @@ Alpine.data('composer', ({ cards = [], books = [], old = null } = {}) => ({
             this.cardId = old.cardId;
             this.bookId = old.bookId;
             this.page = old.page || '';
-            if (old.kind === 'quote') this.caption = old.body || ''; else this.thought = old.body || '';
+            if (old.kind === 'thought') this.thought = old.body || ''; else this.caption = old.body || '';
             this.onCard = Boolean(old.design);
             this.design = old.design || 'wine';
             this.font = old.font || (old.kind === 'quote' ? 'serif' : 'sans');
             this.isOpen = true;
-            this.step = 2;
+            // Photos can't survive a page reload, so a photo post starts again from "choose photos".
+            this.stage = old.kind === 'photo' ? 'select' : 'write';
         }
         const params = new URLSearchParams(window.location.search);
         if (!old && params.get('compose')) {
-            this.open({ kind: params.get('compose') === 'quote' ? 'quote' : 'thought', cardId: Number(params.get('card')) || null });
+            const kind = ['quote', 'photo'].includes(params.get('compose')) ? params.get('compose') : 'thought';
+            this.open({ kind, cardId: Number(params.get('card')) || null });
         }
         this.$watch('isOpen', (open) => document.documentElement.classList.toggle('overflow-hidden', open));
     },
@@ -340,10 +413,10 @@ Alpine.data('composer', ({ cards = [], books = [], old = null } = {}) => ({
             this.cardId = cardId;
             this.design = 'wine';
             this.font = 'serif';
-            this.step = 3;
+            this.stage = 'design';
             return;
         }
-        if (kind) this.choose(kind); else this.step = 1;
+        if (kind) this.choose(kind); else this.stage = 'choose';
     },
 
     close() {
@@ -351,26 +424,147 @@ Alpine.data('composer', ({ cards = [], books = [], old = null } = {}) => ({
         this.isOpen = false;
     },
 
+    back() {
+        if (this.stage === 'choose') {
+            this.close();
+            return;
+        }
+        const stages = this.stages();
+        this.stage = stages[Math.max(0, stages.indexOf(this.stage) - 1)];
+    },
+
+    next() {
+        if (!this.canContinue()) return;
+        const stages = this.stages();
+        this.stage = stages[Math.min(stages.length - 1, stages.indexOf(this.stage) + 1)];
+        if (this.stage === 'caption') this.$nextTick(() => this.$refs.photoCaption?.focus());
+    },
+
     choose(kind) {
         this.kind = kind;
+        if (kind === 'photo') {
+            this.stage = this.photos.length ? 'edit' : 'select';
+            if (!this.photos.length) this.$nextTick(() => this.$refs.picker?.click());
+            return;
+        }
         if (kind === 'thought') {
             this.font = 'sans';
             this.design = this.design === 'wine' ? 'sunset' : this.design;
         } else {
             this.font = 'serif';
         }
-        this.step = 2;
+        this.stage = 'write';
         this.$nextTick(() => (kind === 'quote' ? this.$refs.quote : this.$refs.thought)?.focus());
     },
 
     canContinue() {
+        if (this.stage === 'select' || this.stage === 'edit') return this.photos.length > 0 && !this.processing;
         if (this.kind === 'thought') return this.thought.trim().length > 0;
-        return this.source === 'saved' ? Boolean(this.cardId) : this.quoteText.trim().length > 0;
+        if (this.kind === 'quote') return this.source === 'saved' ? Boolean(this.cardId) : this.quoteText.trim().length > 0;
+        return true;
     },
 
-    next() {
-        if (this.canContinue()) this.step = 3;
+    /* ---------- photos ---------- */
+
+    async addFiles(fileList) {
+        const files = [...fileList].filter((file) => file.type.startsWith('image/'));
+        if (!files.length) return;
+        const room = this.maxPhotos - this.photos.length;
+        if (files.length > room) {
+            window.bookwormToast?.(`You can add up to ${this.maxPhotos} photos to a post.`, 'error');
+        }
+        this.processing = true;
+        try {
+            for (const file of files.slice(0, Math.max(0, room))) {
+                try {
+                    const prepared = await preparePhoto(file);
+                    this.photos.push({
+                        id: ++photoIds,
+                        file: prepared.file,
+                        url: URL.createObjectURL(prepared.file),
+                        width: prepared.width,
+                        height: prepared.height,
+                        focusX: 50,
+                        focusY: 50,
+                        filter: 'normal',
+                    });
+                } catch (error) {
+                    window.bookwormToast?.(error.message, 'error');
+                }
+            }
+        } finally {
+            this.processing = false;
+        }
+        if (this.photos.length) {
+            // A single tall photo suits the portrait frame, a wide one the landscape frame.
+            if (this.photos.length === files.length) {
+                const first = this.photos[0];
+                const shape = first.width / first.height;
+                this.ratio = shape < 0.9 ? 'portrait' : shape > 1.5 ? 'landscape' : 'square';
+            }
+            this.active = Math.min(this.active, this.photos.length - 1);
+            if (this.stage === 'select') this.stage = 'edit';
+        }
     },
+
+    current() {
+        return this.photos[this.active] || null;
+    },
+
+    removePhoto(index) {
+        const [removed] = this.photos.splice(index, 1);
+        if (removed) URL.revokeObjectURL(removed.url);
+        this.active = Math.max(0, Math.min(this.active, this.photos.length - 1));
+        if (!this.photos.length) this.stage = 'select';
+    },
+
+    setFilter(filter) {
+        if (this.current()) this.current().filter = filter;
+    },
+
+    filterAll() {
+        const filter = this.current()?.filter ?? 'normal';
+        this.photos.forEach((photo) => { photo.filter = filter; });
+    },
+
+    startDrag(event) {
+        if (!this.current()) return;
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+        this.dragging = { x: event.clientX, y: event.clientY, focusX: this.current().focusX, focusY: this.current().focusY };
+    },
+
+    drag(event) {
+        if (!this.dragging || !this.current()) return;
+        const frame = this.$refs.frame.getBoundingClientRect();
+        const photo = this.current();
+        // How much of the photo overflows the frame in each direction decides how far a drag moves it.
+        const cover = Math.max(frame.width / photo.width, frame.height / photo.height);
+        const spareX = Math.max(1, photo.width * cover - frame.width);
+        const spareY = Math.max(1, photo.height * cover - frame.height);
+        photo.focusX = Math.min(100, Math.max(0, this.dragging.focusX - ((event.clientX - this.dragging.x) / spareX) * 100));
+        photo.focusY = Math.min(100, Math.max(0, this.dragging.focusY - ((event.clientY - this.dragging.y) / spareY) * 100));
+    },
+
+    endDrag() {
+        this.dragging = null;
+    },
+
+    prepareSubmit(event) {
+        if (this.kind === 'photo') {
+            if (!this.photos.length || this.processing) {
+                event.preventDefault();
+                return;
+            }
+            const transfer = new DataTransfer();
+            this.photos.forEach((photo) => transfer.items.add(photo.file));
+            this.$refs.upload.files = transfer.files;
+        } else {
+            this.$refs.upload.value = '';
+        }
+        this.submitting = true;
+    },
+
+    /* ---------- quote & thought cards ---------- */
 
     selectedCard() {
         return this.cards.find((card) => card.id === this.cardId) || null;
@@ -394,5 +588,32 @@ Alpine.data('composer', ({ cards = [], books = [], old = null } = {}) => ({
         return `qcard--${this.design} qcard--f-${this.font} qcard--len-${lengthClass(this.previewText())}${this.kind === 'thought' ? ' qcard--thought' : ''}`;
     },
 }));
+
+// Photo carousels in the feed: counter, dots and arrows follow the swipe.
+document.querySelectorAll('[data-carousel]').forEach((carousel) => {
+    const track = carousel.querySelector('[data-carousel-track]');
+    const slides = track.children.length;
+    if (slides < 2) return;
+    const count = carousel.querySelector('[data-carousel-count]');
+    const previous = carousel.querySelector('[data-carousel-prev]');
+    const next = carousel.querySelector('[data-carousel-next]');
+    const dots = carousel.closest('article')?.querySelectorAll('[data-carousel-dots] span') ?? [];
+
+    const index = () => Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+    const update = () => {
+        const current = index();
+        count.textContent = `${current + 1}/${slides}`;
+        previous.hidden = current === 0;
+        next.hidden = current >= slides - 1;
+        dots.forEach((dot, dotIndex) => dot.classList.toggle('is-active', dotIndex === current));
+    };
+    const go = (step) => track.scrollTo({ left: (index() + step) * track.clientWidth, behavior: 'smooth' });
+
+    track.addEventListener('scroll', () => window.requestAnimationFrame(update), { passive: true });
+    previous.addEventListener('click', (event) => { event.stopPropagation(); go(-1); });
+    next.addEventListener('click', (event) => { event.stopPropagation(); go(1); });
+    previous.addEventListener('dblclick', (event) => event.stopPropagation());
+    next.addEventListener('dblclick', (event) => event.stopPropagation());
+});
 
 Alpine.start();

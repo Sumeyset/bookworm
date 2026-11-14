@@ -418,3 +418,250 @@
         animation: none;
     }
 }
+
+/* ---------------------------------------------------------------- */
+/* Photo posts: frame shapes, filters and the swipeable carousel     */
+/* ---------------------------------------------------------------- */
+
+.ig-ratio--square { aspect-ratio: 1 / 1; }
+.ig-ratio--portrait { aspect-ratio: 4 / 5; }
+.ig-ratio--landscape { aspect-ratio: 1.91 / 1; }
+
+/* Colour filters (applied when shown; the uploaded file stays untouched) */
+.pf-normal { filter: none; }
+.pf-warm { filter: sepia(.22) saturate(1.25) contrast(1.05) brightness(1.04); }
+.pf-cool { filter: saturate(1.1) hue-rotate(-12deg) contrast(1.05) brightness(1.03); }
+.pf-vintage { filter: sepia(.45) contrast(.9) brightness(1.06) saturate(.85); }
+.pf-fade { filter: contrast(.82) brightness(1.12) saturate(.78); }
+.pf-golden { filter: sepia(.3) saturate(1.5) hue-rotate(-10deg) brightness(1.05); }
+.pf-rose { filter: sepia(.18) saturate(1.3) hue-rotate(-22deg) contrast(1.04) brightness(1.03); }
+.pf-vivid { filter: saturate(1.6) contrast(1.12); }
+.pf-mono { filter: grayscale(1) contrast(1.05); }
+.pf-noir { filter: grayscale(1) contrast(1.45) brightness(.9); }
+
+.ig-carousel {
+    position: relative;
+    overflow: hidden;
+    background: #120b0d;
+}
+
+.ig-carousel__track {
+    display: flex;
+    height: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+
+.ig-carousel__track::-webkit-scrollbar {
+    display: none;
+}
+
+.ig-carousel__slide {
+    flex: 0 0 100%;
+    height: 100%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+}
+
+.ig-carousel__slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -webkit-user-drag: none;
+}
+
+.ig-carousel__count {
+    position: absolute;
+    top: .75rem;
+    right: .75rem;
+    padding: .2rem .55rem;
+    border-radius: 999px;
+    background: rgb(20 12 14 / 65%);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+
+.ig-carousel__arrow {
+    position: absolute;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 85%);
+    color: #2a1a1d;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+    opacity: 0;
+    transform: translateY(-50%);
+    transition: opacity .15s ease;
+}
+
+.ig-carousel:hover .ig-carousel__arrow:not([hidden]) {
+    opacity: 1;
+}
+
+.ig-carousel__arrow[hidden] {
+    display: none;
+}
+
+.ig-carousel__arrow--prev { left: .6rem; }
+.ig-carousel__arrow--next { right: .6rem; }
+
+.ig-carousel__arrow svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+@media (pointer: coarse) {
+    .ig-carousel__arrow {
+        display: none;
+    }
+}
+
+.ig-dots {
+    display: flex;
+    justify-content: center;
+    gap: .25rem;
+    padding-top: .6rem;
+}
+
+.ig-dots span {
+    width: .38rem;
+    height: .38rem;
+    border-radius: 999px;
+    background: #d9c6b6;
+    transition: background-color .2s ease, transform .2s ease;
+}
+
+.dark .ig-dots span {
+    background: #594749;
+}
+
+.ig-dots span.is-active {
+    background: #6d1a2b;
+    transform: scale(1.15);
+}
+
+.dark .ig-dots span.is-active {
+    background: #e9a2ae;
+}
+
+/* ---------------- photo editor in the composer ---------------- */
+
+.ph-frame {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: .9rem;
+    background: #120b0d;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.ph-frame:active {
+    cursor: grabbing;
+}
+
+.ph-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.ph-frame__grid {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, transparent calc(33.33% - .5px), rgb(255 255 255 / 45%) calc(33.33% - .5px), rgb(255 255 255 / 45%) calc(33.33% + .5px), transparent calc(33.33% + .5px), transparent calc(66.66% - .5px), rgb(255 255 255 / 45%) calc(66.66% - .5px), rgb(255 255 255 / 45%) calc(66.66% + .5px), transparent calc(66.66% + .5px)),
+        linear-gradient(0deg, transparent calc(33.33% - .5px), rgb(255 255 255 / 45%) calc(33.33% - .5px), rgb(255 255 255 / 45%) calc(33.33% + .5px), transparent calc(33.33% + .5px), transparent calc(66.66% - .5px), rgb(255 255 255 / 45%) calc(66.66% - .5px), rgb(255 255 255 / 45%) calc(66.66% + .5px), transparent calc(66.66% + .5px));
+    opacity: 0;
+    transition: opacity .15s ease;
+    pointer-events: none;
+}
+
+.ph-frame.is-dragging .ph-frame__grid {
+    opacity: 1;
+}
+
+.ph-thumb {
+    position: relative;
+    flex-shrink: 0;
+    width: 3.6rem;
+    height: 3.6rem;
+    overflow: hidden;
+    border-radius: .6rem;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 10%);
+}
+
+.ph-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ph-thumb[aria-current="true"] {
+    box-shadow: 0 0 0 2px #fffdf9, 0 0 0 4px #6d1a2b;
+}
+
+.ph-filter {
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: .3rem;
+    width: 4.4rem;
+    font-size: .72rem;
+    font-weight: 600;
+}
+
+.ph-filter img {
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: .5rem;
+    object-fit: cover;
+}
+
+.ph-filter[aria-checked="true"] {
+    color: #6d1a2b;
+}
+
+.dark .ph-filter[aria-checked="true"] {
+    color: #e9a2ae;
+}
+
+.ph-filter[aria-checked="true"] img {
+    box-shadow: 0 0 0 2px #6d1a2b;
+}
+
+.ph-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    min-height: 16rem;
+    border: 2px dashed #d9c6b6;
+    border-radius: 1.25rem;
+    text-align: center;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+
+.ph-drop.is-over {
+    border-color: #6d1a2b;
+    background: rgb(109 26 43 / 5%);
+}

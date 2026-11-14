@@ -33,7 +33,7 @@ class FeedController extends Controller
             ->latest()
             ->latest('id')
             ->take(self::PAGE + 1)
-            ->with(['user', 'book'])
+            ->with(['user', 'book', 'photos'])
             ->withReactions($user)
             ->get();
 
