@@ -26,7 +26,7 @@
             <div class="relative grid gap-5 border-t border-warmborder px-5 py-5 dark:border-[#4B3035] sm:grid-cols-[1fr_auto] sm:items-center sm:px-8">
                 <p class="whitespace-pre-line break-words font-serif text-lg italic leading-8 text-walnut dark:text-[#e3d3ca]">{{ $profile->bio ?: 'No introduction yet.' }}</p>
                 <dl class="grid grid-cols-3 gap-2 text-center">
-                    @foreach (['Followers' => $profile->followers_count, 'Following' => $profile->following_count, 'Reviews' => $profile->reviews_count] as $label => $value)
+                    @foreach (['Posts' => $profile->posts_count, 'Followers' => $profile->followers_count, 'Following' => $profile->following_count] as $label => $value)
                         <div class="rounded-2xl bg-parchment/70 px-4 py-2.5 dark:bg-white/5">
                             <dd class="font-display text-3xl text-ink dark:text-[#f4e9e2] font-bold">{{ $value }}</dd>
                             <dt class="font-hand text-lg leading-none text-tan">{{ $label }}</dt>
@@ -35,6 +35,8 @@
                 </dl>
             </div>
         </section>
+
+        @include('users.partials.post-grid')
 
         {{-- The living tree --}}
         <section id="bookshelf" aria-labelledby="bookshelf-heading" class="scroll-mt-24">

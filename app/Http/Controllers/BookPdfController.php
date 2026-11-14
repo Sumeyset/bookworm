@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\BookPdf;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +15,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BookPdfController extends Controller
 {
-    public function store(Request $request, Book $book): RedirectResponse
+    public function store(Request $request, Book $book): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'pdfs' => ['required', 'array', 'min:1', 'max:5'],
@@ -41,7 +42,15 @@ class BookPdfController extends Controller
             ]);
         }
 
-        return to_route('books.show', $book)->with('status', 'Your PDF files were uploaded privately.');
+        $message = count($validated['pdfs']) === 1 ? 'Your PDF was uploaded privately.' : 'Your PDF files were uploaded privately.';
+
+        if ($request->expectsJson()) {
+            session()->flash('status', $message);
+
+            return response()->json(['uploaded' => count($validated['pdfs']), 'redirect' => route('books.show', $book) . '#private-pdfs'], 201);
+        }
+
+        return to_route('books.show', $book)->with('status', $message);
     }
 
     public function download(Request $request, Book $book, BookPdf $bookPdf): StreamedResponse

@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs';
+import { attachReaderSuggest, fetchReaders, markMatch, readerAvatar, readerMeta } from './reader-search.js';
 
 window.Alpine = Alpine;
 
@@ -99,6 +100,56 @@ if (palette) {
         }
     });
     input.addEventListener('input', filter);
+
+    // Readers matching what's typed (top five), above the page shortcuts.
+    const readerGroup = palette.querySelector('[data-palette-readers]');
+    let readerController;
+    let readerTimer;
+    const showReaders = async () => {
+        const query = input.value.trim();
+        readerController?.abort();
+        if (!readerGroup) return;
+        if (!query) {
+            readerGroup.replaceChildren();
+            readerGroup.hidden = true;
+            highlight(0);
+            return;
+        }
+        readerController = new AbortController();
+        try {
+            const readers = await fetchReaders(query, readerController.signal);
+            if (input.value.trim() !== query) return;
+            readerGroup.replaceChildren();
+            if (readers.length) {
+                const heading = document.createElement('p');
+                heading.className = 'bw-palette__heading';
+                heading.textContent = 'Readers';
+                readerGroup.append(heading);
+            }
+            readers.forEach((reader) => {
+                const link = document.createElement('a');
+                link.href = reader.url;
+                link.className = 'bw-palette__item';
+                const text = document.createElement('span');
+                text.className = 'reader-suggest__text';
+                const username = document.createElement('b');
+                username.append(markMatch(reader.username, query));
+                const meta = document.createElement('small');
+                meta.textContent = readerMeta(reader);
+                text.append(username, meta);
+                link.append(readerAvatar(reader), text);
+                readerGroup.append(link);
+            });
+            readerGroup.hidden = readers.length === 0;
+            highlight(0);
+        } catch {
+            // Aborted or offline: keep the page shortcuts.
+        }
+    };
+    input.addEventListener('input', () => {
+        window.clearTimeout(readerTimer);
+        readerTimer = window.setTimeout(showReaders, 120);
+    });
     input.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowDown') { event.preventDefault(); highlight(active + 1); }
         if (event.key === 'ArrowUp') { event.preventDefault(); highlight(active - 1); }
@@ -615,5 +666,178 @@ document.querySelectorAll('[data-carousel]').forEach((carousel) => {
     previous.addEventListener('dblclick', (event) => event.stopPropagation());
     next.addEventListener('dblclick', (event) => event.stopPropagation());
 });
+
+// "Start a buddy read": 1) pick a book → 2) invite friends → 3) name it and start.
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-open-buddy-wizard]')) return;
+    event.preventDefault();
+    window.dispatchEvent(new CustomEvent('open-buddy-wizard'));
+});
+
+Alpine.data('buddyWizard', ({ books = [], friends = [], preselect = 0, old = null } = {}) => ({
+    books,
+    friends,
+    isOpen: false,
+    step: 1,
+    bookId: null,
+    invitees: [],
+    title: '',
+    bookSearch: '',
+    friendSearch: '',
+
+    init() {
+        if (old) {
+            this.bookId = old.book || null;
+            this.invitees = old.invitees || [];
+            this.title = old.title || '';
+            this.step = this.bookId ? 2 : 1;
+            this.isOpen = true;
+        } else if (preselect && this.books.some((book) => book.id === preselect)) {
+            this.bookId = preselect;
+            this.step = 2;
+            this.isOpen = true;
+        }
+        this.$watch('isOpen', (open) => document.documentElement.classList.toggle('overflow-hidden', open));
+    },
+
+    open() {
+        this.isOpen = true;
+        if (!this.bookId) this.step = 1;
+    },
+
+    matches(text, query) {
+        return String(text || '').toLowerCase().includes(query.trim().toLowerCase());
+    },
+
+    filteredBooks() {
+        return this.books.filter((book) => !this.bookSearch.trim() || this.matches(book.title, this.bookSearch) || this.matches(book.author, this.bookSearch));
+    },
+
+    filteredFriends() {
+        return this.friends.filter((friend) => !this.friendSearch.trim() || this.matches(friend.name, this.friendSearch) || this.matches(friend.username, this.friendSearch));
+    },
+
+    toggle(id) {
+        this.invitees = this.invitees.includes(id) ? this.invitees.filter((entry) => entry !== id) : [...this.invitees, id];
+    },
+
+    selectedBook() {
+        return this.books.find((book) => book.id === this.bookId) || null;
+    },
+
+    selectedFriends() {
+        return this.friends.filter((friend) => this.invitees.includes(friend.id));
+    },
+}));
+
+// Book page: pick or drop PDFs, check them before sending, and show upload progress.
+let pdfIds = 0;
+Alpine.data('pdfUploader', ({ maxFiles = 5, maxMb = 20 } = {}) => ({
+    maxFiles,
+    files: [],
+    errors: [],
+    over: false,
+    uploading: false,
+    progress: 0,
+
+    size(bytes) {
+        return bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+    },
+
+    add(list) {
+        this.errors = [];
+        [...list].forEach((file) => {
+            if (this.files.length >= this.maxFiles) {
+                this.errors = [`You can upload up to ${this.maxFiles} PDFs at once.`];
+                return;
+            }
+            const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+            const error = !isPdf ? 'Not a PDF — this one will be skipped.'
+                : file.size > maxMb * 1048576 ? `Larger than ${maxMb} MB — this one will be skipped.`
+                : null;
+            this.files.push({ id: ++pdfIds, file, error });
+        });
+    },
+
+    remove(index) {
+        this.files.splice(index, 1);
+        this.errors = [];
+    },
+
+    validFiles() {
+        return this.files.filter((entry) => !entry.error);
+    },
+
+    upload(form) {
+        const valid = this.validFiles();
+        if (!valid.length || this.uploading) return;
+        const data = new FormData();
+        data.append('_token', form.querySelector('input[name="_token"]').value);
+        valid.forEach((entry) => data.append('pdfs[]', entry.file));
+
+        this.uploading = true;
+        this.progress = 0;
+        this.errors = [];
+        const request = new XMLHttpRequest();
+        request.open('POST', form.action);
+        request.setRequestHeader('Accept', 'application/json');
+        request.upload.addEventListener('progress', (event) => {
+            if (event.lengthComputable) this.progress = Math.round((event.loaded / event.total) * 100);
+        });
+        request.addEventListener('load', () => {
+            let payload = {};
+            try { payload = JSON.parse(request.responseText || '{}'); } catch { /* not JSON */ }
+            if (request.status >= 200 && request.status < 300) {
+                window.location.href = payload.redirect || window.location.href;
+                window.location.reload();
+                return;
+            }
+            this.uploading = false;
+            this.errors = request.status === 413
+                ? ['These files are too big for the server to accept at once. Try fewer files, or raise upload_max_filesize and post_max_size in php.ini.']
+                : payload.errors ? Object.values(payload.errors).flat() : [payload.message || 'The upload didn’t work. Please try again.'];
+        });
+        request.addEventListener('error', () => {
+            this.uploading = false;
+            this.errors = ['The upload was interrupted. Check your connection and try again.'];
+        });
+        request.send(data);
+    },
+}));
+
+// Live reader search on the Find readers page.
+document.querySelectorAll('[data-reader-suggest]').forEach(attachReaderSuggest);
+
+// Stay in place after actions. Replying, deleting, following and other buttons
+// send a form and the page reloads; bring the reader back to where they were
+// instead of the top. Forms marked data-scroll-top (e.g. a new post) skip this.
+const SCROLL_KEY = 'bookworm-scroll';
+document.addEventListener('submit', (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || form.hasAttribute('data-scroll-top')) return;
+    if ((form.getAttribute('method') || 'get').toLowerCase() !== 'post') return;
+    try {
+        sessionStorage.setItem(SCROLL_KEY, JSON.stringify({ path: window.location.pathname + window.location.search, y: window.scrollY, at: Date.now() }));
+    } catch {
+        // Storage blocked: nothing to restore.
+    }
+});
+
+(() => {
+    let saved = null;
+    try {
+        saved = JSON.parse(sessionStorage.getItem(SCROLL_KEY) || 'null');
+        sessionStorage.removeItem(SCROLL_KEY);
+    } catch {
+        return;
+    }
+    if (!saved || Date.now() - saved.at > 60_000 || saved.path !== window.location.pathname + window.location.search) return;
+    const restore = () => window.scrollTo({ top: saved.y, left: 0, behavior: 'instant' });
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    restore();
+    // Images loading in can shift the page; settle again once everything is in.
+    window.addEventListener('load', restore, { once: true });
+    window.setTimeout(restore, 250);
+})();
 
 Alpine.start();

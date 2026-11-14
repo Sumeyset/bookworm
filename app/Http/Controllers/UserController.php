@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserBookShelf;
 use App\Support\BookTree;
 use App\Support\FriendActivity;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -16,21 +17,10 @@ class UserController extends Controller
     {
         $query = trim((string) $request->query('q', ''));
 
-        $readersQuery = User::query()
-            ->where('id', '!=', $request->user()->id);
-
-        if ($query === '') {
-            $readersQuery->whereKey([]);
-        } else {
-            $readersQuery->where(function ($users) use ($query) {
-                $users->where('name', 'like', '%' . $query . '%')
-                    ->orWhere('username', 'like', '%' . $query . '%');
-            });
-        }
-
-        $readers = $readersQuery
-            ->withCount(['followers', 'reviews'])
-            ->orderBy('name')
+        $readers = User::query()
+            ->when($query === '', fn ($users) => $users->whereKey([]))
+            ->when($query !== '', fn ($users) => $users->searchReaders($query, $request->user()))
+            ->withCount('reviews')
             ->paginate(12)
             ->withQueryString();
 
@@ -43,9 +33,32 @@ class UserController extends Controller
         return view('users.index', compact('query', 'readers', 'following'));
     }
 
+    /** Live search: the top five readers for what's typed so far. */
+    public function suggest(Request $request): JsonResponse
+    {
+        $query = trim((string) $request->query('q', ''));
+        if ($query === '' || mb_strlen($query) > 60) {
+            return response()->json([]);
+        }
+
+        $readers = User::query()
+            ->searchReaders($query, $request->user())
+            ->take(5)
+            ->get(['id', 'name', 'username', 'profile_photo_path']);
+
+        return response()->json($readers->map(fn (User $reader) => [
+            'name' => $reader->name,
+            'username' => $reader->username,
+            'photo' => $reader->profile_photo_url,
+            'followers' => $reader->followers_count,
+            'following' => (bool) $reader->followed_by_viewer,
+            'url' => route('users.show', $reader->username),
+        ]));
+    }
+
     public function show(Request $request, User $user): View
     {
-        $user->loadCount(['followers', 'following', 'reviews']);
+        $user->loadCount(['followers', 'following', 'reviews', 'posts']);
 
         // Older accounts rated books before shelves existed: give each of
         // those books a place on the tree (once) so nothing is missing.
@@ -167,8 +180,19 @@ class UserController extends Controller
             : $allUserShelfItems->filter(fn ($item) => $item->status === 'read' && $item->book->reviews->isNotEmpty());
         $treeShelves = BookTree::build($user, $treeItems, $isOwnProfile);
 
+        // Instagram-style grid of the reader's posts, newest first.
+        $posts = $user->posts()
+            ->with(['photos', 'book'])
+            ->withCount(['likes', 'comments'])
+            ->latest()
+            ->latest('id')
+            ->paginate(18, ['*'], 'posts')
+            ->withQueryString()
+            ->fragment('posts');
+
         return view('users.show', [
             'profile' => $user,
+            'posts' => $posts,
             'bookshelf' => $bookshelf,
             'shelfStatuses' => UserBookShelf::STATUSES,
             'shelfStatus' => $status,

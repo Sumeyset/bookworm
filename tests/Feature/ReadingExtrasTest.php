@@ -119,7 +119,32 @@ test('readers can start a buddy read, invite a friend, and keep later pages spoi
 
     $this->actingAs($me)->get(route('buddy.show', $read))
         ->assertOk()
-        ->assertSee('Spoiler from page 200');
+        ->assertSee('Page 200 spoiler');
+
+    $this->get(route('buddy.index'))->assertOk()->assertSee('a message from page 200');
+});
+
+test('buddy read members can invite more friends, and invitations can be declined', function () {
+    $me = User::factory()->create();
+    $friend = User::factory()->create();
+    $later = User::factory()->create(['name' => 'Late Joiner']);
+    $me->following()->attach([$friend->id, $later->id]);
+    $book = Book::create(['ol_id' => 'OL-BUDDY-2', 'title' => 'Group Read']);
+
+    $this->actingAs($me)->post(route('buddy.store'), ['book_id' => $book->id, 'invitees' => [$friend->id]]);
+    $read = BuddyRead::firstOrFail();
+
+    $this->get(route('buddy.show', $read))->assertOk()->assertSee('Invite more friends')->assertSee('Late Joiner');
+    $this->post(route('buddy.invite', $read), ['invitees' => [$later->id, $friend->id]])->assertSessionHasNoErrors();
+    expect($read->members()->count())->toBe(3)
+        ->and($later->notifications()->first()->data['kind'])->toBe('buddy');
+
+    // Only members can invite.
+    $this->actingAs(User::factory()->create())->post(route('buddy.invite', $read), ['invitees' => [$later->id]])->assertNotFound();
+
+    $this->actingAs($later)->get(route('buddy.index'))->assertOk()->assertSee('Group Read')->assertSee('Not now');
+    $this->delete(route('buddy.leave', $read), ['decline' => 1])->assertRedirect(route('buddy.index'));
+    expect($read->members()->count())->toBe(2);
 });
 
 test('recommendations suggest what fans of your favourite book loved', function () {

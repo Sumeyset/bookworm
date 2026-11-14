@@ -716,3 +716,268 @@
 .dark .ig-replies__form {
     border-top-color: #4b3035;
 }
+
+/* ---------------- profile grid ---------------- */
+
+.ig-tile {
+    position: relative;
+    display: block;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #efe3d3;
+}
+
+.dark .ig-tile {
+    background: #2a1a1f;
+}
+
+.ig-tile > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+}
+
+.ig-tile > .qcard {
+    /* show the middle of the 4:5 card in the square tile */
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.ig-tile__text {
+    display: -webkit-box;
+    height: 100%;
+    padding: 12%;
+    overflow: hidden;
+    background: linear-gradient(160deg, #fffdf9, #f3e8da);
+    color: #2a1a1d;
+    font-family: Lora, Georgia, serif;
+    font-size: clamp(.7rem, 2.4vw, 1.05rem);
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 7;
+}
+
+.dark .ig-tile__text {
+    background: linear-gradient(160deg, #2b1a20, #1e1216);
+    color: #f4e9e2;
+}
+
+.ig-tile__badge {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #fff;
+    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 50%));
+}
+
+.ig-tile__badge--quote {
+    font-family: Georgia, serif;
+    font-size: 1.6rem;
+    line-height: 1.3rem;
+    text-align: center;
+}
+
+.ig-tile__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    background: rgb(20 10 12 / 45%);
+    color: #fff;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+
+.ig-tile__overlay span {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+.ig-tile__overlay svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.ig-tile:hover .ig-tile__overlay,
+.ig-tile:focus-visible .ig-tile__overlay {
+    opacity: 1;
+}
+
+.ig-tile:hover > img {
+    transform: scale(1.03);
+}
+
+@media (hover: none) {
+    .ig-tile__overlay {
+        display: none;
+    }
+}
+
+/* ---------------- live reader search ---------------- */
+
+.reader-suggest {
+    position: absolute;
+    top: calc(100% + .4rem);
+    right: 0;
+    left: 0;
+    z-index: 40;
+    overflow: hidden;
+    border: 1px solid #e6d9d0;
+    border-radius: 1.1rem;
+    background: #fffdf9;
+    box-shadow: 0 22px 50px -20px rgb(42 26 29 / 45%);
+    animation: palette-in .16s ease-out;
+}
+
+.reader-suggest[hidden] {
+    display: none;
+}
+
+.dark .reader-suggest {
+    border-color: #4b3035;
+    background: #271519;
+}
+
+.reader-suggest__item,
+.bw-palette .reader-suggest__text {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.reader-suggest__item {
+    padding: .6rem .9rem;
+    color: #2a1a1d;
+}
+
+.dark .reader-suggest__item {
+    color: #f4e9e2;
+}
+
+.reader-suggest__item:hover,
+.reader-suggest__item.is-active,
+.reader-suggest__all:hover,
+.reader-suggest__all.is-active {
+    background: #f1e4d6;
+}
+
+.dark .reader-suggest__item:hover,
+.dark .reader-suggest__item.is-active,
+.dark .reader-suggest__all:hover,
+.dark .reader-suggest__all.is-active {
+    background: #382329;
+}
+
+.reader-suggest__avatar {
+    flex-shrink: 0;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 999px;
+    object-fit: cover;
+    box-shadow: 0 0 0 2px #fffdf9, 0 0 0 3.5px rgb(109 26 43 / 55%);
+}
+
+.bw-palette .reader-suggest__avatar {
+    width: 2.1rem;
+    height: 2.1rem;
+}
+
+.reader-suggest__avatar--initial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #efe3d3;
+    color: #6d1a2b;
+    font-family: Lora, Georgia, serif;
+    font-weight: 600;
+}
+
+.dark .reader-suggest__avatar--initial {
+    background: #493536;
+    color: #f4e9e2;
+}
+
+.reader-suggest__text {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    line-height: 1.25;
+}
+
+.bw-palette .reader-suggest__text {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+}
+
+.reader-suggest__text b {
+    overflow: hidden;
+    font-size: .92rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reader-suggest__text b mark {
+    background: none;
+    color: #6d1a2b;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+
+.dark .reader-suggest__text b mark {
+    color: #e9a2ae;
+}
+
+.reader-suggest__text small {
+    overflow: hidden;
+    color: #8a6a55;
+    font-size: .78rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reader-suggest__all,
+.reader-suggest__empty {
+    display: block;
+    padding: .7rem .9rem;
+    border-top: 1px solid #e6d9d0;
+    color: #6d1a2b;
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+.reader-suggest__empty {
+    border-top: 0;
+    color: #8a6a55;
+    font-weight: 400;
+}
+
+.dark .reader-suggest__all {
+    border-top-color: #4b3035;
+    color: #e9a2ae;
+}
+
+.bw-palette__heading {
+    padding: .5rem .75rem .25rem;
+    color: #8a6a55;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.ig-tile .qcard__mark,
+.ig-tile .qcard__brand {
+    display: none;
+}

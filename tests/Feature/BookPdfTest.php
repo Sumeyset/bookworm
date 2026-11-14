@@ -218,3 +218,24 @@ test('book PDF highlights and reader are private to the PDF owner', function () 
     $this->getJson(route('books.pdfs.highlights.index', [$book, $pdf]))
         ->assertNotFound();
 });
+
+test('the PDF card can upload with progress (JSON) and lands back on the book', function () {
+    Storage::fake('local');
+    $user = User::factory()->create();
+    $book = Book::create(['ol_id' => 'OL-PDF-JSON', 'title' => 'Uploaded Book']);
+
+    $this->actingAs($user)
+        ->post(route('books.pdfs.store', $book), ['pdfs' => [UploadedFile::fake()->createWithContent('my-copy.pdf', "%PDF-1.4\nHello\n%%EOF")]], ['Accept' => 'application/json'])
+        ->assertCreated()
+        ->assertJsonPath('uploaded', 1)
+        ->assertJsonPath('redirect', route('books.show', $book) . '#private-pdfs');
+
+    $this->get(route('books.show', $book))
+        ->assertOk()
+        ->assertSee('my-copy.pdf')
+        ->assertSee('Your PDF was uploaded privately.');
+
+    $this->post(route('books.pdfs.store', $book), ['pdfs' => [UploadedFile::fake()->create('photo.jpg', 10, 'image/jpeg')]], ['Accept' => 'application/json'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('pdfs.0');
+});

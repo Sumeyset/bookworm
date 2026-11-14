@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="title">Find readers · Bookworm</x-slot>
     <x-slot name="header">
-        <x-page-header eyebrow="Bookworm community" title="Find readers" subtitle="Search by name or username to find readers and follow their book reviews.">
+        <x-page-header eyebrow="Bookworm community" title="Find readers" subtitle="Start typing a name or username — the best matches appear right away.">
             <x-slot name="actions">
                 <a href="{{ route('books.index') }}" class="btn-ghost"><span aria-hidden="true">&larr;</span> Explore books</a>
             </x-slot>
@@ -12,7 +12,7 @@
         <form method="GET" action="{{ route('users.index') }}" class="bw-search" role="search">
             <label for="reader-search" class="sr-only">Name or username</label>
             <svg class="bw-search__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8.5 3a5.5 5.5 0 1 0 3.46 9.78l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 8.5 3ZM4.5 8.5a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"/></svg>
-            <input id="reader-search" type="search" name="q" value="{{ $query }}" placeholder="Search names or usernames" autocomplete="off" class="bw-search__input">
+            <input id="reader-search" type="search" name="q" value="{{ $query }}" placeholder="Search names or usernames" autocomplete="off" class="bw-search__input" data-reader-suggest autofocus>
             <button type="submit" class="btn-primary shrink-0">Search readers</button>
         </form>
 

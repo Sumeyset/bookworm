@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class BuddyRead extends Model
 {
@@ -30,6 +31,11 @@ class BuddyRead extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(BuddyReadComment::class)->oldest();
+    }
+
+    public function latestComment(): HasOne
+    {
+        return $this->hasOne(BuddyReadComment::class)->latestOfMany();
     }
 
     public function hasMember(User $user, bool $joinedOnly = true): bool

@@ -166,11 +166,12 @@
     <dialog id="command-palette" class="bw-palette" aria-label="Search and jump">
         <form method="GET" action="{{ route('books.index') }}" class="flex items-center gap-3 border-b border-warmborder px-5 py-4 dark:border-[#4B3035]" data-palette-form>
             <svg class="h-5 w-5 shrink-0 text-tan" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8.5 3a5.5 5.5 0 1 0 3.46 9.78l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 8.5 3ZM4.5 8.5a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"/></svg>
-            <label for="palette-input" class="sr-only">Search books or jump to a page</label>
-            <input id="palette-input" name="q" type="search" autocomplete="off" placeholder="Search books, or jump to a page…" class="min-w-0 flex-1 border-0 bg-transparent p-0 text-lg text-ink placeholder:text-tan/70 focus:outline-none focus:ring-0 dark:text-[#F4E9E2]" data-palette-input>
+            <label for="palette-input" class="sr-only">Search readers and books, or jump to a page</label>
+            <input id="palette-input" name="q" type="search" autocomplete="off" placeholder="Search readers and books, or jump to a page…" class="min-w-0 flex-1 border-0 bg-transparent p-0 text-lg text-ink placeholder:text-tan/70 focus:outline-none focus:ring-0 dark:text-[#F4E9E2]" data-palette-input>
             <kbd class="rounded-md border border-warmborder px-1.5 py-0.5 text-[10px] font-semibold text-tan dark:border-[#4B3035]">Esc</kbd>
         </form>
-        <ul class="max-h-80 overflow-y-auto p-2" role="listbox" data-palette-list>
+        <ul class="max-h-96 overflow-y-auto p-2" role="listbox" data-palette-list>
+            <li data-palette-readers hidden></li>
             <li data-palette-search hidden>
                 <button type="button" class="bw-palette__item" data-palette-submit>
                     <span class="bw-palette__icon">⌕</span>

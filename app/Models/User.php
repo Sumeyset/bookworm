@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -147,6 +148,34 @@ class User extends Authenticatable
     public function quoteCards(): HasMany
     {
         return $this->hasMany(QuoteCard::class);
+    }
+
+    /**
+     * Reader search, Instagram style: best matches first.
+     * Exact username, then usernames starting with the text, then names starting
+     * with it, then a word in the name, then anything containing it. Readers the
+     * viewer follows and well-followed readers come first within each group.
+     */
+    public function scopeSearchReaders(Builder $query, string $term, User $viewer): Builder
+    {
+        $term = mb_strtolower(ltrim(trim($term), '@'));
+        // "!" escapes % and _ so they're searched as plain characters (works in MySQL and SQLite).
+        $like = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term);
+
+        return $query
+            ->whereKeyNot($viewer->id)
+            ->where(fn ($users) => $users
+                ->whereRaw("LOWER(username) LIKE ? ESCAPE '!'", ['%' . $like . '%'])
+                ->orWhereRaw("LOWER(name) LIKE ? ESCAPE '!'", ['%' . $like . '%']))
+            ->withCount('followers')
+            ->withExists(['followers as followed_by_viewer' => fn ($followers) => $followers->where('user_follows.follower_id', $viewer->id)])
+            ->orderByRaw(
+                "CASE WHEN LOWER(username) = ? THEN 0 WHEN LOWER(username) LIKE ? ESCAPE '!' THEN 1 WHEN LOWER(name) LIKE ? ESCAPE '!' THEN 2 WHEN LOWER(name) LIKE ? ESCAPE '!' THEN 3 ELSE 4 END",
+                [$term, $like . '%', $like . '%', '% ' . $like . '%'],
+            )
+            ->orderByDesc('followed_by_viewer')
+            ->orderByDesc('followers_count')
+            ->orderBy('name');
     }
 
     public function followers(): BelongsToMany

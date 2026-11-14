@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/suggest', [UserController::class, 'suggest'])->middleware('throttle:120,1')->name('users.suggest');
 
     // Posts, likes and replies
     Route::post('/posts', [PostController::class, 'store'])->middleware('throttle:posting')->name('posts.store');
@@ -93,6 +94,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/buddy-reads/{buddyRead}', [BuddyReadController::class, 'show'])->name('buddy.show');
     Route::post('/buddy-reads/{buddyRead}/join', [BuddyReadController::class, 'join'])->name('buddy.join');
     Route::delete('/buddy-reads/{buddyRead}/leave', [BuddyReadController::class, 'leave'])->name('buddy.leave');
+    Route::post('/buddy-reads/{buddyRead}/invite', [BuddyReadController::class, 'invite'])->middleware('throttle:posting')->name('buddy.invite');
     Route::post('/buddy-reads/{buddyRead}/comments', [BuddyReadController::class, 'comment'])->middleware('throttle:posting')->name('buddy.comment');
     Route::get('/users/{user:username}',[UserController::class,'show'])->name('users.show');
     Route::post('/users/{user:username}/follow', [FollowController::class, 'store'])->name('users.follow');

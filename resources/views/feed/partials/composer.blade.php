@@ -35,7 +35,7 @@
     <section x-show="isOpen" x-transition.scale.95 role="dialog" aria-modal="true" aria-labelledby="composer-title"
              class="fixed inset-x-2 bottom-2 top-16 z-[71] mx-auto flex flex-col overflow-hidden rounded-3xl bg-paper shadow-2xl dark:bg-raised sm:inset-x-6 sm:bottom-8 sm:top-24"
              :class="wide() ? 'max-w-4xl' : 'max-w-xl'">
-        <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data" class="flex min-h-0 flex-1 flex-col" @submit="prepareSubmit($event)" x-ref="form">
+        <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data" class="flex min-h-0 flex-1 flex-col" @submit="prepareSubmit($event)" x-ref="form" data-scroll-top>
             @csrf
             <input type="hidden" name="type" :value="kind === 'quote' ? 'quote' : 'post'">
             <input type="hidden" name="quote_card_id" :value="kind === 'quote' && source === 'saved' ? cardId : ''" :disabled="!(kind === 'quote' && source === 'saved')">
