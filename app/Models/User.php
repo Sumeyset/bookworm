@@ -178,6 +178,29 @@ class User extends Authenticatable
             ->orderBy('name');
     }
 
+    public function conversations(): BelongsToMany
+    {
+        return $this->belongsToMany(Conversation::class)->withPivot(['last_read_at', 'accepted_at'])->withTimestamps();
+    }
+
+    /** How many conversations have messages this reader hasn't seen (accepted chats only). */
+    public function unreadConversationCount(): int
+    {
+        return $this->conversations()
+            ->whereNotNull('conversation_user.accepted_at')
+            ->whereHas('messages', fn ($messages) => $messages
+                ->where('messages.user_id', '!=', $this->id)
+                ->where(fn ($unread) => $unread
+                    ->whereNull('conversation_user.last_read_at')
+                    ->orWhereColumn('messages.created_at', '>', 'conversation_user.last_read_at')))
+            ->count();
+    }
+
+    public function messageRequestCount(): int
+    {
+        return $this->conversations()->whereNull('conversation_user.accepted_at')->whereHas('messages')->count();
+    }
+
     public function followers(): BelongsToMany
     {
         return $this->belongsToMany(

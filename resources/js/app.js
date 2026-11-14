@@ -1,5 +1,6 @@
 import Alpine from 'alpinejs';
 import { attachReaderSuggest, fetchReaders, markMatch, readerAvatar, readerMeta } from './reader-search.js';
+import { initMessages } from './messages.js';
 
 window.Alpine = Alpine;
 
@@ -807,6 +808,9 @@ Alpine.data('pdfUploader', ({ maxFiles = 5, maxMb = 20 } = {}) => ({
 
 // Live reader search on the Find readers page.
 document.querySelectorAll('[data-reader-suggest]').forEach(attachReaderSuggest);
+
+// Direct messages: chat, "New message", and "Send to" on posts.
+initMessages();
 
 // Stay in place after actions. Replying, deleting, following and other buttons
 // send a form and the page reloads; bring the reader back to where they were

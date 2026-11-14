@@ -15,6 +15,7 @@ use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ShelfEntryController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\NotificationController;
@@ -64,6 +65,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/suggest', [UserController::class, 'suggest'])->middleware('throttle:120,1')->name('users.suggest');
+
+    // Direct messages
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/contacts', [MessageController::class, 'contacts'])->name('messages.contacts');
+    Route::get('/messages/to/{user:username}', [MessageController::class, 'start'])->name('messages.start');
+    Route::get('/messages/{conversation}', [MessageController::class, 'show'])->whereNumber('conversation')->name('messages.show');
+    Route::post('/messages/{conversation}', [MessageController::class, 'store'])->whereNumber('conversation')->middleware('throttle:60,1')->name('messages.store');
+    Route::get('/messages/{conversation}/poll', [MessageController::class, 'poll'])->whereNumber('conversation')->middleware('throttle:120,1')->name('messages.poll');
+    Route::post('/messages/{conversation}/accept', [MessageController::class, 'accept'])->whereNumber('conversation')->name('messages.accept');
+    Route::delete('/messages/{conversation}', [MessageController::class, 'destroy'])->whereNumber('conversation')->name('messages.destroy');
+    Route::post('/posts/{post}/send', [MessageController::class, 'sendPost'])->middleware('throttle:30,1')->name('posts.send');
 
     // Posts, likes and replies
     Route::post('/posts', [PostController::class, 'store'])->middleware('throttle:posting')->name('posts.store');

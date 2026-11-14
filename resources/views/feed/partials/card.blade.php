@@ -104,7 +104,7 @@
         <button type="button" class="ig-icon" @click="all = true; $nextTick(() => $refs.reply.focus())" aria-label="Reply">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.5L3.5 20.5l1.4-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/></svg>
         </button>
-        <button type="button" class="ig-icon" data-share-url="{{ $permalink }}" data-share-title="{{ $item->book?->title ?? 'Bookworm' }}" aria-label="Share">
+        <button type="button" class="ig-icon" data-share-url="{{ $permalink }}" data-share-title="{{ $item->book?->title ?? 'Bookworm' }}" @unless ($isReview) data-send-post="{{ route('posts.send', $item) }}" @endunless aria-label="Send">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 3.5 10.6 13.4M21.5 3.5 14.6 21l-4-7.6-7.6-4 18.5-5.9Z"/></svg>
         </button>
         @if ($item->book)

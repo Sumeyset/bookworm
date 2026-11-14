@@ -11,6 +11,7 @@
         : null;
     $readingPercent = $readingNow?->progressPercent() ?? 0;
     $unreadCount = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0;
+    $unreadMessages = auth()->check() ? auth()->user()->unreadConversationCount() + auth()->user()->messageRequestCount() : 0;
     $recentNotifications = auth()->check() ? auth()->user()->notifications()->take(6)->get() : collect();
 @endphp
 
@@ -85,6 +86,12 @@
                     <a href="{{ route('books.index') }}" class="focus-ring hidden h-10 items-center gap-1.5 rounded-full bg-[#FFF8EF] px-4 text-sm font-semibold text-burgundy-deep shadow-[0_8px_20px_-10px_rgba(0,0,0,0.6)] transition hover:-translate-y-0.5 hover:bg-white lg:inline-flex">
                         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 4a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H5a1 1 0 1 1 0-2h4V5a1 1 0 0 1 1-1Z"/></svg>
                         Add a book
+                    </a>
+
+                    {{-- Messages --}}
+                    <a href="{{ route('messages.index') }}" class="focus-ring relative flex h-10 w-10 items-center justify-center rounded-full text-[#fff8ef] transition hover:bg-white/10" aria-label="Messages{{ $unreadMessages ? ' (' . $unreadMessages . ' unread)' : '' }}" title="Messages">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 3.5 10.6 13.4M21.5 3.5 14.6 21l-4-7.6-7.6-4 18.5-5.9Z"/></svg>
+                        <span data-dm-badge @if (! $unreadMessages) hidden @endif class="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#F2C38B] px-1 text-[10px] font-bold text-burgundy-deep ring-2 ring-burgundy-deep">{{ $unreadMessages > 9 ? '9+' : $unreadMessages }}</span>
                     </a>
 
                     {{-- Notifications --}}
@@ -187,6 +194,7 @@
                 [now()->year . ' in books', route('year.show', Auth::user()->username), '✨', 'year recap wrapped stats'],
                 ['Import from Goodreads', route('import.show'), '⬆️', 'import goodreads storygraph csv'],
                 ['Notifications', route('notifications.index'), '🔔', 'notifications alerts'],
+                ['Messages', route('messages.index'), '✉️', 'messages dm direct chat inbox send'],
                 ['Find readers', route('users.index'), '👋', 'readers people follow'],
                 ['Reading preferences', route('onboarding.show'), '🎯', 'goal genres preferences'],
                 ['Profile settings', route('profile.edit'), '⚙️', 'settings profile account password bio'],

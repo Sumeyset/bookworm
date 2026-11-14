@@ -16,10 +16,15 @@
                 <div class="shrink-0">
                     @if ($isOwnProfile)
                         <a href="{{ route('profile.edit') }}" class="btn-ghost">Edit profile and photo</a>
-                    @elseif ($isFollowing)
-                        <form method="POST" action="{{ route('users.unfollow', $profile->username) }}">@csrf @method('DELETE')<button type="submit" class="btn-ghost">Following · Unfollow</button></form>
                     @else
-                        <form method="POST" action="{{ route('users.follow', $profile->username) }}">@csrf<button type="submit" class="btn-primary">Follow reader</button></form>
+                        <div class="flex flex-wrap gap-2">
+                            @if ($isFollowing)
+                                <form method="POST" action="{{ route('users.unfollow', $profile->username) }}">@csrf @method('DELETE')<button type="submit" class="btn-ghost">Following · Unfollow</button></form>
+                            @else
+                                <form method="POST" action="{{ route('users.follow', $profile->username) }}">@csrf<button type="submit" class="btn-primary">Follow reader</button></form>
+                            @endif
+                            <a href="{{ route('messages.start', $profile->username) }}" class="btn-ghost">Message</a>
+                        </div>
                     @endif
                 </div>
             </div>
