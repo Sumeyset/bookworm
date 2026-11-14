@@ -1,29 +1,66 @@
-{{-- Barnaby the worm: a bookish little worm with round glasses, peeking out of an open book. --}}
+{{-- Barnaby the worm: a bookish worm in gold glasses and a scarf, wriggling out of an open book. --}}
 @php($uid = 'barnaby-' . Str::random(6))
 <svg {{ $attributes->merge(['viewBox' => '0 0 64 64', 'aria-hidden' => 'true']) }} xmlns="http://www.w3.org/2000/svg">
-    <defs>
-        <linearGradient id="{{ $uid }}-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B2A3D"/><stop offset="1" stop-color="#4A1220"/></linearGradient>
-        <linearGradient id="{{ $uid }}-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7B5C2"/><stop offset="1" stop-color="#E38599"/></linearGradient>
-    </defs>
+  <defs>
+    <radialGradient id="{{ $uid }}-bg" cx="32%" cy="22%" r="90%">
+      <stop offset="0" stop-color="#A83A52"/><stop offset=".5" stop-color="#6D1A2B"/><stop offset="1" stop-color="#3A0D18"/>
+    </radialGradient>
+    <linearGradient id="{{ $uid }}-skin" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FBCDD6"/><stop offset=".5" stop-color="#F3A2B3"/><stop offset="1" stop-color="#D8718A"/>
+    </linearGradient>
+    <radialGradient id="{{ $uid }}-head" cx="38%" cy="32%" r="72%">
+      <stop offset="0" stop-color="#FFE0E6"/><stop offset=".55" stop-color="#F6AABA"/><stop offset="1" stop-color="#DC7890"/>
+    </radialGradient>
+    <linearGradient id="{{ $uid }}-pageL" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#EADBC3"/><stop offset=".85" stop-color="#FFFCF5"/><stop offset="1" stop-color="#E8D9C2"/>
+    </linearGradient>
+    <linearGradient id="{{ $uid }}-pageR" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#EADBC3"/><stop offset=".85" stop-color="#FFFCF5"/><stop offset="1" stop-color="#E8D9C2"/>
+    </linearGradient>
+    <radialGradient id="{{ $uid }}-hole" cx="50%" cy="40%" r="60%">
+      <stop offset="0" stop-color="#1E0B08"/><stop offset="1" stop-color="#5A3A28"/>
+    </radialGradient>
+    <clipPath id="{{ $uid }}-circle"><circle cx="32" cy="32" r="32"/></clipPath>
+    <clipPath id="{{ $uid }}-abovehole"><rect x="0" y="0" width="64" height="49.6"/></clipPath>
+  </defs>
+  <g clip-path="url(#{{ $uid }}-circle)">
     <circle cx="32" cy="32" r="32" fill="url(#{{ $uid }}-bg)"/>
-    {{-- body rising out of the book --}}
-    <path d="M27 50c-1-7 1-12 5-15 4-3 5-7 3-11" fill="none" stroke="url(#{{ $uid }}-body)" stroke-width="11" stroke-linecap="round"/>
-    <path d="M25.8 44.5h4.6M27.5 38.8h4.3M31.6 33.6h4.2" stroke="#C9677D" stroke-width="1.4" stroke-linecap="round" opacity=".7"/>
-    {{-- head --}}
-    <circle cx="35" cy="21" r="9.5" fill="url(#{{ $uid }}-body)"/>
-    <circle cx="30.4" cy="25" r="1.8" fill="#F28AA0" opacity=".7"/>
-    <circle cx="40.6" cy="24.6" r="1.8" fill="#F28AA0" opacity=".7"/>
-    {{-- glasses --}}
-    <circle cx="31.5" cy="20" r="3.6" fill="#FFF8EF" fill-opacity=".55" stroke="#2A1A1D" stroke-width="1.3"/>
-    <circle cx="39.2" cy="19.7" r="3.6" fill="#FFF8EF" fill-opacity=".55" stroke="#2A1A1D" stroke-width="1.3"/>
-    <path d="M35.1 19.8h0.5" stroke="#2A1A1D" stroke-width="1.3" stroke-linecap="round"/>
-    <circle cx="32" cy="20.3" r="1.25" fill="#2A1A1D"/>
-    <circle cx="39.6" cy="20" r="1.25" fill="#2A1A1D"/>
-    <path d="M33.3 25.6c1.2 1 2.8 1 4 0" fill="none" stroke="#2A1A1D" stroke-width="1.2" stroke-linecap="round"/>
-    {{-- a little tuft --}}
-    <path d="M35.5 11.6c.2-1.8 1.4-3 3-3.2" fill="none" stroke="#E38599" stroke-width="1.6" stroke-linecap="round"/>
-    {{-- the open book --}}
-    <path d="M12 46c6-2.4 13-2.4 20 1 7-3.4 14-3.4 20-1v8c-6-2.4-13-2.4-20 1-7-3.4-14-3.4-20-1z" fill="#FFF8EF"/>
-    <path d="M32 47v8" stroke="#D9C6B6" stroke-width="1.2"/>
-    <path d="M16 49.4c3.6-1 7.4-.9 11 .3M37 49.7c3.6-1.2 7.4-1.3 11-.3" stroke="#D9C6B6" stroke-width="1" stroke-linecap="round"/>
+    <circle cx="32" cy="32" r="30.4" fill="none" stroke="#E9C27D" stroke-opacity=".5" stroke-width=".9"/>
+    <path d="M12.5 18.5l1 2.3 2.3 1-2.3 1-1 2.3-1-2.3-2.3-1 2.3-1z" fill="#F2C38B"/>
+    <circle cx="52" cy="15" r="1.2" fill="#F2C38B" opacity=".85"/>
+    <circle cx="48.2" cy="9.6" r=".75" fill="#F2C38B" opacity=".6"/>
+    <path d="M4 50.5q14-5.2 28 .4 14-5.6 28-.4V66H4z" fill="#3E0F1A"/>
+    <path d="M4 50.5q14-5.2 28 .4 14-5.6 28-.4" fill="none" stroke="#B8893B" stroke-width="1.1"/>
+    <path d="M6 49.2q13-5.2 26 .3V66H6z" fill="url(#{{ $uid }}-pageL)"/>
+    <path d="M58 49.2q-13-5.2-26 .3V66h26z" fill="url(#{{ $uid }}-pageR)"/>
+    <path d="M32 49.5V66" stroke="#CDB497" stroke-width=".9"/>
+    <path d="M10 54q9-3.3 18 .2M10 57.6q9-3.3 18 .2M10 61.2q9-3.3 18 .2M36 54.2q9-3.5 18-.2M36 57.8q9-3.5 18-.2M36 61.4q9-3.5 18-.2" fill="none" stroke="#DCC9B2" stroke-width=".75" stroke-linecap="round"/>
+    <ellipse cx="22.6" cy="49.4" rx="6.3" ry="2.1" fill="url(#{{ $uid }}-hole)"/>
+    <g clip-path="url(#{{ $uid }}-abovehole)">
+      <path d="M22.6 52c-1.6-7 .6-11.4 5.3-14 4.4-2.4 6.1-6 4.6-10" fill="none" stroke="url(#{{ $uid }}-skin)" stroke-width="10.2" stroke-linecap="round"/>
+      <path d="M18.8 45.8h7.6M19.7 41.6h7.5M23 37.8h7.2M26.9 34.4h6.4" stroke="#C45E77" stroke-width="1.05" stroke-linecap="round" opacity=".4"/>
+    </g>
+    <path d="M16.3 49.4q6.3 2.6 12.6 0" fill="none" stroke="#8C6A4E" stroke-width=".9" stroke-linecap="round" opacity=".8"/>
+    <path d="M26.6 30.2q7.4 4 15-.4l-.5 3.5q-7 3.4-14-.1z" fill="#E9C27D"/>
+    <path d="M28.4 31.6l.2 2M31.8 32.4v2M35.2 32.5v2M38.6 31.8l-.2 2" stroke="#B8893B" stroke-width=".7" opacity=".7"/>
+    <path d="M37.6 32.6l3.3 6.6-3.2 1-2-6.4z" fill="#D9A754"/>
+    <path d="M38.4 37.4l1.9-.6M37.8 35.8l1.7-.5" stroke="#B8893B" stroke-width=".6" opacity=".7"/>
+    <circle cx="34.5" cy="19.6" r="12" fill="url(#{{ $uid }}-head)"/>
+    <path d="M32.4 8.2c-.8-2.6.4-4.8 2.9-5.4" fill="none" stroke="#E07F96" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="35.6" cy="2.8" r="1.4" fill="#F6AABA"/>
+    <path d="M37.4 8.3c.6-2.4 2.4-3.6 4.7-3.3" fill="none" stroke="#E07F96" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="42.4" cy="5" r="1.2" fill="#F6AABA"/>
+    <ellipse cx="26.9" cy="24.4" rx="2.5" ry="1.6" fill="#EE7491" opacity=".55"/>
+    <ellipse cx="42.2" cy="24.2" rx="2.5" ry="1.6" fill="#EE7491" opacity=".55"/>
+    <circle cx="29.7" cy="18.9" r="4.8" fill="#FFFDF7" fill-opacity=".5" stroke="#C99A45" stroke-width="1.6"/>
+    <circle cx="39.4" cy="18.7" r="4.8" fill="#FFFDF7" fill-opacity=".5" stroke="#C99A45" stroke-width="1.6"/>
+    <path d="M34.4 18.4q.25-.9.6 0" fill="none" stroke="#C99A45" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M24.9 18.2l-1.4-.6M44.2 18l1.4-.6" stroke="#C99A45" stroke-width="1.3" stroke-linecap="round"/>
+    <circle cx="30.3" cy="19.4" r="2.1" fill="#2A1A1D"/>
+    <circle cx="39.9" cy="19.2" r="2.1" fill="#2A1A1D"/>
+    <circle cx="31" cy="18.6" r=".75" fill="#fff"/>
+    <circle cx="40.6" cy="18.4" r=".75" fill="#fff"/>
+    <path d="M26.7 16.8a3.8 3.8 0 0 1 2.2-2M36.4 16.6a3.8 3.8 0 0 1 2.2-2" stroke="#fff" stroke-width=".85" stroke-linecap="round" opacity=".9"/>
+    <path d="M32.1 25.1q2.6 2.4 5.2 0" fill="#7A2133" stroke="#2A1A1D" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>

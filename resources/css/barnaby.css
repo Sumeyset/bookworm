@@ -440,3 +440,9 @@ body:has(.reader) .barnaby-fab {
 body:has(.reader) .barnaby-fab__label {
     display: none;
 }
+
+/* A cream ring so Barnaby stands out on the burgundy header */
+.barnaby-panel__head > svg {
+    border-radius: 999px;
+    box-shadow: 0 0 0 2px rgb(255 248 239 / 75%);
+}
