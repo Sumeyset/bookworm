@@ -1,4 +1,7 @@
 <x-app-layout>
+    @push('scripts')
+        <script>window.bookwormBarnabyContext = @js(['book_id' => $book->id, 'title' => $book->title]);</script>
+    @endpush
     <x-slot name="header">
         <a href="{{ route('books.index') }}" class="focus-ring inline-flex items-center gap-2 rounded-full border border-warmborder bg-paper/70 px-4 py-2 text-sm font-semibold text-burgundy transition hover:-translate-x-0.5 hover:border-burgundy/40 dark:border-[#4B3035] dark:bg-white/5 dark:text-[#E9A2AE]">
             <span aria-hidden="true">&larr;</span> Search books
@@ -60,6 +63,9 @@
                     </form>
                     <div class="mt-4 flex flex-wrap gap-2">
                         <a href="{{ route('buddy.index', ['book' => $book->id]) }}" class="bw-chip">🤝 Start a buddy read</a>
+                        <button type="button" class="bw-chip" data-ask-barnaby="Would I enjoy “{{ $book->title }}”{{ $book->author_name ? ' by ' . $book->author_name : '' }}? Tell me a little about it, spoiler-free, and how it fits my shelf.">
+                            <x-barnaby-avatar class="h-5 w-5" /> Ask Barnaby
+                        </button>
                         <a href="{{ route('feed.index') }}#composer" class="bw-chip">❝ Share a quote</a>
                     </div>
                 </div>

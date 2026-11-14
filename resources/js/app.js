@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs';
 import { attachReaderSuggest, fetchReaders, markMatch, readerAvatar, readerMeta } from './reader-search.js';
 import { initMessages } from './messages.js';
+import { initBarnaby } from './barnaby.js';
 import { preparePhoto } from './photo-prep.js';
 
 window.Alpine = Alpine;
@@ -790,6 +791,9 @@ document.querySelectorAll('[data-reader-suggest]').forEach(attachReaderSuggest);
 
 // Direct messages: chat, "New message", and "Send to" on posts.
 initMessages();
+
+// Barnaby the worm, the reading assistant.
+initBarnaby();
 
 // Stay in place after actions. Replying, deleting, following and other buttons
 // send a form and the page reloads; bring the reader back to where they were

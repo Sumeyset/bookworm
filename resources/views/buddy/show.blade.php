@@ -48,8 +48,24 @@
                 {{-- Conversation --}}
                 <section aria-labelledby="talk-heading" class="bw-card overflow-hidden">
                     <div class="border-b border-warmborder px-5 py-4 dark:border-[#4B3035]">
-                        <h2 id="talk-heading" class="font-display text-3xl font-bold text-ink dark:text-[#F4E9E2]">The conversation</h2>
-                        <p class="mt-0.5 text-sm text-tan">Tag each message with a page. Messages from pages you haven’t reached stay blurred until you tap them.</p>
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <h2 id="talk-heading" class="font-display text-3xl font-bold text-ink dark:text-[#F4E9E2]">The conversation</h2>
+                                <p class="mt-0.5 text-sm text-tan">Tag each message with a page. Messages from pages you haven’t reached stay blurred until you tap them.</p>
+                            </div>
+                            @if ($joined)
+                                <button type="button" class="bw-chip shrink-0" data-barnaby-discussion="{{ route('barnaby.discussion', $read) }}">
+                                    <x-barnaby-avatar class="h-5 w-5" /> Discussion questions
+                                </button>
+                            @endif
+                        </div>
+                        <div class="barnaby-answer mt-4" data-barnaby-discussion-box hidden>
+                            <x-barnaby-avatar class="h-9 w-9 shrink-0" />
+                            <div class="min-w-0 flex-1">
+                                <div class="barnaby-msg__bubble" data-barnaby-discussion-text></div>
+                                <p class="mt-1.5 text-xs text-tan" data-barnaby-discussion-note></p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="space-y-3 bg-parchment/30 px-4 py-5 dark:bg-white/[0.02] sm:px-5">

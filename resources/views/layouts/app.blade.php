@@ -65,6 +65,10 @@
                         </a>
                     @endforeach
                 </nav>
+
+                @unless (request()->routeIs('messages.*'))
+                    <x-barnaby />
+                @endunless
             @endauth
         </div>
     </body>

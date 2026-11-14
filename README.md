@@ -121,6 +121,23 @@ php artisan serve
 
 <p>Then open <code>http://localhost:8000</code> 🎉</p>
 
+<h3>🪱 Barnaby the worm (AI reading assistant)</h3>
+
+<p>Barnaby recommends books (describe one and he finds matches), explains passages in the reader, recaps the story up to your bookmark without spoilers, and writes buddy-read discussion questions. He uses free AI tiers: <b>Gemini</b> first, and <b>Groq</b> as a backup when Gemini's daily limit runs out.</p>
+
+<ol>
+  <li>Get a free Gemini key at <a href="https://aistudio.google.com">aistudio.google.com</a> → <i>Get API key</i>.</li>
+  <li>Optional backup: get a free Groq key at <a href="https://console.groq.com">console.groq.com</a> → <i>API Keys</i>.</li>
+  <li>Add them to your <code>.env</code> (never commit this file or paste keys anywhere public):</li>
+</ol>
+
+```bash
+GEMINI_API_KEY=your-gemini-key
+GROQ_API_KEY=your-groq-key
+```
+
+<p>Then run <code>php artisan config:clear</code>. Without keys, Barnaby politely says he's asleep. Each reader can ask him 40 questions a day (<code>BARNABY_PER_DAY</code>). On free tiers the AI providers may use requests to improve their models, so Barnaby is never sent private messages.</p>
+
 <h2>🗂️ Project Structure</h2>
 
 ```

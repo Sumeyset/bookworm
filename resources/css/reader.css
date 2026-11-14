@@ -1182,3 +1182,37 @@
         border-left: 0;
     }
 }
+
+/* ---------- Barnaby in the reader ---------- */
+
+.reader-panel--barnaby {
+    width: min(26rem, calc(100% - 1.5rem));
+}
+
+.reader-panel--barnaby .barnaby-msg__bubble {
+    max-width: none;
+    border: 1px solid var(--r-border);
+    border-top-left-radius: 1.1rem;
+    background: var(--r-page);
+    color: var(--r-ink);
+    font-family: var(--reader-font);
+}
+
+.reader-barnaby-quote {
+    margin-bottom: .75rem;
+    padding: .5rem .75rem;
+    border-left: 3px solid rgb(234 179 8 / 85%);
+    color: var(--r-muted);
+    font-family: var(--reader-font);
+    font-size: .85rem;
+    font-style: italic;
+}
+
+.reader-panel--barnaby .barnaby-typing {
+    color: var(--r-muted);
+}
+
+.reader-pop [data-action="barnaby"] svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}

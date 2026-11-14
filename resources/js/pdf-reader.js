@@ -13,6 +13,7 @@ import '@fontsource/atkinson-hyperlegible/400.css';
 import '@fontsource/atkinson-hyperlegible/400-italic.css';
 import '@fontsource/atkinson-hyperlegible/700.css';
 import { CARD_FONTS, CARD_STYLES, buildQuoteCard } from './quote-card.js';
+import { askBarnaby, renderBarnaby, typingIndicator } from './barnaby.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -210,6 +211,7 @@ function initializeReader(reader) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
     const bookTitle = reader.dataset.bookTitle || '';
     const bookAuthor = reader.dataset.bookAuthor || '';
+    const bookId = Number(reader.dataset.bookId) || null;
 
     let settings = loadSettings();
     let documentProxy;
@@ -729,6 +731,8 @@ function initializeReader(reader) {
 
     function updateChrome() {
         if (!documentProxy) return;
+        // Let the Barnaby chat bubble know where the reader is (so he never spoils past it).
+        window.bookwormBarnabyContext = { book_id: bookId, title: bookTitle, page: currentPdfPage() };
 
         if (isBook()) {
             const total = layout.totalCols;
@@ -1073,6 +1077,15 @@ function initializeReader(reader) {
         const action = button.dataset.action;
         const target = toolbarTarget;
 
+        if (action === 'barnaby') {
+            const text = target.kind === 'selection' ? target.payload.text : target.highlight.text;
+            const page = target.kind === 'selection' ? target.payload.page_number : target.highlight.page_number;
+            hideToolbar();
+            window.getSelection()?.removeAllRanges();
+            barnabyAsk('About this passage', text, reader.dataset.barnabyExplainUrl, { text, book_id: bookId, page });
+            return;
+        }
+
         if (action === 'share') {
             openShare(target.kind === 'selection'
                 ? { text: target.payload.text, page: target.payload.page_number, payload: target.payload }
@@ -1233,6 +1246,41 @@ function initializeReader(reader) {
     });
 
     window.addEventListener('scroll', () => { if (toolbarTarget?.kind === 'highlight') hideToolbar(); }, { passive: true });
+
+    /* ---------------- Barnaby: passage help & story so far ---------------- */
+
+    const barnabyPanel = $('[data-panel="barnaby"]');
+    const barnabyBody = $('[data-barnaby-reader-body]');
+    const barnabyTitle = $('[data-barnaby-reader-title]');
+    let barnabyRequest = 0;
+
+    async function barnabyAsk(title, quote, url, body) {
+        closePanels();
+        barnabyPanel.hidden = false;
+        barnabyTitle.textContent = title;
+        barnabyBody.replaceChildren();
+        if (quote) {
+            const quoted = document.createElement('blockquote');
+            quoted.className = 'reader-barnaby-quote';
+            quoted.textContent = quote.length > 280 ? `${quote.slice(0, 279)}…` : quote;
+            barnabyBody.append(quoted);
+        }
+        const bubble = document.createElement('div');
+        bubble.className = 'barnaby-msg__bubble';
+        bubble.append(typingIndicator(quote ? 'Barnaby is thinking about this passage…' : 'Barnaby is flipping back through the pages…'));
+        barnabyBody.append(bubble);
+
+        const ticket = ++barnabyRequest;
+        const result = await askBarnaby(url, body);
+        if (ticket !== barnabyRequest) return;
+        bubble.innerHTML = renderBarnaby(result.reply || '');
+        bubble.classList.toggle('opacity-75', Boolean(result.failed));
+    }
+
+    $('[data-barnaby-recap]')?.addEventListener('click', () => {
+        const page = currentPdfPage();
+        barnabyAsk(`Story so far · up to page ${page}`, null, reader.dataset.barnabyRecapUrl, { page });
+    });
 
     /* ---------------- share a quote to the feed ---------------- */
 

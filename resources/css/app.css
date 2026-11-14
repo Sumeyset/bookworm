@@ -447,3 +447,9 @@ nav:hover > .bw-nav__link[aria-current="page"]:not(:hover) { color: rgb(255 248 
         animation: none;
     }
 }
+
+/* Never let something too wide make phones zoom out (which hides fixed bars and buttons). */
+html,
+body {
+    overflow-x: clip;
+}

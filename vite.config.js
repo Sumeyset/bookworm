@@ -16,6 +16,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/posts.css',
+                'resources/css/barnaby.css',
                 'resources/js/app.js',
                 'resources/js/tree-shelf.js',
                 'resources/js/pdf-reader.js',

@@ -1,0 +1,442 @@
+/* Barnaby the worm: floating chat, answers, book cards. */
+
+.barnaby-fab {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .3rem 1rem .3rem .3rem;
+    border-radius: 999px;
+    background: #fffdf9;
+    color: #4a1220;
+    font-size: .88rem;
+    font-weight: 700;
+    box-shadow: 0 14px 34px -12px rgb(74 18 32 / 55%), 0 0 0 1px rgb(109 26 43 / 12%);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.dark .barnaby-fab {
+    background: #271519;
+    color: #f4e9e2;
+}
+
+.barnaby-fab:hover {
+    transform: translateY(-2px);
+}
+
+.barnaby-fab__avatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    animation: barnaby-peek 6s ease-in-out infinite;
+}
+
+@keyframes barnaby-peek {
+    0%, 86%, 100% { transform: rotate(0); }
+    90% { transform: rotate(-8deg); }
+    94% { transform: rotate(6deg); }
+}
+
+.barnaby-fab[aria-expanded="true"] {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.barnaby-panel {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 61;
+    display: flex;
+    flex-direction: column;
+    width: min(25rem, calc(100vw - 1.5rem));
+    height: min(38rem, calc(100dvh - 7rem));
+    overflow: hidden;
+    border: 1px solid #e6d9d0;
+    border-radius: 1.5rem;
+    background: #fffdf9;
+    color: #2a1a1d;
+    box-shadow: 0 30px 80px -24px rgb(26 15 18 / 60%);
+    transform-origin: bottom right;
+    animation: barnaby-open .2s cubic-bezier(.2, .9, .3, 1.1);
+}
+
+.dark .barnaby-panel {
+    border-color: #4b3035;
+    background: #22131a;
+    color: #f4e9e2;
+}
+
+.barnaby-panel[hidden] {
+    display: none;
+}
+
+@keyframes barnaby-open {
+    from { opacity: 0; transform: translateY(10px) scale(.96); }
+}
+
+.barnaby-panel__head {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .7rem .6rem .7rem .9rem;
+    background: linear-gradient(112deg, #4a1220 0%, #6d1a2b 60%, #8b2a3d 100%);
+    color: #fff8ef;
+}
+
+.barnaby-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 999px;
+}
+
+.barnaby-icon:hover {
+    background: rgb(255 255 255 / 14%);
+}
+
+.barnaby-icon svg,
+.barnaby-send svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.barnaby-panel__body {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1rem .9rem;
+}
+
+.barnaby-msg {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: .8rem;
+}
+
+.barnaby-msg--me {
+    justify-content: flex-end;
+}
+
+.barnaby-msg__avatar {
+    width: 1.9rem;
+    height: 1.9rem;
+    flex-shrink: 0;
+}
+
+.barnaby-msg__bubble {
+    max-width: 85%;
+    padding: .6rem .85rem;
+    border-radius: 1.1rem;
+    border-top-left-radius: .3rem;
+    background: #f6ede3;
+    font-size: .9rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.dark .barnaby-msg__bubble {
+    background: #33212a;
+}
+
+.barnaby-msg--me .barnaby-msg__bubble {
+    border-top-left-radius: 1.1rem;
+    border-top-right-radius: .3rem;
+    background: linear-gradient(135deg, #6d1a2b, #8b2a3d);
+    color: #fff8ef;
+    white-space: pre-line;
+}
+
+.barnaby-msg--muted .barnaby-msg__bubble {
+    color: #8a6a55;
+    font-style: italic;
+}
+
+.barnaby-msg__bubble p + p,
+.barnaby-msg__bubble p + ul,
+.barnaby-msg__bubble ul + p,
+.barnaby-msg__bubble p + ol,
+.barnaby-msg__bubble ol + p {
+    margin-top: .5rem;
+}
+
+.barnaby-msg__bubble ul,
+.barnaby-msg__bubble ol {
+    padding-left: 1.1rem;
+}
+
+.barnaby-msg__bubble ul { list-style: disc; }
+.barnaby-msg__bubble ol { list-style: decimal; }
+
+.barnaby-msg__bubble li + li {
+    margin-top: .2rem;
+}
+
+.barnaby-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin: -.2rem 0 .9rem 2.4rem;
+}
+
+.barnaby-chips[hidden] {
+    display: none;
+}
+
+.barnaby-chips button {
+    padding: .4rem .75rem;
+    border: 1px solid #e6d9d0;
+    border-radius: 999px;
+    color: #6d1a2b;
+    font-size: .8rem;
+    font-weight: 600;
+    text-align: left;
+    transition: background-color .12s ease, border-color .12s ease;
+}
+
+.barnaby-chips button:hover {
+    border-color: #6d1a2b;
+    background: #fdf3f4;
+}
+
+.dark .barnaby-chips button {
+    border-color: #4b3035;
+    color: #e9a2ae;
+}
+
+.dark .barnaby-chips button:hover {
+    background: rgb(255 255 255 / 5%);
+}
+
+.barnaby-chips button[hidden] {
+    display: none;
+}
+
+.barnaby-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    color: #8a6a55;
+    font-size: .82rem;
+}
+
+.barnaby-typing i {
+    display: inline-block;
+    width: .4rem;
+    height: .4rem;
+    border-radius: 999px;
+    background: #c9677d;
+    animation: barnaby-wiggle 1s ease-in-out infinite;
+}
+
+.barnaby-typing i:nth-child(2) { animation-delay: .15s; }
+.barnaby-typing i:nth-child(3) { animation-delay: .3s; }
+
+@keyframes barnaby-wiggle {
+    0%, 100% { transform: translateY(0); opacity: .5; }
+    50% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Book recommendation cards */
+.barnaby-books {
+    display: flex;
+    gap: .6rem;
+    margin: -.2rem 0 .9rem 2.4rem;
+    overflow-x: auto;
+    padding-bottom: .3rem;
+    scroll-snap-type: x mandatory;
+}
+
+.barnaby-book {
+    display: flex;
+    flex: 0 0 11.5rem;
+    flex-direction: column;
+    gap: .35rem;
+    padding: .6rem;
+    border: 1px solid #e6d9d0;
+    border-radius: 1rem;
+    background: #fffdf9;
+    color: inherit;
+    scroll-snap-align: start;
+    transition: border-color .12s ease, transform .12s ease;
+}
+
+.dark .barnaby-book {
+    border-color: #4b3035;
+    background: #2a1a1f;
+}
+
+.barnaby-book:hover {
+    border-color: #6d1a2b;
+    transform: translateY(-2px);
+}
+
+.barnaby-book__top {
+    display: flex;
+    gap: .55rem;
+}
+
+.barnaby-book__cover {
+    width: 3rem;
+    height: 4.5rem;
+    flex-shrink: 0;
+    border-radius: .3rem;
+    object-fit: cover;
+    box-shadow: 0 4px 10px -4px rgb(0 0 0 / 45%);
+}
+
+.barnaby-book__cover--blank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: .2rem;
+    background: linear-gradient(135deg, #6d1a2b, #4a1220);
+    color: #fff8ef;
+    font-family: Lora, Georgia, serif;
+    font-size: .55rem;
+    text-align: center;
+}
+
+.barnaby-book__title {
+    display: -webkit-box;
+    overflow: hidden;
+    font-family: Lora, Georgia, serif;
+    font-size: .88rem;
+    font-weight: 600;
+    line-height: 1.2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.barnaby-book__author {
+    margin-top: .15rem;
+    color: #8a6a55;
+    font-size: .72rem;
+}
+
+.barnaby-book__why {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: .76rem;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+}
+
+.barnaby-book__cta {
+    margin-top: auto;
+    color: #6d1a2b;
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.dark .barnaby-book__cta {
+    color: #e9a2ae;
+}
+
+.barnaby-panel__form {
+    display: flex;
+    align-items: flex-end;
+    gap: .4rem;
+    margin: 0 .75rem .75rem;
+    padding: .3rem .35rem .3rem .9rem;
+    border: 1px solid #e6d9d0;
+    border-radius: 1.4rem;
+}
+
+.dark .barnaby-panel__form {
+    border-color: #4b3035;
+}
+
+.barnaby-panel__form:focus-within {
+    border-color: #6d1a2b;
+}
+
+.barnaby-panel__form textarea {
+    flex: 1;
+    max-height: 7rem;
+    padding: .45rem 0;
+    border: 0;
+    background: transparent;
+    font-size: .9rem;
+    resize: none;
+}
+
+.barnaby-panel__form textarea:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.barnaby-send {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.3rem;
+    height: 2.3rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: #6d1a2b;
+    color: #fff8ef;
+}
+
+.barnaby-send:disabled {
+    opacity: .35;
+}
+
+/* Barnaby answers shown inside a page (reader, buddy reads) */
+.barnaby-answer {
+    display: flex;
+    gap: .6rem;
+}
+
+.barnaby-answer .barnaby-msg__bubble {
+    max-width: none;
+    flex: 1;
+}
+
+@media (max-width: 767px) {
+    .barnaby-fab {
+        right: .9rem;
+        bottom: 5.4rem;
+        padding: .25rem;
+    }
+
+    .barnaby-fab__label {
+        display: none;
+    }
+
+    .barnaby-panel {
+        right: .5rem;
+        bottom: .5rem;
+        left: .5rem;
+        width: auto;
+        height: calc(100dvh - 5rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .barnaby-fab__avatar,
+    .barnaby-panel,
+    .barnaby-typing i {
+        animation: none;
+    }
+}
+
+/* In the PDF reader, keep the bubble small and clear of the page counter. */
+body:has(.reader) .barnaby-fab {
+    bottom: 5rem;
+    padding: .25rem;
+}
+
+body:has(.reader) .barnaby-fab__label {
+    display: none;
+}

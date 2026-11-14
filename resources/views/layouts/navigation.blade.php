@@ -118,7 +118,8 @@
                         </div>
                     </details>
 
-                    @include('layouts.partials.theme-toggle')
+                    {{-- On phones the theme switch lives in the account menu, so the bar fits. --}}
+                    <span class="hidden sm:inline-flex">@include('layouts.partials.theme-toggle')</span>
 
                     <details class="group relative">
                         <summary class="focus-ring flex cursor-pointer list-none items-center gap-1.5 rounded-full p-0.5 pr-1.5 text-sm font-medium text-[#fff8ef] transition hover:bg-white/10 [&::-webkit-details-marker]:hidden">
@@ -147,6 +148,10 @@
                             ] as [$label, $url])
                                 <a href="{{ $url }}" class="focus-ring group/item mt-1 flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-walnut transition hover:bg-parchment hover:text-burgundy dark:text-[#e3d3ca] dark:hover:bg-[#382329] dark:hover:text-[#F4E9E2]">{{ $label }} <span aria-hidden="true" class="text-tan transition group-hover/item:translate-x-0.5">&rarr;</span></a>
                             @endforeach
+                            <button type="button" data-theme-toggle class="focus-ring mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm text-walnut transition hover:bg-parchment hover:text-burgundy dark:text-[#e3d3ca] dark:hover:bg-[#382329] dark:hover:text-[#F4E9E2] sm:hidden">
+                                <span class="dark:hidden">Dark mode</span><span class="hidden dark:inline">Light mode</span>
+                                <span aria-hidden="true">🌙</span>
+                            </button>
                             <form method="POST" action="{{ route('logout') }}" class="mt-1 border-t border-warmborder pt-1 dark:border-[#4B3035]">
                                 @csrf
                                 <button type="submit" class="focus-ring block w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-burgundy transition hover:bg-rosetint dark:text-[#e7a8b2] dark:hover:bg-[#382329]">Log out</button>

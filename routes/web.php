@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BarnabyController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BookRatingController;
 use App\Http\Controllers\ReviewController;
@@ -65,6 +66,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/suggest', [UserController::class, 'suggest'])->middleware('throttle:120,1')->name('users.suggest');
+
+    // Barnaby the worm (AI reading assistant)
+    Route::post('/barnaby/chat', [BarnabyController::class, 'chat'])->name('barnaby.chat');
+    Route::post('/barnaby/explain', [BarnabyController::class, 'explain'])->name('barnaby.explain');
+    Route::post('/barnaby/recap/{book}', [BarnabyController::class, 'recap'])->name('barnaby.recap');
+    Route::post('/barnaby/buddy-reads/{buddyRead}/questions', [BarnabyController::class, 'discussion'])->name('barnaby.discussion');
 
     // Direct messages
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
