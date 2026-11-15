@@ -26,8 +26,8 @@
             @if ($scene['glass'])
                 {{-- The view outside, behind the glass --}}
                 <div class="photo-shelf__view" style="left: {{ $scene['glass']['left'] }}%; top: {{ $scene['glass']['top'] }}%; width: {{ $scene['glass']['width'] }}%; height: {{ $scene['glass']['height'] }}%;" aria-hidden="true">
-                    <img src="{{ asset("images/shelves/window/{$season}-{$part}.webp") }}" alt="" data-window-view decoding="async">
-                    <img alt="" data-window-view-next decoding="async" hidden>
+                    <img src="{{ asset("images/shelves/window/{$season}-{$part}.webp") }}" alt="" data-window-view>
+                    <img alt="" data-window-view-next class="is-waiting">
                 </div>
             @endif
             <img class="photo-shelf__img" src="{{ asset($scene['image']) }}" alt="" width="{{ $scene['width'] }}" height="{{ $scene['height'] }}" decoding="async" fetchpriority="high" draggable="false">

@@ -587,11 +587,11 @@ document.querySelectorAll('[data-window-scene]').forEach((scene) => {
         const src = `${scene.dataset.viewBase}/${season}-${time}.webp`;
         // Crossfade to the new view once it has loaded.
         next.onload = () => {
-            next.hidden = false;
+            next.classList.remove('is-waiting');
             window.setTimeout(() => {
                 view.src = src;
-                next.hidden = true;
-            }, 1200);
+                next.classList.add('is-waiting');
+            }, 1300);
         };
         next.src = src;
         scene.dataset.time = time;

@@ -10,10 +10,12 @@
     $spineLight = in_array($spineColor, ['#C99A45', '#E3A63B', '#D9C6B6'], true);
     $spineSize = 86 + crc32('h' . $book->id) % 15; // height in %, so a row of spines isn't perfectly even
     $spineThick = 26 + crc32('w' . $book->id) % 12;
+    $variant = crc32('v' . $book->id) % 4; // cloth, leather, paperback, linen
 @endphp
 
 <button type="button"
-        class="tree-book tree-book--{{ $statusKey }}"
+        class="tree-book tree-book--{{ $statusKey }} tree-book--v{{ $variant }}"
+        style="--spine: {{ $spineColor }}; --spine-size: {{ $spineSize }}%;"
         data-book-id="{{ $book->id }}"
         data-book="{{ json_encode($payload) }}"
         aria-label="{{ $label }}"
@@ -28,9 +30,9 @@
             <span class="tree-book__fallback-author">{{ $book->author_name ?? '' }}</span>
         </span>
     </span>
-    <span class="tree-book__spine {{ $spineLight ? 'tree-book__spine--light' : '' }}" style="--spine: {{ $spineColor }}; --spine-size: {{ $spineSize }}%; --spine-thick: {{ $spineThick }};" aria-hidden="true">
-        <span class="tree-book__spine-title">{{ Str::limit($book->title, 38) }}</span>
-        @if ($book->author_name)<span class="tree-book__spine-author">{{ Str::limit(Str::afterLast($book->author_name, ' '), 14) }}</span>@endif
+    <span class="tree-book__spine {{ $spineLight ? 'tree-book__spine--light' : '' }}" aria-hidden="true">
+        <span class="tree-book__spine-label"><span class="tree-book__spine-title">{{ Str::limit($book->title, 34) }}</span></span>
+        @if ($book->author_name)<span class="tree-book__spine-author">{{ Str::limit(Str::afterLast($book->author_name, ' '), 12) }}</span>@endif
     </span>
     <span class="tree-book__ribbon" aria-hidden="true"></span>
     <span class="tree-book__progress" aria-hidden="true" @if ($progress === null || $statusKey !== 'reading') hidden @endif>
