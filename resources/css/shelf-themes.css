@@ -1127,3 +1127,10 @@
 .book-tree.photo-shelf--christmas .photo-shelf__shelf--single .tree-shelf__name {
     display: none;
 }
+
+/* Empty book places only show while a book is being moved; otherwise the
+   shelves look like real shelves. They keep their space so nothing jumps. */
+.book-tree .tree-slot-empty { visibility: hidden; }
+.book-tree.is-dragging .tree-slot-empty { visibility: visible; }
+.photo-shelf__more--empty { display: none; }
+.book-tree.is-dragging .photo-shelf__more--empty { display: block; }

@@ -82,7 +82,7 @@
 
     @if ($extra->isNotEmpty())
         {{-- More books than the picture has shelves for --}}
-        <div class="photo-shelf__more">
+        <div class="photo-shelf__more {{ $extra->every(fn ($s) => $s['items']->isEmpty()) ? 'photo-shelf__more--empty' : '' }}">
             <p class="photo-shelf__more-title">More shelves</p>
             <div class="photo-shelf__more-list">
                 @foreach ($extra as $shelf)
