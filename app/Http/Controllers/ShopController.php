@@ -30,7 +30,12 @@ class ShopController extends Controller
             return back()->withErrors(['shop' => $error]);
         }
 
-        return back()->with('status', Acorns::ITEMS[$item][1] . ' ' . Acorns::ITEMS[$item][0] . ' added to your tree!');
+        $bought = Acorns::ITEMS[$item][1] . ' ' . Acorns::ITEMS[$item][0];
+        if (\App\Support\ShelfStyle::for($request->user())['key'] !== 'tree') {
+            return back()->with('status', $bought . ' is yours! Decorations show on the Living tree — switch your shelf style to the tree to see it.');
+        }
+
+        return back()->with('status', $bought . ' added to your tree!');
     }
 
     public function toggle(Request $request, string $item): RedirectResponse
