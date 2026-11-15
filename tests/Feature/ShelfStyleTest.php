@@ -88,3 +88,16 @@ test('the christmas tree shelves hold as many books as fit', function () {
     expect(\App\Support\ShelfScene::capacityFor($user, 6))->toBe(1)
         ->and(\App\Support\ShelfScene::capacityFor($user->forceFill(['shelf_style' => 'tree']), 6))->toBe(3);
 });
+
+test('every shop decoration shows on the photo shelves', function () {
+    foreach (['wall', 'window', 'christmas'] as $style) {
+        $me = User::factory()->create(['shelf_style' => $style]);
+        foreach (array_keys(\App\Support\Acorns::ITEMS) as $item) {
+            $me->decorations()->create(['item' => $item, 'enabled' => true]);
+        }
+        $page = $this->actingAs($me)->get(route('users.show', $me->username))->assertOk();
+        foreach (['decor-lights', 'tree-ornament', 'tree-lantern', 'tree-creature--nest', 'tree-creature--owl', 'tree-creature--swing', 'tree-creature--squirrel', 'tree-butterfly', 'tree-firefly', 'tree-fall'] as $piece) {
+            $page->assertSee($piece, false);
+        }
+    }
+});

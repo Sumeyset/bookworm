@@ -593,8 +593,9 @@ document.querySelectorAll('[data-window-scene]').forEach((scene) => {
 
     const update = () => {
         const now = new Date();
-        const time = timeOfDay(now.getHours());
-        const season = seasonOf(now.getMonth());
+        // A Tree shop theme can hold the view (Starry evening: night; Christmas set: winter).
+        const time = scene.dataset.fixedTime || timeOfDay(now.getHours());
+        const season = scene.dataset.fixedSeason || seasonOf(now.getMonth());
         if (scene.dataset.time === time && scene.dataset.season === season && view.src) return;
         const src = `${scene.dataset.viewBase}/${season}-${time}.webp`;
         // Crossfade to the new view once it has loaded.

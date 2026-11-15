@@ -1222,3 +1222,33 @@
     margin: 0;
 }
 .photo-shelf__shelf--pile .tree-shelf__name { display: none; }
+
+/* =====================================================================
+   Tree shop decorations on the photo shelves
+   (spots per picture come from App\Support\ShelfScene 'decor')
+   ===================================================================== */
+
+/* fairy lights hang along the front of each shelf, just under the books */
+.photo-shelf.decor-lights .tree-shelf::after {
+    top: calc(100% + var(--u) * 1);
+    height: calc(var(--u) * 16);
+    background-size: calc(var(--u) * 90) 100%;
+}
+.photo-shelf.decor-lights .tree-shelf__name { top: calc(100% + var(--u) * 18); }
+.photo-shelf .photo-shelf__shelf--pile::after { display: none; }
+
+/* evening: the room dims and the lamps glow (the window nook uses its own night light) */
+.photo-shelf.decor-evening .book-tree__frame { background: #141a33; }
+.photo-shelf.decor-evening:not(.photo-shelf--window) .photo-shelf__img { filter: brightness(.5) saturate(.75) contrast(1.05); }
+.photo-shelf--window.decor-evening .book-tree__scene::after { display: none; }
+.photo-shelf.decor-evening .tree-book { filter: brightness(.82); }
+
+/* autumn: a golden afternoon */
+.photo-shelf.decor-autumn:not(.decor-evening) .photo-shelf__img { filter: sepia(.18) saturate(1.2) hue-rotate(-8deg); }
+
+/* snow: a cooler winter light */
+.photo-shelf.decor-snow:not(.decor-evening):not(.decor-autumn) .photo-shelf__img { filter: saturate(.88) brightness(.98); }
+.dark .photo-shelf.decor-evening:not(.photo-shelf--window) .photo-shelf__img { filter: brightness(.4) saturate(.7); }
+
+/* the creatures cast their shadow on the photo too, and keep clear of the frame edge */
+.photo-shelf .tree-decor { overflow: hidden; }

@@ -74,7 +74,7 @@
     @endif
 
     @if ($shelfStyle['scene'])
-        @include('profile.partials.photo-shelf', ['sceneKey' => $shelfStyle['scene'], 'snow' => in_array('snow', \App\Support\Acorns::enabled($profile), true)])
+        @include('profile.partials.photo-shelf', ['sceneKey' => $shelfStyle['scene'], 'decorations' => \App\Support\Acorns::enabled($profile)])
     @else
     @php
         $scene = \App\Support\TreeBackdrop::layout($branchCount);

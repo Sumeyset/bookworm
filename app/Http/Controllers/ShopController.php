@@ -19,7 +19,6 @@ class ShopController extends Controller
             'owned' => $user->decorations()->pluck('enabled', 'item'),
             'history' => $user->acornEvents()->latest('id')->take(12)->get(),
             'streak' => Acorns::streak($user),
-            'treeStyle' => ($user->shelf_style ?? 'tree') === 'tree',
         ]);
     }
 
@@ -31,11 +30,8 @@ class ShopController extends Controller
         }
 
         $bought = Acorns::ITEMS[$item][1] . ' ' . Acorns::ITEMS[$item][0];
-        if (\App\Support\ShelfStyle::for($request->user())['key'] !== 'tree') {
-            return back()->with('status', $bought . ' is yours! Decorations show on the Living tree — switch your shelf style to the tree to see it.');
-        }
 
-        return back()->with('status', $bought . ' added to your tree!');
+        return back()->with('status', $bought . ' added to your shelves!');
     }
 
     public function toggle(Request $request, string $item): RedirectResponse

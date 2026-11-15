@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="title">Tree shop · Bookworm</x-slot>
     <x-slot name="header">
-        <x-page-header eyebrow="Spend what you’ve read" title="Tree shop" subtitle="Every book you read earns acorns. Spend them on decorations for your living tree — and switch them on or off any time.">
+        <x-page-header eyebrow="Spend what you’ve read" title="Tree shop" subtitle="Every book you read earns acorns. Spend them on decorations for your shelves — they show on every shelf style, and you can switch them on or off any time.">
             <x-slot name="actions">
                 <a href="{{ route('users.show', auth()->user()->username) }}#bookshelf" class="btn-ghost">See my tree &rarr;</a>
             </x-slot>
@@ -11,13 +11,6 @@
 
     <div class="page-section grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div class="min-w-0 space-y-6">
-            @unless ($treeStyle)
-                <div class="bw-card flex flex-wrap items-center gap-3 p-4 text-sm">
-                    <span aria-hidden="true">🌳</span>
-                    <p class="min-w-0 flex-1 text-walnut dark:text-[#d4c2b9]">Decorations show on the <b>Living tree</b> shelf style. You’re using another style right now.</p>
-                    <form method="POST" action="{{ route('shelf.style') }}">@csrf<input type="hidden" name="style" value="tree"><button class="btn-primary min-h-0 py-2">Switch to the tree</button></form>
-                </div>
-            @endunless
 
             <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach (\App\Support\Acorns::ITEMS as $key => [$name, $emoji, $price, $description, $window])

@@ -9,18 +9,24 @@
     $scene = \App\Support\ShelfScene::layout($sceneKey, \App\Support\ShelfScene::bandsFor($sceneKey, $treeShelves->count()));
     $sceneShelfCount = count($scene['shelves']);
     $inScene = $treeShelves->filter(fn ($s) => $s['slot'] < $sceneShelfCount);
-    $snow = $snow ?? false;
+    $decorations = $decorations ?? [];
+    $snow = in_array('snow', $decorations, true);
+    // Shop themes change the window nook's view: evening brings the night, snow winter, autumn autumn.
+    $fixedTime = in_array('evening', $decorations, true) ? 'night' : null;
+    $fixedSeason = $snow ? 'winter' : (in_array('autumn', $decorations, true) ? 'autumn' : null);
     $firstEmptySlot = $treeShelves->first(fn ($s) => $s['items']->isEmpty())['slot'] ?? null;
     $season = \App\Support\ShelfStyle::season(now());
     $hour = (int) now()->format('G');
     $part = match (true) { $hour >= 5 && $hour < 8 => 'dawn', $hour >= 8 && $hour < 17 => 'day', $hour >= 17 && $hour < 20 => 'dusk', default => 'night' };
+    $part = $fixedTime ?? $part;
+    $season = $fixedSeason ?? $season;
 @endphp
-<div class="book-tree photo-shelf photo-shelf--{{ $sceneKey }} photo-shelf--{{ $scene['view'] }} {{ $snow ? 'decor-snow' : '' }}" role="region" aria-label="{{ \App\Support\ShelfStyle::STYLES[$sceneKey][0] }}"
+<div class="book-tree photo-shelf photo-shelf--{{ $sceneKey }} photo-shelf--{{ $scene['view'] }} {{ collect($decorations)->map(fn ($item) => 'decor-' . $item)->implode(' ') }}" role="region" aria-label="{{ \App\Support\ShelfStyle::STYLES[$sceneKey][0] }}"
      data-book-tree
      data-editable="{{ $isOwnProfile ? 'true' : 'false' }}"
      data-capacity="{{ $capacity }}"
      data-shelves='@json($shelfOptions)'
-     @if ($scene['glass']) data-window-scene data-time="{{ $part }}" data-season="{{ $season }}" data-view-base="{{ asset('images/shelves/window') }}" @endif
+     @if ($scene['glass']) data-window-scene data-time="{{ $part }}" data-season="{{ $season }}" data-view-base="{{ asset('images/shelves/window') }}" @if ($fixedTime) data-fixed-time="{{ $fixedTime }}" @endif @if ($fixedSeason) data-fixed-season="{{ $fixedSeason }}" @endif @endif
      style="--scene-w: {{ $scene['width'] }}; --scene-ar: {{ $scene['width'] }} / {{ $scene['height'] }};@if ($scene['glass']) --glass-l: {{ $scene['glass']['left'] }}%; --glass-t: {{ $scene['glass']['top'] }}%; --glass-r: {{ $scene['glass']['left'] + $scene['glass']['width'] }}%; --glass-b: {{ $scene['glass']['top'] + $scene['glass']['height'] }}%;@endif --min-w: {{ $scene['min_width'] }}px; --spine-px: {{ $scene['spine'] ?? 20 }}; --book-px: {{ $scene['book'] ?? 74 }};">
     <div class="book-tree__frame photo-shelf__frame" data-scroll-frame>
         <div class="book-tree__scene photo-shelf__scene">
@@ -85,11 +91,8 @@
                 </div>
             @endforeach
 
-            @if ($snow && ! $scene['glass'])
-                <div class="tree-fx" aria-hidden="true">
-                    <span class="tree-fx__snow"></span>
-                    <span class="tree-fx__snow tree-fx__snow--far"></span>
-                </div>
+            @if ($decorations && $scene['decor'])
+                @include('profile.partials.tree-decor', ['decorations' => $decorations, 'spots' => $scene['decor'], 'windowSnow' => (bool) $scene['glass']])
             @endif
 
             <span class="book-tree__sign" aria-hidden="true">{{ $treeBookCount }} {{ Str::plural('book', $treeBookCount) }}</span>

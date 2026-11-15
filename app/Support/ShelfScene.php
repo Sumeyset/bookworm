@@ -32,6 +32,20 @@ class ShelfScene
             'view' => 'spines',
             'spine' => 23,          // spine thickness (px)
             'min_width' => 640,     // narrow screens scroll sideways from this width
+            // Where Tree shop decorations go in this picture
+            'decor' => [
+                'star' => [622, 112],
+                'ornaments' => [[566, 196], [680, 214], [508, 330], [742, 344], [446, 470], [800, 486], [384, 610], [862, 626], [322, 752], [920, 770]],
+                'gifts' => [[455, 1035], [520, 1040], [790, 1032]],
+                'pumpkins' => [[800, 1032], [460, 1035]],
+                'leaves' => [[380, 1040, -30], [430, 1052, 40], [560, 1045, 10], [700, 1050, -60], [760, 1040, 25], [880, 1050, -15], [620, 1060, 70], [330, 1060, 80], [930, 1062, -45]],
+                'lanterns' => [[200, 120], [1030, 200], [430, 140], [820, 150]],
+                'nest' => [1180, 440],
+                'owl' => [1146, 132],
+                'swing' => [920, 862],
+                'squirrel' => [1070, 400],
+                'butterflies' => [[200, 520], [960, 560], [330, 200], [1000, 300]],
+            ],
             'slots' => [
                 // rows 1–3: books lean in on the middle board, like the tree's outline
                 ['x1' => 540, 'x2' => 612, 'y' => 276, 'h' => 96, 'align' => 'end', 'cap' => 2, 'lean' => 13, 'room' => .2],
@@ -66,6 +80,19 @@ class ShelfScene
             'width' => 1800,
             'height' => 1200,
             'view' => 'covers',
+            'decor' => [
+                'star' => [900, 30],
+                'ornaments' => [[330, 292], [900, 296], [1470, 292], [615, 576], [1185, 576], [330, 850], [1470, 850], [900, 852]],
+                'gifts' => [[1760, 1082], [40, 1082], [615, 1082]],
+                'pumpkins' => [[40, 1082], [1765, 1082]],
+                'leaves' => [[200, 1110, -30], [380, 1120, 40], [560, 1112, 10], [760, 1125, -60], [960, 1110, 25], [1140, 1122, -15], [1320, 1112, 70], [1500, 1124, 80], [1680, 1114, -45]],
+                'lanterns' => [[615, 300], [1185, 300], [615, 860], [1185, 860]],
+                'nest' => [615, 554],
+                'owl' => [1185, 827],
+                'swing' => [1185, 280],
+                'squirrel' => [1765, 640],
+                'butterflies' => [[300, 330], [1300, 610], [900, 880], [1600, 330]],
+            ],
             'book' => 146,          // cover width (px)
             'min_width' => 860,
             'slots' => [
@@ -103,6 +130,19 @@ class ShelfScene
             'view' => 'spines',
             'spine' => 34,
             'min_width' => 900,
+            'decor' => [
+                'star' => [1028, 205],
+                'ornaments' => [[760, 222], [880, 226], [1000, 226], [1120, 226], [1240, 222], [330, 112], [1720, 112]],
+                'gifts' => [[760, 742], [828, 742], [1300, 742]],
+                'pumpkins' => [[1290, 742], [770, 742]],
+                'leaves' => [[700, 744, -30], [880, 746, 40], [940, 744, 10], [1060, 746, -60], [1150, 744, 25], [1210, 746, -15], [990, 746, 70], [1360, 744, 80], [650, 746, -45]],
+                'lanterns' => [[720, 290], [1336, 290], [330, 120], [1720, 120]],
+                'nest' => [1200, 744],
+                'owl' => [890, 744],
+                'swing' => [1028, 250],
+                'squirrel' => [556, 460],
+                'butterflies' => [[900, 330], [1200, 420], [700, 600], [1500, 300]],
+            ],
             // the glass, so the view can sit behind it
             'window' => ['x1' => 676, 'y1' => 272, 'x2' => 1382, 'y2' => 736],
             'slots' => [
@@ -274,6 +314,28 @@ class ShelfScene
             ];
         }
 
-        return ['height' => $h, 'pieces' => $pieces, 'shelves' => $shelves, 'glass' => $window] + $scene;
+        // Decoration spots, as page percentages (moved down with the shelves when it grew).
+        $point = function (array $p) use ($grow, $bands, $bh, $w, $h, $pct) {
+            $y = $p[1] >= ($grow['at'] ?? PHP_INT_MAX) ? $p[1] + $bands * $bh : $p[1];
+
+            return ['left' => $pct($p[0], $w), 'top' => $pct($y, $h)];
+        };
+        $d = $scene['decor'] ?? [];
+        $decor = $d ? [
+            'star' => $point($d['star']),
+            'ornaments' => array_map($point, $d['ornaments']),
+            'gifts' => array_map($point, $d['gifts']),
+            'pumpkins' => array_map($point, $d['pumpkins']),
+            'leaves' => array_map(fn ($l) => ['at' => $point($l), 'turn' => $l[2]], $d['leaves']),
+            'lanterns' => array_map($point, $d['lanterns']),
+            'nest' => $point($d['nest']),
+            'owl' => $point($d['owl']),
+            'swing' => $point($d['swing']),
+            'squirrel' => $point($d['squirrel']),
+            'butterflies' => array_map($point, $d['butterflies']),
+            'window' => null,   // the window nook has a real window
+        ] : null;
+
+        return ['height' => $h, 'pieces' => $pieces, 'shelves' => $shelves, 'glass' => $window, 'decor' => $decor] + $scene;
     }
 }
