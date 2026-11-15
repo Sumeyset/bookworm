@@ -35,15 +35,16 @@ class ShelfScene
                 ['x1' => 628, 'x2' => 745, 'y' => 428, 'h' => 126, 'align' => 'start', 'lean' => -13, 'room' => .2],
                 ['x1' => 446, 'x2' => 612, 'y' => 575, 'h' => 132, 'align' => 'end', 'cap' => 4, 'lean' => 13, 'room' => .2],
                 ['x1' => 628, 'x2' => 798, 'y' => 575, 'h' => 132, 'align' => 'start', 'cap' => 4, 'lean' => -13, 'room' => .2],
-                // rows 4–5: the middle books lie against the slanted boards
-                ['x1' => 427, 'x2' => 467, 'y' => 717, 'h' => 118, 'align' => 'center', 'cap' => 1],
+                // rows 4–5: the middle books lie against the slanted boards; the side
+                // triangles span the whole triangle so they are easy to drop on
+                ['x1' => 377, 'x2' => 517, 'y' => 717, 'h' => 118, 'align' => 'center', 'cap' => 1],
                 ['x1' => 534, 'x2' => 614, 'y' => 717, 'h' => 122, 'align' => 'start', 'lean' => -30],
                 ['x1' => 626, 'x2' => 703, 'y' => 717, 'h' => 122, 'align' => 'end', 'lean' => 30],
-                ['x1' => 772, 'x2' => 812, 'y' => 717, 'h' => 118, 'align' => 'center', 'cap' => 1],
-                ['x1' => 380, 'x2' => 420, 'y' => 861, 'h' => 118, 'align' => 'center', 'cap' => 1],
+                ['x1' => 722, 'x2' => 862, 'y' => 717, 'h' => 118, 'align' => 'center', 'cap' => 1],
+                ['x1' => 320, 'x2' => 480, 'y' => 861, 'h' => 118, 'align' => 'center', 'cap' => 1],
                 ['x1' => 497, 'x2' => 614, 'y' => 861, 'h' => 124, 'align' => 'start', 'lean' => -30],
                 ['x1' => 626, 'x2' => 739, 'y' => 861, 'h' => 124, 'align' => 'end', 'lean' => 30],
-                ['x1' => 842, 'x2' => 882, 'y' => 861, 'h' => 118, 'align' => 'center', 'cap' => 1],
+                ['x1' => 782, 'x2' => 942, 'y' => 861, 'h' => 118, 'align' => 'center', 'cap' => 1],
             ],
         ],
 

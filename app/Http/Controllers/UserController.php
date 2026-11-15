@@ -190,6 +190,19 @@ class UserController extends Controller
         $scene = ShelfStyle::for($user)['scene'];
         $treeShelves = BookTree::build($user, $treeItems, $isOwnProfile, $scene ? ShelfScene::slotCount($scene) : null, $scene ? ShelfScene::capacities($scene) : []);
 
+        // Books that no longer fit where they were (a shelf that holds fewer
+        // books in this style) were moved on screen; remember where they went.
+        if ($isOwnProfile) {
+            foreach ($treeShelves as $shelf) {
+                foreach ($shelf['items'] as $order => $item) {
+                    $item->forceFill(['shelf_slot' => $shelf['slot'], 'shelf_order' => $order]);
+                    if ($item->isDirty(['shelf_slot', 'shelf_order'])) {
+                        $item->saveQuietly();
+                    }
+                }
+            }
+        }
+
         // Instagram-style grid of the reader's posts, newest first.
         $posts = $user->posts()
             ->with(['photos', 'book'])

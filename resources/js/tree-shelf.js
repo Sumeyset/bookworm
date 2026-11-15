@@ -140,10 +140,20 @@ function initTree(tree) {
                 const edge = 70;
                 if (drag.lastY < edge) window.scrollBy(0, -14);
                 else if (drag.lastY > window.innerHeight - edge) window.scrollBy(0, 14);
+                // photo shelves wider than the screen scroll sideways too
+                const frame = tree.querySelector('[data-scroll-frame]');
+                if (frame && frame.scrollWidth > frame.clientWidth) {
+                    const box = frame.getBoundingClientRect();
+                    const side = Math.min(70, box.width / 5);
+                    if (drag.lastX < box.left + side) frame.scrollLeft -= 12;
+                    else if (drag.lastX > box.right - side) frame.scrollLeft += 12;
+                }
+                if (frame && (drag.lastX !== undefined)) drag.target = findTarget(drag.lastX, drag.lastY);
             }, 16);
         };
 
         const moveGhost = (x, y) => {
+            drag.lastX = x;
             drag.lastY = y;
             drag.ghost.style.transform = `translate(${x - drag.offsetX}px, ${y - drag.offsetY}px) rotate(-4deg) scale(1.06)`;
         };
