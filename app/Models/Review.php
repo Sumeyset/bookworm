@@ -22,12 +22,14 @@ class Review extends Model
         // Followers hear about ratings and reviews in their notifications (not the feed).
         static::created(function (Review $review): void {
             filled($review->body) ? FriendActivity::reviewed($review) : FriendActivity::rated($review);
+            \App\Support\Acorns::reviewed($review);
         });
 
         // A star rating that later gets written words counts as a review.
         static::updated(function (Review $review): void {
             if ($review->wasChanged('body') && blank($review->getOriginal('body')) && filled($review->body)) {
                 FriendActivity::reviewed($review);
+                \App\Support\Acorns::reviewed($review);
             }
         });
     }

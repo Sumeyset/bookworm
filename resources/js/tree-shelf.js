@@ -569,3 +569,42 @@ if (styleDialog) {
     styleDialog.querySelector('[data-close-shelf-styles]')?.addEventListener('click', () => styleDialog.close());
     styleDialog.addEventListener('click', (event) => { if (event.target === styleDialog) styleDialog.close(); });
 }
+
+// Window nook: the view outside follows the visitor's own clock and the season.
+const timeOfDay = (hour) => (hour >= 5 && hour < 8 ? 'dawn' : hour >= 8 && hour < 17 ? 'day' : hour >= 17 && hour < 20 ? 'dusk' : 'night');
+const seasonOf = (month) => (month >= 2 && month <= 4 ? 'spring' : month >= 5 && month <= 7 ? 'summer' : month >= 8 && month <= 10 ? 'autumn' : 'winter');
+
+document.querySelectorAll('[data-window-scene]').forEach((scene) => {
+    const view = scene.querySelector('[data-window-view]');
+    const next = scene.querySelector('[data-window-view-next]');
+    if (!view || !next) return;
+
+    const update = () => {
+        const now = new Date();
+        const time = timeOfDay(now.getHours());
+        const season = seasonOf(now.getMonth());
+        if (scene.dataset.time === time && scene.dataset.season === season && view.src) return;
+        const src = `${scene.dataset.viewBase}/${season}-${time}.webp`;
+        // Crossfade to the new view once it has loaded.
+        next.onload = () => {
+            next.hidden = false;
+            window.setTimeout(() => {
+                view.src = src;
+                next.hidden = true;
+            }, 1200);
+        };
+        next.src = src;
+        scene.dataset.time = time;
+        scene.dataset.season = season;
+    };
+
+    update();
+    window.setInterval(update, 60 * 1000);
+});
+
+// Narrow screens: photo shelves scroll sideways; start in the middle of the picture.
+document.querySelectorAll('[data-scroll-frame]').forEach((frame) => {
+    if (frame.scrollWidth > frame.clientWidth) {
+        frame.scrollLeft = (frame.scrollWidth - frame.clientWidth) / 2;
+    }
+});

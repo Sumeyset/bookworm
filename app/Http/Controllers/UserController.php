@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\User;
 use App\Models\UserBookShelf;
+use App\Support\Acorns;
 use App\Support\BookTree;
+use App\Support\ShelfScene;
+use App\Support\ShelfStyle;
 use App\Support\FriendActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -64,6 +67,7 @@ class UserController extends Controller
         // those books a place on the tree (once) so nothing is missing.
         if ($user->reviews_count > 0 && ! $user->shelfItems()->exists()) {
             FriendActivity::$quiet = true;
+            Acorns::$quiet = true;
             $user->reviews()->orderBy('created_at')->get()->each(
                 fn ($review) => $user->shelfItems()->create([
                     'book_id' => $review->book_id,
@@ -72,6 +76,11 @@ class UserController extends Controller
                 ]),
             );
             FriendActivity::$quiet = false;
+            Acorns::$quiet = false;
+        }
+
+        if ($request->user()->is($user)) {
+            Acorns::welcome($user);
         }
 
         $isOwnProfile = $request->user()->id === $user->id;
@@ -178,7 +187,8 @@ class UserController extends Controller
         $treeItems = $isOwnProfile
             ? $allUserShelfItems
             : $allUserShelfItems->filter(fn ($item) => $item->status === 'read' && $item->book->reviews->isNotEmpty());
-        $treeShelves = BookTree::build($user, $treeItems, $isOwnProfile);
+        $scene = ShelfStyle::for($user)['scene'];
+        $treeShelves = BookTree::build($user, $treeItems, $isOwnProfile, $scene ? ShelfScene::slotCount($scene) : null);
 
         // Instagram-style grid of the reader's posts, newest first.
         $posts = $user->posts()

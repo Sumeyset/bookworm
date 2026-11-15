@@ -178,6 +178,16 @@ class User extends Authenticatable
             ->orderBy('name');
     }
 
+    public function acornEvents(): HasMany
+    {
+        return $this->hasMany(AcornEvent::class);
+    }
+
+    public function decorations(): HasMany
+    {
+        return $this->hasMany(UserDecoration::class);
+    }
+
     public function conversations(): BelongsToMany
     {
         return $this->belongsToMany(Conversation::class)->withPivot(['last_read_at', 'accepted_at'])->withTimestamps();

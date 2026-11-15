@@ -13,6 +13,8 @@
     $capacity = \App\Models\UserBookShelf::MAX_BOOKS_PER_SHELF;
     $shelfOptions = $treeShelves->map(fn ($s) => ['slot' => $s['slot'], 'title' => $s['title']])->values();
     $shelfStyle = \App\Support\ShelfStyle::for($profile);
+    $decorations = $shelfStyle['scene'] ? [] : \App\Support\Acorns::enabled($profile);
+    $decorClasses = collect($decorations)->map(fn ($item) => 'decor-' . $item)->implode(' ');
 @endphp
 
 @push('scripts')
@@ -54,10 +56,11 @@
             @if ($profile->is_public)
                 <button type="button" class="bw-chip" data-copy-link="{{ route('share.tree', $profile->username) }}">🔗 Copy link</button>
             @endif
-            @if ($shelfStyle['layout'] === 'tree')
+            @if (! $shelfStyle['scene'])
                 <button type="button" class="bw-chip" data-share-tree-image data-name="{{ $profile->name }}" data-count="{{ $treeBookCount }}">🖼️ Save tree as image</button>
             @endif
-            <button type="button" class="bw-chip" data-open-shelf-styles>🎨 Shelf style: {{ \App\Support\ShelfStyle::STYLES[$shelfStyle['key']][0] }}</button>
+            <button type="button" class="bw-chip" data-open-shelf-styles>🎨 Shelf style: {{ $shelfStyle['name'] }}</button>
+            <a href="{{ route('shop.index') }}" class="bw-chip">🌰 {{ number_format($profile->acorns) }} acorns · Tree shop</a>
             <a href="{{ route('year.show', $profile->username) }}" class="bw-chip">✨ {{ now()->year }} in books</a>
             <a href="{{ route('import.show') }}" class="bw-chip ml-auto">⬆️ Import from Goodreads</a>
         </div>
@@ -66,14 +69,12 @@
     @if ($isOwnProfile && $treeBookCount > 0)
         <p class="flex items-center gap-2 px-1 text-sm text-tan dark:text-[#c7a491]">
             <svg class="h-4 w-4 shrink-0 text-gold" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a6 6 0 0 0-3.5 10.9V15a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-2.1A6 6 0 0 0 10 2Zm-2 16h4a1 1 0 0 1 0 2H8a1 1 0 0 1 0-2Z"/></svg>
-            Tap a book to open it. Drag books between branches to rearrange (long-press on phones).
+            Tap a book to open it. Drag books between shelves to rearrange (long-press on phones).
         </p>
     @endif
 
-    @if ($shelfStyle['layout'] === 'bookcase')
-        @include('profile.partials.bookcase', ['theme' => $shelfStyle['theme']])
-    @elseif ($shelfStyle['layout'] === 'booktree')
-        @include('profile.partials.booktree')
+    @if ($shelfStyle['scene'])
+        @include('profile.partials.photo-shelf', ['sceneKey' => $shelfStyle['scene']])
     @else
     @php
         $scene = \App\Support\TreeBackdrop::layout($branchCount);
@@ -82,7 +83,7 @@
         $sceneH = $scene['height'];
         $cropW = \App\Support\TreeBackdrop::CROP_TO - \App\Support\TreeBackdrop::CROP_FROM;
     @endphp
-    <div class="book-tree book-tree--{{ $shelfStyle['theme'] }}" role="region" aria-label="Tree-shaped bookshelf"
+    <div class="book-tree {{ $decorClasses ?? '' }}" role="region" aria-label="Tree-shaped bookshelf"
          data-book-tree
          data-editable="{{ $isOwnProfile ? 'true' : 'false' }}"
          data-capacity="{{ $capacity }}"
@@ -100,9 +101,7 @@
                     </div>
                 @endforeach
 
-                @if (in_array($shelfStyle['theme'], ['christmas', 'autumn', 'night'], true))
-                    @include('profile.partials.tree-decor', ['theme' => $shelfStyle['theme'], 'branchCount' => $branchCount])
-                @endif
+                @include('profile.partials.tree-decor', ['decorations' => $decorations ?? [], 'branchCount' => $branchCount])
 
                 @php
                     // Only the lowest empty shelf shows "+" slots; the others keep the picture clean until you drag a book.

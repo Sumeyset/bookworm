@@ -47,6 +47,9 @@
             @if ($errors->any())
                 <span data-flash="{{ $errors->first() }}" data-tone="error" hidden></span>
             @endif
+            @foreach (session()->pull('acorn_toasts', []) as $acornToast)
+                <span data-flash="{{ $acornToast }}" hidden></span>
+            @endforeach
 
             @auth
                 @php

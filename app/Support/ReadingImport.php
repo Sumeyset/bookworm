@@ -40,6 +40,7 @@ class ReadingImport
 
         // Bulk import: don't notify followers for every single historic book or review.
         FriendActivity::$quiet = true;
+        Acorns::$quiet = true;
         try {
             Review::withoutEvents(function () use ($handle, $header, $source, $user, &$stats, $existing) {
                 DB::transaction(function () use ($handle, $header, $source, $user, &$stats, $existing) {
@@ -84,6 +85,7 @@ class ReadingImport
             });
         } finally {
             FriendActivity::$quiet = false;
+            Acorns::$quiet = false;
         }
 
         fclose($handle);

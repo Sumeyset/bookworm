@@ -74,6 +74,17 @@ class UserBookShelf extends Model
                 static::notifyGoalMilestone($item);
             }
 
+            // Acorns for reading: finishing a book (also when it's added as already read),
+            // and for reading today (the day, a streak and the pages).
+            if ($item->user) {
+                if ($finished || ($item->wasRecentlyCreated && $item->status === 'read')) {
+                    \App\Support\Acorns::finishedBook($item);
+                }
+                if (($item->wasChanged('current_page') && $pagesForward > 0) || $finished) {
+                    \App\Support\Acorns::readingActivity($item->user);
+                }
+            }
+
             // Tell followers when a book is started or finished.
             $statusMoved = $item->wasRecentlyCreated || $item->wasChanged('status');
             if ($statusMoved && in_array($item->status, ['reading', 'read'], true) && $item->user && $item->book) {
@@ -120,6 +131,7 @@ class UserBookShelf extends Model
         foreach ([100 => 'You reached your reading goal for ' . now()->year . '! 🎉', 80 => '80% of your yearly goal — the finish line is in sight.', 50 => 'Halfway to your yearly reading goal!'] as $percent => $message) {
             if ($finished === (int) ceil($goal * $percent / 100)) {
                 \App\Notifications\BookwormNotification::send($user, 'goal', $message . " ({$finished} of {$goal} books)", route('users.show', $user->username));
+                \App\Support\Acorns::goal($user, $percent, now()->year);
                 break;
             }
         }

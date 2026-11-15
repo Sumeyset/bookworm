@@ -26,6 +26,7 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\YearInReadingController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\ShelfStyleController;
+use App\Http\Controllers\ShopController;
 use App\Http\Controllers\BuddyReadController;
 
 Route::get('/', WelcomeController::class)->name('home');
@@ -111,6 +112,9 @@ Route::middleware('auth')->group(function () {
     // Sharing
     Route::post('/share/toggle', [ShareController::class, 'toggle'])->name('share.toggle');
     Route::post('/shelf-style', ShelfStyleController::class)->name('shelf.style');
+    Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+    Route::post('/shop/{item}', [ShopController::class, 'buy'])->whereAlpha('item')->name('shop.buy');
+    Route::post('/shop/{item}/toggle', [ShopController::class, 'toggle'])->whereAlpha('item')->name('shop.toggle');
 
     // Buddy reads
     Route::get('/buddy-reads', [BuddyReadController::class, 'index'])->name('buddy.index');

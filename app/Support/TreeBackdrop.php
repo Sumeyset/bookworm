@@ -54,6 +54,19 @@ class TreeBackdrop
 
     public const CROWN_TOP = [835, 26];
 
+    /** Spots for shop decorations (picture pixels). Perched things: the point is where they sit. */
+    public const LANTERNS = [[425, 200], [1185, 160], [1245, 450], [380, 330], [1235, 600], [700, 80]];
+
+    public const NEST = [1238, 352];
+
+    public const OWL = [1192, 228];
+
+    public const SWING = [515, 632];
+
+    public const SQUIRREL = [872, 770];
+
+    public const BUTTERFLIES = [[300, 170], [1330, 260], [1340, 560], [330, 520]];
+
     /** The window on the left: glass from (x1, y1) to (x2, y2). */
     public const WINDOW = [2, 34, 70, 742];
 

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\UserBookShelf;
 use App\Support\BookTree;
+use App\Support\ShelfScene;
+use App\Support\ShelfStyle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,7 +24,7 @@ class ShareController extends Controller
 
         return view('share.tree', [
             'profile' => $user,
-            'treeShelves' => BookTree::build($user, $items, false),
+            'treeShelves' => BookTree::build($user, $items, false, ($scene = ShelfStyle::for($user)['scene']) ? ShelfScene::slotCount($scene) : null),
             'treeBookCount' => $items->count(),
             'isOwnProfile' => false,
             'shelfStatuses' => UserBookShelf::STATUSES,

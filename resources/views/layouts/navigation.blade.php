@@ -140,6 +140,7 @@
                             @foreach ([
                                 ['My book tree', route('users.show', Auth::user()->username)],
                                 [now()->year . ' in books', route('year.show', Auth::user()->username)],
+                                ['🌰 ' . number_format(Auth::user()->acorns) . ' acorns · Tree shop', route('shop.index')],
                                 ['Buddy reads', route('buddy.index')],
                                 ['Quote wall', route('quotes.index')],
                                 ['Import from Goodreads', route('import.show')],
@@ -196,6 +197,7 @@
                 ['Reading feed', route('feed.index'), '✍️', 'activity feed reviews posts write'],
                 ['Quote wall', route('quotes.index'), '❝', 'quotes wall passages'],
                 ['Buddy reads', route('buddy.index'), '🤝', 'buddy read together club friends'],
+                ['Tree shop', route('shop.index'), '🌰', 'shop acorns coins decorations tree store'],
                 [now()->year . ' in books', route('year.show', Auth::user()->username), '✨', 'year recap wrapped stats'],
                 ['Import from Goodreads', route('import.show'), '⬆️', 'import goodreads storygraph csv'],
                 ['Notifications', route('notifications.index'), '🔔', 'notifications alerts'],

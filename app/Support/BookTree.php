@@ -21,7 +21,7 @@ class BookTree
      * @param  Collection<int, UserBookShelf>  $items
      * @return Collection<int, array{slot: int, title: string, items: Collection<int, UserBookShelf>, sprouting: bool}>
      */
-    public static function build(User $owner, Collection $items, bool $isOwner): Collection
+    public static function build(User $owner, Collection $items, bool $isOwner, ?int $fixedShelves = null): Collection
     {
         $capacity = UserBookShelf::MAX_BOOKS_PER_SHELF;
         $bySlot = [];
@@ -48,7 +48,7 @@ class BookTree
         }
 
         $highestUsed = empty($bySlot) ? -1 : max(array_keys($bySlot));
-        $branchCount = max(self::MIN_BRANCHES, $highestUsed + 1);
+        $branchCount = max($fixedShelves ?? self::MIN_BRANCHES, $highestUsed + 1);
 
         // Give the owner a fresh branch to grow into once the top one is in use.
         if ($isOwner && $highestUsed === $branchCount - 1 && $branchCount < UserBookShelf::MAX_SHELVES) {
@@ -56,7 +56,10 @@ class BookTree
         }
 
         // The tree picture shows 7 planks and grows two planks at a time.
-        $branchCount = TreeBackdrop::shelvesFor(min($branchCount, UserBookShelf::MAX_SHELVES - 1));
+        // Photo shelves have a fixed number of shelves; extra ones go below the picture.
+        $branchCount = $fixedShelves === null
+            ? TreeBackdrop::shelvesFor(min($branchCount, UserBookShelf::MAX_SHELVES - 1))
+            : min($branchCount, UserBookShelf::MAX_SHELVES);
 
         return collect(range(0, $branchCount - 1))->map(fn (int $slot) => [
             'slot' => $slot,
