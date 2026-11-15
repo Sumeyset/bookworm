@@ -94,3 +94,11 @@ test('seasonal decorations are only for sale in season', function () {
         ->and(Acorns::onSale('autumn', Carbon::parse('2026-03-01')))->toBeFalse()
         ->and(Acorns::onSale('owl', Carbon::parse('2026-03-01')))->toBeTrue();
 });
+
+test('acorns can be given by hand', function () {
+    $jack = \App\Models\User::factory()->create(['name' => 'Jack Reed', 'username' => 'jackreads']);
+
+    $this->artisan('acorns:give', ['user' => 'jack', 'amount' => 1000])->assertSuccessful();
+
+    expect($jack->fresh()->acorns)->toBe(1000);
+});
