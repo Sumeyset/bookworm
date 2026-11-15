@@ -1134,3 +1134,7 @@
 .book-tree.is-dragging .tree-slot-empty { visibility: visible; }
 .photo-shelf__more--empty { display: none; }
 .book-tree.is-dragging .photo-shelf__more--empty { display: block; }
+
+/* On shelves where books gather on the right, the (hidden) empty places go on
+   the left, so the books really rest against the board instead of mid-shelf. */
+.photo-shelf__shelf--end .tree-slot-empty { order: -1; }
