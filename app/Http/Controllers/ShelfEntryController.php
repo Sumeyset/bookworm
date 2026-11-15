@@ -84,7 +84,7 @@ class ShelfEntryController extends Controller
     {
         $validated = $request->validate([
             'slot' => ['required', 'integer', 'min:0', 'max:' . (UserBookShelf::MAX_SHELVES - 1)],
-            'position' => ['nullable', 'integer', 'min:0', 'max:' . (UserBookShelf::MAX_BOOKS_PER_SHELF - 1)],
+            'position' => ['nullable', 'integer', 'min:0', 'max:9'],
         ]);
 
         $user = $request->user();

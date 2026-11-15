@@ -52,10 +52,10 @@ test('the window view follows the season', function () {
     }
 });
 
-test('the christmas tree triangles hold one book each', function () {
+test('the christmas tree shelves hold as many books as fit', function () {
     $caps = \App\Support\ShelfScene::capacities('christmas');
     expect([$caps[6], $caps[9], $caps[10], $caps[13]])->toBe([1, 1, 1, 1])
-        ->and($caps[0])->toBe(\App\Models\UserBookShelf::MAX_BOOKS_PER_SHELF);
+        ->and([$caps[0], $caps[2], $caps[4], $caps[7]])->toBe([2, 3, 4, 3]);
 
     $user = \App\Models\User::factory()->create(['shelf_style' => 'christmas']);
     expect(\App\Support\ShelfScene::capacityFor($user, 6))->toBe(1)

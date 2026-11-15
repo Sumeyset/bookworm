@@ -10,6 +10,9 @@ namespace App\Support;
  *   h      tallest book that fits there (image px)
  *   align  where books gather on the shelf: start | center | end
  *   cap    how many books fit (default UserBookShelf::MAX_BOOKS_PER_SHELF)
+ *   lean   books lean this many degrees (+ = top to the right), each resting on the next
+ *   room   room left at the foot of the board they lean on, as a share of h
+ *          (0 when they lie flat against a slanted board)
  */
 class ShelfScene
 {
@@ -25,19 +28,21 @@ class ShelfScene
             'spine' => 23,          // spine thickness (px)
             'min_width' => 640,     // narrow screens scroll sideways from this width
             'slots' => [
-                ['x1' => 540, 'x2' => 612, 'y' => 276, 'h' => 96, 'align' => 'end'],
-                ['x1' => 628, 'x2' => 700, 'y' => 276, 'h' => 96, 'align' => 'start'],
-                ['x1' => 500, 'x2' => 612, 'y' => 428, 'h' => 126, 'align' => 'end'],
-                ['x1' => 628, 'x2' => 745, 'y' => 428, 'h' => 126, 'align' => 'start'],
-                ['x1' => 446, 'x2' => 612, 'y' => 575, 'h' => 132, 'align' => 'end'],
-                ['x1' => 628, 'x2' => 798, 'y' => 575, 'h' => 132, 'align' => 'start'],
+                // rows 1–3: books lean in on the middle board, like the tree's outline
+                ['x1' => 540, 'x2' => 612, 'y' => 276, 'h' => 96, 'align' => 'end', 'cap' => 2, 'lean' => 13, 'room' => .2],
+                ['x1' => 628, 'x2' => 700, 'y' => 276, 'h' => 96, 'align' => 'start', 'cap' => 2, 'lean' => -13, 'room' => .2],
+                ['x1' => 500, 'x2' => 612, 'y' => 428, 'h' => 126, 'align' => 'end', 'lean' => 13, 'room' => .2],
+                ['x1' => 628, 'x2' => 745, 'y' => 428, 'h' => 126, 'align' => 'start', 'lean' => -13, 'room' => .2],
+                ['x1' => 446, 'x2' => 612, 'y' => 575, 'h' => 132, 'align' => 'end', 'cap' => 4, 'lean' => 13, 'room' => .2],
+                ['x1' => 628, 'x2' => 798, 'y' => 575, 'h' => 132, 'align' => 'start', 'cap' => 4, 'lean' => -13, 'room' => .2],
+                // rows 4–5: the middle books lie against the slanted boards
                 ['x1' => 427, 'x2' => 467, 'y' => 717, 'h' => 118, 'align' => 'center', 'cap' => 1],
-                ['x1' => 540, 'x2' => 616, 'y' => 717, 'h' => 122, 'align' => 'end'],
-                ['x1' => 625, 'x2' => 700, 'y' => 717, 'h' => 122, 'align' => 'start'],
+                ['x1' => 534, 'x2' => 614, 'y' => 717, 'h' => 122, 'align' => 'start', 'lean' => -30],
+                ['x1' => 626, 'x2' => 703, 'y' => 717, 'h' => 122, 'align' => 'end', 'lean' => 30],
                 ['x1' => 772, 'x2' => 812, 'y' => 717, 'h' => 118, 'align' => 'center', 'cap' => 1],
                 ['x1' => 380, 'x2' => 420, 'y' => 861, 'h' => 118, 'align' => 'center', 'cap' => 1],
-                ['x1' => 490, 'x2' => 616, 'y' => 861, 'h' => 124, 'align' => 'end'],
-                ['x1' => 625, 'x2' => 750, 'y' => 861, 'h' => 124, 'align' => 'start'],
+                ['x1' => 497, 'x2' => 614, 'y' => 861, 'h' => 124, 'align' => 'start', 'lean' => -30],
+                ['x1' => 626, 'x2' => 739, 'y' => 861, 'h' => 124, 'align' => 'end', 'lean' => 30],
                 ['x1' => 842, 'x2' => 882, 'y' => 861, 'h' => 118, 'align' => 'center', 'cap' => 1],
             ],
         ],
@@ -142,6 +147,10 @@ class ShelfScene
                 'h' => $s['h'],
                 'align' => $s['align'],
                 'cap' => $s['cap'] ?? \App\Models\UserBookShelf::MAX_BOOKS_PER_SHELF,
+                'lean' => $s['lean'] ?? 0,
+                'room' => $s['room'] ?? 0,
+                // leaning books sit a little further apart: thickness × (1/cos − 1)
+                'lean_gap' => isset($s['lean']) ? round(($scene['spine'] ?? 20) * (1 / cos(deg2rad(abs($s['lean']))) - 1) + 1, 2) : 0,
             ];
         }
 
