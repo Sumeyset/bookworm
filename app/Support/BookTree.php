@@ -19,11 +19,12 @@ class BookTree
 
     /**
      * @param  Collection<int, UserBookShelf>  $items
+     * @param  array<int, int>  $capacities  slot => how many books fit, where it isn't the usual 3
      * @return Collection<int, array{slot: int, title: string, items: Collection<int, UserBookShelf>, sprouting: bool}>
      */
-    public static function build(User $owner, Collection $items, bool $isOwner, ?int $fixedShelves = null): Collection
+    public static function build(User $owner, Collection $items, bool $isOwner, ?int $fixedShelves = null, array $capacities = []): Collection
     {
-        $capacity = UserBookShelf::MAX_BOOKS_PER_SHELF;
+        $capacity = fn (int $slot) => $capacities[$slot] ?? UserBookShelf::MAX_BOOKS_PER_SHELF;
         $bySlot = [];
         $overflow = [];
 
@@ -31,7 +32,7 @@ class BookTree
         // (legacy data, or a full branch) goes onto the first branch with room.
         foreach ($items->sortBy([['shelf_slot', 'asc'], ['shelf_order', 'asc'], ['id', 'asc']]) as $item) {
             $slot = (int) $item->shelf_slot;
-            if ($slot < UserBookShelf::MAX_SHELVES && count($bySlot[$slot] ?? []) < $capacity) {
+            if ($slot < UserBookShelf::MAX_SHELVES && count($bySlot[$slot] ?? []) < $capacity($slot)) {
                 $bySlot[$slot][] = $item;
             } else {
                 $overflow[] = $item;
@@ -40,7 +41,7 @@ class BookTree
 
         foreach ($overflow as $item) {
             $slot = 0;
-            while (count($bySlot[$slot] ?? []) >= $capacity) {
+            while (count($bySlot[$slot] ?? []) >= $capacity($slot)) {
                 $slot++;
             }
             $item->shelf_slot = $slot;
@@ -65,6 +66,7 @@ class BookTree
             'slot' => $slot,
             'title' => $owner->getTreeShelfName($slot),
             'items' => collect($bySlot[$slot] ?? [])->values(),
+            'capacity' => $capacity($slot),
             'sprouting' => $isOwner && $slot === $branchCount - 1 && empty($bySlot[$slot]),
         ]);
     }

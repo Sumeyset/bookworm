@@ -188,7 +188,7 @@ class UserController extends Controller
             ? $allUserShelfItems
             : $allUserShelfItems->filter(fn ($item) => $item->status === 'read' && $item->book->reviews->isNotEmpty());
         $scene = ShelfStyle::for($user)['scene'];
-        $treeShelves = BookTree::build($user, $treeItems, $isOwnProfile, $scene ? ShelfScene::slotCount($scene) : null);
+        $treeShelves = BookTree::build($user, $treeItems, $isOwnProfile, $scene ? ShelfScene::slotCount($scene) : null, $scene ? ShelfScene::capacities($scene) : []);
 
         // Instagram-style grid of the reader's posts, newest first.
         $posts = $user->posts()

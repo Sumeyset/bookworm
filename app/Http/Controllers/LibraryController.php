@@ -42,15 +42,17 @@ class LibraryController extends Controller
                 ->where('book_id', '!=', $book->id)
                 ->count();
 
-            if ($existingCount >= UserBookShelf::MAX_BOOKS_PER_SHELF) {
+            $fits = \App\Support\ShelfScene::capacityFor($user, $targetSlot);
+            if ($existingCount >= $fits) {
+                $message = 'This shelf is full (it holds ' . $fits . ' ' . ($fits === 1 ? 'book' : 'books') . '). Remove or move one to add another.';
                 if ($request->expectsJson()) {
-                    return response()->json(['error' => 'This shelf is full (maximum 3 books allowed).'], 422);
+                    return response()->json(['error' => $message], 422);
                 }
-                return back()->withErrors(['shelf_slot' => 'This branch shelf already holds the maximum of 3 books. Remove or move one to add another.']);
+                return back()->withErrors(['shelf_slot' => $message]);
             }
 
             $shelfItem->shelf_slot = $targetSlot;
-            $shelfItem->shelf_order = $validated['shelf_order'] ?? min(2, $existingCount);
+            $shelfItem->shelf_order = $validated['shelf_order'] ?? min($fits - 1, $existingCount);
         }
 
         $wasRead = $shelfItem->exists && $shelfItem->status === 'read' && $shelfItem->read_at !== null;

@@ -40,9 +40,9 @@
                     $slot = $shelf['slot'];
                     $pos = $scene['shelves'][$slot];
                     $quiet = $shelf['items']->isEmpty() && $slot !== $firstEmptySlot;
-                    $emptyCount = max(0, $capacity - $shelf['items']->count());
+                    $emptyCount = max(0, $pos['cap'] - $shelf['items']->count());
                 @endphp
-                <div class="tree-shelf photo-shelf__shelf photo-shelf__shelf--{{ $pos['align'] }} {{ $quiet ? 'tree-shelf--quiet' : '' }}"
+                <div class="tree-shelf photo-shelf__shelf photo-shelf__shelf--{{ $pos['align'] }} {{ $pos['cap'] === 1 ? 'photo-shelf__shelf--single' : '' }} {{ $quiet ? 'tree-shelf--quiet' : '' }}" data-capacity="{{ $pos['cap'] }}"
                      data-slot="{{ $slot }}" role="group" aria-label="{{ $shelf['title'] }}"
                      style="left: {{ $pos['left'] }}%; bottom: {{ $pos['bottom'] }}%; width: {{ $pos['width'] }}%; --max-h: {{ $pos['h'] }};">
                     <div class="tree-shelf__books">

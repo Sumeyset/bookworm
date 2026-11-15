@@ -53,12 +53,14 @@ function initTree(tree) {
     const shelfEl = (slot) => tree.querySelector(`.tree-shelf[data-slot="${slot}"]`);
     const shelfTitle = (slot) => shelves.find((s) => Number(s.slot) === Number(slot))?.title ?? `Branch ${Number(slot) + 1}`;
     const booksOn = (shelf) => [...shelf.querySelectorAll('.tree-book')];
+    // a few photo shelves (the Christmas tree's little triangles) hold fewer books
+    const capacityOf = (shelf) => Number(shelf?.dataset.capacity) || capacity;
 
     function refreshEmpties(shelf) {
         if (!editable || !shelf || !emptyTemplate) return;
         const container = shelf.querySelector('.tree-shelf__books');
         container.querySelectorAll('.tree-slot-empty').forEach((el) => el.remove());
-        const missing = Math.max(0, capacity - booksOn(shelf).length);
+        const missing = Math.max(0, capacityOf(shelf) - booksOn(shelf).length);
         for (let i = 0; i < missing; i += 1) {
             container.appendChild(emptyTemplate.content.firstElementChild.cloneNode(true));
         }
@@ -156,7 +158,7 @@ function initTree(tree) {
                 const r = b.getBoundingClientRect();
                 return x > r.left + r.width / 2;
             }).length;
-            const full = !sameShelf && others.length >= capacity;
+            const full = !sameShelf && others.length >= capacityOf(shelf);
             shelf.classList.add('is-drop-target');
             if (full) {
                 shelf.classList.add('is-full');

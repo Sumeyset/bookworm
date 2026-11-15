@@ -9,11 +9,14 @@ namespace App\Support;
  *
  *   h      tallest book that fits there (image px)
  *   align  where books gather on the shelf: start | center | end
+ *   cap    how many books fit (default UserBookShelf::MAX_BOOKS_PER_SHELF)
  */
 class ShelfScene
 {
     public const SCENES = [
-        // Christmas tree bookshelf by the fireplace. Books stand as spines.
+        // Christmas tree bookshelf by the fireplace. Books stand as spines and lean
+        // in towards the trunk from both sides, so full shelves make a tree shape too.
+        // The little side triangles hold one book each.
         'christmas' => [
             'image' => 'images/shelves/christmas-tree-shelf.webp',
             'width' => 1240,
@@ -28,14 +31,14 @@ class ShelfScene
                 ['x1' => 628, 'x2' => 745, 'y' => 428, 'h' => 126, 'align' => 'start'],
                 ['x1' => 446, 'x2' => 612, 'y' => 575, 'h' => 132, 'align' => 'end'],
                 ['x1' => 628, 'x2' => 798, 'y' => 575, 'h' => 132, 'align' => 'start'],
-                ['x1' => 415, 'x2' => 505, 'y' => 717, 'h' => 62, 'align' => 'center'],
+                ['x1' => 427, 'x2' => 467, 'y' => 717, 'h' => 118, 'align' => 'center', 'cap' => 1],
                 ['x1' => 540, 'x2' => 616, 'y' => 717, 'h' => 122, 'align' => 'end'],
                 ['x1' => 625, 'x2' => 700, 'y' => 717, 'h' => 122, 'align' => 'start'],
-                ['x1' => 735, 'x2' => 825, 'y' => 717, 'h' => 62, 'align' => 'center'],
-                ['x1' => 350, 'x2' => 470, 'y' => 861, 'h' => 74, 'align' => 'center'],
-                ['x1' => 490, 'x2' => 616, 'y' => 861, 'h' => 124, 'align' => 'center'],
-                ['x1' => 625, 'x2' => 750, 'y' => 861, 'h' => 124, 'align' => 'center'],
-                ['x1' => 772, 'x2' => 892, 'y' => 861, 'h' => 74, 'align' => 'center'],
+                ['x1' => 772, 'x2' => 812, 'y' => 717, 'h' => 118, 'align' => 'center', 'cap' => 1],
+                ['x1' => 380, 'x2' => 420, 'y' => 861, 'h' => 118, 'align' => 'center', 'cap' => 1],
+                ['x1' => 490, 'x2' => 616, 'y' => 861, 'h' => 124, 'align' => 'end'],
+                ['x1' => 625, 'x2' => 750, 'y' => 861, 'h' => 124, 'align' => 'start'],
+                ['x1' => 842, 'x2' => 882, 'y' => 861, 'h' => 118, 'align' => 'center', 'cap' => 1],
             ],
         ],
 
@@ -68,10 +71,10 @@ class ShelfScene
         'window' => [
             'image' => 'images/shelves/window-nook.webp',
             'width' => 2048,
-            'height' => 1144,
+            'height' => 792,        // cropped under the window sill: no cupboards or floor
             'view' => 'spines',
             'spine' => 34,
-            'min_width' => 980,
+            'min_width' => 900,
             // the glass, so the view can sit behind it
             'window' => ['x1' => 676, 'y1' => 272, 'x2' => 1382, 'y2' => 736],
             'slots' => [
@@ -104,6 +107,20 @@ class ShelfScene
         return array_key_exists($key, self::SCENES);
     }
 
+    /** @return array<int, int> slot => how many books fit, for every slot of the scene */
+    public static function capacities(string $key): array
+    {
+        return array_map(fn ($slot) => $slot['cap'] ?? \App\Models\UserBookShelf::MAX_BOOKS_PER_SHELF, self::SCENES[$key]['slots']);
+    }
+
+    /** How many books fit on one of this reader's shelves, in their current shelf style. */
+    public static function capacityFor(\App\Models\User $user, int $slot): int
+    {
+        $scene = ShelfStyle::for($user)['scene'];
+
+        return $scene ? (self::capacities($scene)[$slot] ?? \App\Models\UserBookShelf::MAX_BOOKS_PER_SHELF) : \App\Models\UserBookShelf::MAX_BOOKS_PER_SHELF;
+    }
+
     public static function slotCount(string $key): int
     {
         return count(self::SCENES[$key]['slots']);
@@ -124,6 +141,7 @@ class ShelfScene
                 'bottom' => round(($h - $s['y']) / $h * 100, 3),
                 'h' => $s['h'],
                 'align' => $s['align'],
+                'cap' => $s['cap'] ?? \App\Models\UserBookShelf::MAX_BOOKS_PER_SHELF,
             ];
         }
 

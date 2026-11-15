@@ -107,9 +107,10 @@ class UserBookShelf extends Model
             ->groupBy('shelf_slot')
             ->pluck('aggregate', 'shelf_slot');
 
+        $owner = User::find($userId);
         for ($slot = 0; $slot < self::MAX_SHELVES; $slot++) {
             $used = (int) ($counts[$slot] ?? 0);
-            if ($used < self::MAX_BOOKS_PER_SHELF) {
+            if ($used < ($owner ? \App\Support\ShelfScene::capacityFor($owner, $slot) : self::MAX_BOOKS_PER_SHELF)) {
                 return [$slot, $used];
             }
         }

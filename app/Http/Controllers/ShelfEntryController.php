@@ -102,7 +102,7 @@ class ShelfEntryController extends Controller
 
             $position = min($validated['position'] ?? $target->count(), $target->count());
 
-            if ($fromSlot !== $toSlot && $target->count() >= UserBookShelf::MAX_BOOKS_PER_SHELF) {
+            if ($fromSlot !== $toSlot && $target->count() >= \App\Support\ShelfScene::capacityFor($user, $toSlot)) {
                 // Full branch: swap with the book currently at that position.
                 $position = min($position, $target->count() - 1);
                 $swapped = $target->get($position);

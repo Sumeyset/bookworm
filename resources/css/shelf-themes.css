@@ -1076,7 +1076,7 @@
 .photo-shelf--window .photo-shelf__light {
     clip-path: polygon(evenodd,
         0 0, 100% 0, 100% 100%, 0 100%, 0 0,
-        33.4% 24.2%, 67.1% 24.2%, 67.1% 63.9%, 33.4% 63.9%, 33.4% 24.2%);
+        33.4% 34.3%, 67.1% 34.3%, 67.1% 92.9%, 33.4% 92.9%, 33.4% 34.3%);
 }
 
 /* moonlight falling into the room from the window */
@@ -1085,6 +1085,61 @@
     position: absolute;
     inset: 0;
     z-index: 4;
-    background: radial-gradient(40% 55% at 50% 72%, rgb(140 160 255 / 14%), transparent 70%);
+    background: radial-gradient(40% 60% at 50% 96%, rgb(140 160 255 / 14%), transparent 70%);
     pointer-events: none;
+}
+
+/* Spine text only belongs on side-on shelves; elsewhere it would stretch the cover */
+.tree-book__spine { display: none; }
+.photo-shelf--spines .tree-book__spine { display: flex; }
+
+/* ---- Christmas tree: books lean in towards the trunk from both sides ----
+   Left of the trunk they lean right, right of it they lean left, like
+   dominoes resting on the middle board, so a full shelf makes a tree shape. */
+
+.book-tree.photo-shelf--christmas { --lean: 13deg; }
+
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--end .tree-shelf__books {
+    /* room at the foot of the middle board for the top of the leaning book */
+    padding-right: calc(var(--u) * var(--max-h) * .2);
+}
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--start .tree-shelf__books {
+    padding-left: calc(var(--u) * var(--max-h) * .2);
+}
+
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--end .tree-book,
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--end .tree-book:first-child:has(+ .tree-book) {
+    margin: 0 0 0 calc(var(--u) * 1.5);
+    transform: rotate(var(--lean));
+    transform-origin: 100% 100%;
+}
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--start .tree-book,
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--start .tree-book + .tree-book:not(:has(+ .tree-book)) {
+    margin: 0 calc(var(--u) * 1.5) 0 0;
+    transform: rotate(calc(var(--lean) * -1));
+    transform-origin: 0 100%;
+}
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--end .tree-slot-empty {
+    transform: rotate(var(--lean));
+    transform-origin: 100% 100%;
+}
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--start .tree-slot-empty {
+    transform: rotate(calc(var(--lean) * -1));
+    transform-origin: 0 100%;
+}
+
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--end .tree-book:is(:hover, :focus-visible) {
+    transform: translateY(calc(var(--u) * -6)) rotate(var(--lean));
+}
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--start .tree-book:is(:hover, :focus-visible) {
+    transform: translateY(calc(var(--u) * -6)) rotate(calc(var(--lean) * -1));
+}
+
+/* the little triangles: one book, standing straight, as tall as the others */
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--single .tree-book {
+    --thick: 1.1;
+    --spine-size: 100%;
+}
+.book-tree.photo-shelf--christmas .photo-shelf__shelf--single .tree-shelf__name {
+    display: none;
 }
