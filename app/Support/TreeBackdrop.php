@@ -43,6 +43,38 @@ class TreeBackdrop
         ['y' => 667, 'x1' => 838, 'x2' => 1196],
     ];
 
+    /*
+     * Where seasonal decorations go, in picture pixels (x, y). Chosen on leaf
+     * clusters and around the trunk, clear of the books on the planks.
+     */
+    public const ORNAMENTS = [
+        [425, 200], [380, 330], [395, 420], [600, 150], [700, 80], [900, 60],
+        [1040, 90], [1185, 160], [1235, 280], [1245, 450], [1235, 600], [580, 672],
+    ];
+
+    public const CROWN_TOP = [835, 26];
+
+    /** The window on the left: glass from (x1, y1) to (x2, y2). */
+    public const WINDOW = [2, 34, 70, 742];
+
+    /** Things standing on the floor by the roots (bottom-centre points). */
+    public const FLOOR_LEFT = [618, 930];
+
+    public const FLOOR_RIGHT = [1120, 930];
+
+    /** A picture point -> percentages in the (possibly taller) scene. */
+    public static function point(int $x, int $y, int $shelfCount): array
+    {
+        $bands = self::bandsFor($shelfCount);
+        $height = self::HEIGHT + $bands * (self::BAND_TO - self::BAND_FROM);
+        $shifted = $y >= self::BAND_TO ? $y + $bands * (self::BAND_TO - self::BAND_FROM) : $y;
+
+        return [
+            'left' => round($x / self::WIDTH * 100, 3),
+            'top' => round($shifted / $height * 100, 3),
+        ];
+    }
+
     /** How many shelves the picture can show for the given number needed. */
     public static function shelvesFor(int $needed): int
     {

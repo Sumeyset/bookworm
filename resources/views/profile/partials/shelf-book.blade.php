@@ -4,6 +4,12 @@
     $statusKey = $payload['status'];
     $progress = ($isOwnProfile ?? false) ? $payload['progress'] : null;
     $label = $book->title . ($book->author_name ? ' by ' . $book->author_name : '') . ', ' . ($payload['status_label'] === 'Currently reading' ? 'Reading' : $payload['status_label']);
+    // Spine colour and size for shelf styles that show books side-on.
+    $spines = ['#7A2133', '#2F5D48', '#1F3A5F', '#C99A45', '#8A5A36', '#4A1220', '#B8402B', '#3F6FB5', '#5B6B2F', '#2A1A1D', '#E3A63B', '#6C3B85', '#D9C6B6', '#A3324A', '#356B6B'];
+    $spineColor = $spines[crc32((string) $book->id) % count($spines)];
+    $spineLight = in_array($spineColor, ['#C99A45', '#E3A63B', '#D9C6B6'], true);
+    $spineSize = 86 + crc32('h' . $book->id) % 15; // height in %, so a row of spines isn't perfectly even
+    $spineThick = 26 + crc32('w' . $book->id) % 12;
 @endphp
 
 <button type="button"
@@ -21,6 +27,10 @@
             <span class="tree-book__fallback-title">{{ $book->title }}</span>
             <span class="tree-book__fallback-author">{{ $book->author_name ?? '' }}</span>
         </span>
+    </span>
+    <span class="tree-book__spine {{ $spineLight ? 'tree-book__spine--light' : '' }}" style="--spine: {{ $spineColor }}; --spine-size: {{ $spineSize }}%; --spine-thick: {{ $spineThick }};" aria-hidden="true">
+        <span class="tree-book__spine-title">{{ Str::limit($book->title, 38) }}</span>
+        @if ($book->author_name)<span class="tree-book__spine-author">{{ Str::limit(Str::afterLast($book->author_name, ' '), 14) }}</span>@endif
     </span>
     <span class="tree-book__ribbon" aria-hidden="true"></span>
     <span class="tree-book__progress" aria-hidden="true" @if ($progress === null || $statusKey !== 'reading') hidden @endif>

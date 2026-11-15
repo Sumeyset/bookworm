@@ -1,6 +1,7 @@
 @import '@fontsource/caveat/600.css';
 @import '@fontsource/caveat/700.css';
 @import './tree.css';
+@import './shelf-themes.css';
 
 @tailwind base;
 @tailwind components;

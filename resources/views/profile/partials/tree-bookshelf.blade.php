@@ -12,6 +12,7 @@
     $branchCount = $treeShelves->count();
     $capacity = \App\Models\UserBookShelf::MAX_BOOKS_PER_SHELF;
     $shelfOptions = $treeShelves->map(fn ($s) => ['slot' => $s['slot'], 'title' => $s['title']])->values();
+    $shelfStyle = \App\Support\ShelfStyle::for($profile);
 @endphp
 
 @push('scripts')
@@ -53,7 +54,10 @@
             @if ($profile->is_public)
                 <button type="button" class="bw-chip" data-copy-link="{{ route('share.tree', $profile->username) }}">🔗 Copy link</button>
             @endif
-            <button type="button" class="bw-chip" data-share-tree-image data-name="{{ $profile->name }}" data-count="{{ $treeBookCount }}">🖼️ Save tree as image</button>
+            @if ($shelfStyle['layout'] === 'tree')
+                <button type="button" class="bw-chip" data-share-tree-image data-name="{{ $profile->name }}" data-count="{{ $treeBookCount }}">🖼️ Save tree as image</button>
+            @endif
+            <button type="button" class="bw-chip" data-open-shelf-styles>🎨 Shelf style: {{ \App\Support\ShelfStyle::STYLES[$shelfStyle['key']][0] }}</button>
             <a href="{{ route('year.show', $profile->username) }}" class="bw-chip">✨ {{ now()->year }} in books</a>
             <a href="{{ route('import.show') }}" class="bw-chip ml-auto">⬆️ Import from Goodreads</a>
         </div>
@@ -66,6 +70,11 @@
         </p>
     @endif
 
+    @if ($shelfStyle['layout'] === 'bookcase')
+        @include('profile.partials.bookcase', ['theme' => $shelfStyle['theme']])
+    @elseif ($shelfStyle['layout'] === 'booktree')
+        @include('profile.partials.booktree')
+    @else
     @php
         $scene = \App\Support\TreeBackdrop::layout($branchCount);
         $treeImage = asset(\App\Support\TreeBackdrop::IMAGE);
@@ -73,7 +82,7 @@
         $sceneH = $scene['height'];
         $cropW = \App\Support\TreeBackdrop::CROP_TO - \App\Support\TreeBackdrop::CROP_FROM;
     @endphp
-    <div class="book-tree" role="region" aria-label="Tree-shaped bookshelf"
+    <div class="book-tree book-tree--{{ $shelfStyle['theme'] }}" role="region" aria-label="Tree-shaped bookshelf"
          data-book-tree
          data-editable="{{ $isOwnProfile ? 'true' : 'false' }}"
          data-capacity="{{ $capacity }}"
@@ -90,6 +99,10 @@
                              style="top: {{ round(-$segment['from'] / $segH * 100, 4) }}%;">
                     </div>
                 @endforeach
+
+                @if (in_array($shelfStyle['theme'], ['christmas', 'autumn', 'night'], true))
+                    @include('profile.partials.tree-decor', ['theme' => $shelfStyle['theme'], 'branchCount' => $branchCount])
+                @endif
 
                 @php
                     // Only the lowest empty shelf shows "+" slots; the others keep the picture clean until you drag a book.
@@ -147,9 +160,14 @@
             </template>
         @endif
     </div>
+    @endif
 </div>
 
 @include('profile.partials.book-popup', ['isOwnProfile' => $isOwnProfile, 'shelfOptions' => $shelfOptions])
+
+@if ($isOwnProfile)
+    @include('profile.partials.shelf-style-picker', ['current' => $shelfStyle['key']])
+@endif
 
 @if ($isOwnProfile)
     <dialog id="rename-shelf-dialog" class="bw-dialog" aria-labelledby="rename-shelf-title">

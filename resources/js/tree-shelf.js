@@ -560,3 +560,12 @@ document.querySelectorAll('[data-share-tree-image]').forEach((button) => {
         try { await renderTreeImage(button); } finally { button.disabled = false; }
     });
 });
+
+
+// Shelf style picker
+const styleDialog = document.getElementById('shelf-style-dialog');
+if (styleDialog) {
+    document.querySelectorAll('[data-open-shelf-styles]').forEach((button) => button.addEventListener('click', () => styleDialog.showModal()));
+    styleDialog.querySelector('[data-close-shelf-styles]')?.addEventListener('click', () => styleDialog.close());
+    styleDialog.addEventListener('click', (event) => { if (event.target === styleDialog) styleDialog.close(); });
+}

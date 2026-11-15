@@ -25,6 +25,7 @@ use App\Http\Controllers\QuoteWallController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\YearInReadingController;
 use App\Http\Controllers\ShareController;
+use App\Http\Controllers\ShelfStyleController;
 use App\Http\Controllers\BuddyReadController;
 
 Route::get('/', WelcomeController::class)->name('home');
@@ -109,6 +110,7 @@ Route::middleware('auth')->group(function () {
 
     // Sharing
     Route::post('/share/toggle', [ShareController::class, 'toggle'])->name('share.toggle');
+    Route::post('/shelf-style', ShelfStyleController::class)->name('shelf.style');
 
     // Buddy reads
     Route::get('/buddy-reads', [BuddyReadController::class, 'index'])->name('buddy.index');

@@ -1,0 +1,1903 @@
+/* =====================================================================
+   Shelf styles: seasonal themes for the tree, and other bookcases.
+   Tree decorations use --u (one picture pixel) so they scale with the tree.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   Shared decoration layers
+   --------------------------------------------------------------------- */
+
+.tree-decor,
+.tree-fx {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.tree-decor { z-index: 1; }
+.tree-fx { z-index: 4; overflow: hidden; }
+
+.tree-decor > * {
+    position: absolute;
+}
+
+.tree-decor__window {
+    overflow: hidden;
+    border-radius: calc(var(--u) * 3);
+}
+
+.tree-decor__floor {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 5%;
+}
+
+/* ---------------------------------------------------------------------
+   🎄 Christmas
+   --------------------------------------------------------------------- */
+
+.book-tree--christmas .book-tree__segment img {
+    filter: saturate(.82) brightness(.97) contrast(1.03);
+}
+
+.book-tree--christmas .book-tree__scene::after {
+    /* a cool winter light over the warm room */
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(180deg, rgb(205 225 245 / 28%), rgb(255 236 214 / 6%) 60%, rgb(255 255 255 / 0%));
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
+
+.tree-decor__window--christmas {
+    background:
+        radial-gradient(circle at 30% 20%, #fff 0 1.2px, transparent 1.5px) 0 0 / 14px 18px,
+        radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 1.3px) 0 0 / 11px 15px,
+        linear-gradient(180deg, #C9D9EA 0%, #E8F0F7 70%, #FFFFFF 100%);
+    opacity: .9;
+}
+
+/* Snow resting on every plank (behind the books) */
+.book-tree--christmas .tree-shelf::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: calc(var(--u) * -4);
+    right: calc(var(--u) * -4);
+    bottom: calc(var(--u) * -9);
+    height: calc(var(--u) * 20);
+    background:
+        radial-gradient(ellipse at 50% 100%, #fff 58%, transparent 61%) 0 100% / calc(var(--u) * 34) calc(var(--u) * 18) repeat-x,
+        linear-gradient(#fff, #f1f6fb);
+    background-size: calc(var(--u) * 34) calc(var(--u) * 18), 100% calc(var(--u) * 10);
+    background-position: 0 0, 0 100%;
+    background-repeat: repeat-x, no-repeat;
+    border-radius: calc(var(--u) * 8) calc(var(--u) * 8) calc(var(--u) * 4) calc(var(--u) * 4);
+    filter: drop-shadow(0 calc(var(--u) * 2) calc(var(--u) * 2) rgb(70 90 120 / 30%));
+}
+
+/* Fairy lights along the front of each plank */
+.book-tree--christmas .tree-shelf::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    right: 0;
+    top: calc(100% + var(--u) * 6);
+    height: calc(var(--u) * 22);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 22'%3E%3Cpath d='M0 4 Q15 14 30 4 T60 4 T90 4 T120 4' fill='none' stroke='%23463020' stroke-width='1.2'/%3E%3Cg%3E%3Ccircle cx='15' cy='12' r='4' fill='%23FFD36B'/%3E%3Ccircle cx='45' cy='12' r='4' fill='%23FF6F7D'/%3E%3Ccircle cx='75' cy='12' r='4' fill='%2380E0B0'/%3E%3Ccircle cx='105' cy='12' r='4' fill='%2387B8FF'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: calc(var(--u) * 120) 100%;
+    background-repeat: repeat-x;
+    filter: drop-shadow(0 0 calc(var(--u) * 4) rgb(255 220 140 / 90%));
+    animation: tree-twinkle 2.4s ease-in-out infinite;
+}
+
+.book-tree--christmas .tree-shelf:nth-child(odd)::after {
+    animation-delay: -1.2s;
+}
+
+@keyframes tree-twinkle {
+    0%, 100% { opacity: 1; filter: drop-shadow(0 0 calc(var(--u) * 5) rgb(255 220 140 / 95%)); }
+    50% { opacity: .7; filter: drop-shadow(0 0 calc(var(--u) * 2) rgb(255 220 140 / 50%)); }
+}
+
+/* Keep the nameplate readable over the lights */
+.book-tree--christmas .tree-shelf__name {
+    top: calc(100% + var(--u) * 26);
+}
+
+.tree-decor__star {
+    width: calc(var(--u) * 92);
+    height: calc(var(--u) * 92);
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 0 calc(var(--u) * 10) rgb(255 214 110 / 80%));
+    animation: tree-star 4s ease-in-out infinite;
+}
+
+@keyframes tree-star {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.06) rotate(4deg); }
+}
+
+.tree-ornament {
+    --ball: #C8303F;
+    width: calc(var(--u) * 26);
+    height: calc(var(--u) * 26);
+    margin-left: calc(var(--u) * -13);
+    border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, rgb(255 255 255 / 85%) 0 9%, transparent 10%), radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--ball) 70%, white), var(--ball) 55%, color-mix(in srgb, var(--ball) 60%, black));
+    box-shadow: 0 calc(var(--u) * 4) calc(var(--u) * 8) rgb(40 20 10 / 35%);
+    transform-origin: 50% calc(var(--u) * -30);
+    animation: tree-sway var(--sway, 3s) ease-in-out var(--delay, 0s) infinite;
+}
+
+.tree-ornament::before {
+    /* string */
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    width: 1px;
+    height: calc(var(--u) * 26);
+    background: rgb(120 90 50 / 70%);
+}
+
+.tree-ornament::after {
+    /* gold cap */
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(var(--u) * -4);
+    width: calc(var(--u) * 9);
+    height: calc(var(--u) * 6);
+    border-radius: calc(var(--u) * 2);
+    background: linear-gradient(90deg, #B8893B, #F2D49A, #B8893B);
+    transform: translateX(-50%);
+}
+
+.tree-ornament--gold { --ball: #D9A53A; }
+.tree-ornament--green { --ball: #2F7D57; }
+.tree-ornament--blue { --ball: #3F6FB5; }
+
+@keyframes tree-sway {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+}
+
+.tree-decor__gift {
+    width: calc(var(--u) * 92);
+    transform: translate(-50%, -100%);
+    filter: drop-shadow(0 calc(var(--u) * 4) calc(var(--u) * 5) rgb(40 20 10 / 35%));
+}
+
+.tree-decor__gift--small {
+    width: calc(var(--u) * 66);
+}
+
+.tree-decor__floor--snow {
+    background: linear-gradient(180deg, transparent, rgb(255 255 255 / 85%) 55%, #fff);
+}
+
+/* Snowfall: two layers of flakes drifting down */
+.tree-fx__snow {
+    position: absolute;
+    inset: -100% 0 0;
+    background-image:
+        radial-gradient(circle, #fff 0 1.6px, transparent 2px),
+        radial-gradient(circle, rgb(255 255 255 / 85%) 0 1.2px, transparent 1.6px);
+    background-size: 120px 140px, 70px 90px;
+    background-position: 10px 0, 40px 30px;
+    opacity: .85;
+    animation: tree-snow 14s linear infinite;
+}
+
+.tree-fx__snow--far {
+    background-size: 90px 110px, 50px 64px;
+    background-position: 30px 20px, 5px 50px;
+    opacity: .5;
+    filter: blur(.4px);
+    animation-duration: 22s;
+}
+
+@keyframes tree-snow {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-30px, 50%, 0); }
+}
+
+/* ---------------------------------------------------------------------
+   🍂 Autumn
+   --------------------------------------------------------------------- */
+
+.book-tree--autumn .book-tree__segment img {
+    /* greens turn gold and copper */
+    filter: sepia(.32) saturate(1.45) hue-rotate(-24deg) brightness(1.02);
+}
+
+.book-tree--autumn .book-tree__scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(80% 60% at 70% 30%, rgb(255 170 80 / 18%), transparent 70%);
+    pointer-events: none;
+}
+
+.tree-decor__window--autumn {
+    background: linear-gradient(180deg, #F2C38B 0%, #E79A55 55%, #C96A3B 100%);
+    opacity: .55;
+    mix-blend-mode: multiply;
+}
+
+.tree-leaf {
+    width: calc(var(--u) * 24);
+    height: calc(var(--u) * 24);
+    color: #E07B2A;
+}
+
+.tree-leaf--red { color: #B8402B; }
+.tree-leaf--gold { color: #E3A63B; }
+.tree-leaf--orange { color: #E07B2A; }
+
+.tree-leaf--fallen {
+    width: calc(var(--u) * 30);
+    height: calc(var(--u) * 30);
+    transform: translate(-50%, -100%) rotate(var(--turn, 0deg)) scaleY(.6);
+    filter: drop-shadow(0 calc(var(--u) * 2) calc(var(--u) * 2) rgb(60 30 10 / 30%));
+}
+
+.tree-decor__pumpkin {
+    width: calc(var(--u) * 96);
+    transform: translate(-50%, -100%);
+    filter: drop-shadow(0 calc(var(--u) * 5) calc(var(--u) * 6) rgb(60 30 10 / 35%));
+}
+
+.tree-decor__pumpkin--small {
+    width: calc(var(--u) * 64);
+}
+
+.tree-decor__floor--leaves {
+    background: linear-gradient(180deg, transparent, rgb(200 110 50 / 18%));
+}
+
+/* Leaves drifting down */
+.tree-fall {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    animation: tree-fall var(--dur, 14s) linear var(--delay, 0s) infinite;
+}
+
+.tree-fall > .tree-leaf {
+    display: block;
+    width: calc(var(--u) * 26);
+    height: calc(var(--u) * 26);
+    animation: tree-flutter 2.8s ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+@keyframes tree-fall {
+    from { transform: translate3d(0, -8%, 0); opacity: 0; }
+    8% { opacity: 1; }
+    88% { opacity: 1; }
+    to { transform: translate3d(var(--drift, 30px), 100%, 0); opacity: 0; }
+}
+
+@keyframes tree-flutter {
+    from { transform: translateX(-14px) rotate(-35deg); }
+    to { transform: translateX(14px) rotate(40deg); }
+}
+
+/* ---------------------------------------------------------------------
+   🌙 Starry night
+   --------------------------------------------------------------------- */
+
+.book-tree--night .book-tree__frame {
+    background: #141a33;
+}
+
+.book-tree--night .book-tree__segment img {
+    filter: brightness(.42) saturate(.7) contrast(1.05);
+}
+
+.book-tree--night .book-tree__scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(180deg, rgb(40 55 120 / 45%), rgb(20 25 60 / 30%));
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
+
+.tree-decor__window--night {
+    background:
+        radial-gradient(circle, #fff 0 1px, transparent 1.4px) 0 0 / 17px 23px,
+        radial-gradient(circle, rgb(255 255 255 / 70%) 0 .8px, transparent 1.2px) 7px 11px / 11px 13px,
+        linear-gradient(180deg, #1B2448 0%, #2B3A6E 70%, #3D4F86 100%);
+}
+
+.tree-decor__moon {
+    position: absolute;
+    top: 6%;
+    left: 50%;
+    width: 70%;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 0 6px rgb(255 246 216 / 80%));
+}
+
+/* A warm lantern glow behind the books on every plank */
+.book-tree--night .tree-shelf::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: -12%;
+    right: -12%;
+    bottom: -10%;
+    height: 130%;
+    background: radial-gradient(60% 70% at 50% 85%, rgb(255 196 110 / 55%), rgb(255 170 80 / 18%) 55%, transparent 75%);
+    pointer-events: none;
+}
+
+.book-tree--night .tree-shelf__name {
+    box-shadow: 0 0 calc(var(--u) * 12) rgb(255 200 120 / 45%);
+}
+
+.book-tree--night .book-tree__sign {
+    filter: brightness(.75);
+}
+
+.tree-lantern {
+    width: calc(var(--u) * 22);
+    height: calc(var(--u) * 30);
+    margin-left: calc(var(--u) * -11);
+    border-radius: calc(var(--u) * 5) calc(var(--u) * 5) calc(var(--u) * 8) calc(var(--u) * 8);
+    background: radial-gradient(circle at 50% 55%, #FFF3C4, #F6B85A 55%, #B9772E);
+    box-shadow: 0 0 calc(var(--u) * 26) calc(var(--u) * 6) rgb(255 190 100 / 55%);
+    transform-origin: 50% calc(var(--u) * -24);
+    animation: tree-sway 4s ease-in-out var(--delay, 0s) infinite, tree-flicker 3s ease-in-out var(--delay, 0s) infinite;
+}
+
+.tree-lantern::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    width: 1px;
+    height: calc(var(--u) * 22);
+    background: rgb(200 170 120 / 60%);
+}
+
+@keyframes tree-flicker {
+    0%, 100% { opacity: 1; }
+    45% { opacity: .82; }
+    50% { opacity: .95; }
+    70% { opacity: .86; }
+}
+
+.tree-firefly {
+    position: absolute;
+    width: calc(var(--u) * 7);
+    height: calc(var(--u) * 7);
+    border-radius: 50%;
+    background: #FFF7A8;
+    box-shadow: 0 0 calc(var(--u) * 10) calc(var(--u) * 4) rgb(255 240 140 / 70%);
+    animation: tree-firefly var(--dur, 7s) ease-in-out var(--delay, 0s) infinite;
+}
+
+@keyframes tree-firefly {
+    0% { transform: translate(0, 0); opacity: 0; }
+    15% { opacity: 1; }
+    40% { transform: translate(calc(var(--u) * 30), calc(var(--u) * -24)); opacity: .3; }
+    60% { opacity: 1; }
+    85% { transform: translate(calc(var(--u) * -18), calc(var(--u) * 14)); opacity: .8; }
+    100% { transform: translate(0, 0); opacity: 0; }
+}
+
+/* Dark mode already dims the tree; themes bring their own light */
+.dark .book-tree--christmas .book-tree__segment img { filter: saturate(.8) brightness(.62) sepia(.08); }
+.dark .book-tree--autumn .book-tree__segment img { filter: sepia(.32) saturate(1.4) hue-rotate(-24deg) brightness(.62); }
+.dark .book-tree--night .book-tree__segment img { filter: brightness(.38) saturate(.7); }
+
+@media (prefers-reduced-motion: reduce) {
+    .tree-fx { display: none; }
+    .tree-ornament,
+    .tree-lantern,
+    .tree-decor__star,
+    .book-tree--christmas .tree-shelf::after { animation: none; }
+}
+
+/* =====================================================================
+   Bookcases (not the tree): shared layout
+   ===================================================================== */
+
+.bookcase__frame {
+    /* sizes for this furniture: one unit ≈ 1px on a 1000px-wide bookcase */
+    --u: calc(100cqw / 1000);
+    --book-w: calc(var(--u) * 86);
+    --gap: calc(var(--u) * 14);
+
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.6rem;
+    box-shadow: 0 40px 80px -40px rgb(40 15 8 / 65%);
+}
+
+@container (max-width: 640px) {
+    .bookcase__frame {
+        --u: calc(100cqw / 430);
+        --book-w: calc(var(--u) * 82);
+        --gap: calc(var(--u) * 12);
+    }
+}
+
+.bookcase__shelves {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 calc(var(--u) * 22);
+}
+
+@container (max-width: 640px) {
+    .bookcase__shelves {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* An odd last shelf spans the whole width */
+.bookcase__shelves > .tree-shelf:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+}
+
+.bookcase .tree-shelf {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    border-radius: 0;
+}
+
+.bookcase .tree-shelf__books {
+    position: relative;
+    z-index: 1;
+    padding-top: calc(var(--u) * 26);
+}
+
+.bookcase__plank {
+    position: relative;
+    z-index: 2;
+    display: block;
+    height: calc(var(--u) * 30);
+}
+
+.bookcase .tree-shelf__name {
+    top: auto;
+    bottom: calc(var(--u) * 4);
+    font-size: max(10px, calc(var(--u) * 14));
+}
+
+.bookcase .book-tree__empty {
+    top: 46%;
+}
+
+/* =====================================================================
+   📚 Classic library: carved mahogany bookcase with brass nameplates
+   ===================================================================== */
+
+.bookcase--library .bookcase__frame {
+    padding: 0 calc(var(--u) * 30);
+    background:
+        repeating-linear-gradient(90deg, rgb(255 255 255 / 3%) 0 2px, transparent 2px 9px),
+        linear-gradient(90deg, #3a160d, #5b2617 7%, #4a1d11 50%, #5b2617 93%, #3a160d);
+}
+
+.bookcase__crown {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(var(--u) * 92);
+    margin: 0 calc(var(--u) * -30);
+    background:
+        linear-gradient(180deg, transparent calc(100% - var(--u) * 14), #2c0f08 calc(100% - var(--u) * 14), #6e3220 calc(100% - var(--u) * 10), #3a160d),
+        linear-gradient(180deg, #6e3220, #4d1e12);
+    clip-path: polygon(0 34%, 40% 34%, 50% 0, 60% 34%, 100% 34%, 100% 100%, 0 100%);
+}
+
+.bookcase__crown::before {
+    /* carved rosette in the pediment */
+    content: "";
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: calc(var(--u) * 26);
+    height: calc(var(--u) * 26);
+    border-radius: 50%;
+    background: radial-gradient(circle, #d9a754 0 22%, #8a5a26 24% 40%, #5b2617 42% 60%, #8a5a26 62% 70%, transparent 72%);
+    transform: translateX(-50%);
+}
+
+.bookcase__plaque {
+    position: relative;
+    top: calc(var(--u) * 18);
+    padding: calc(var(--u) * 3) calc(var(--u) * 18);
+    border: 1px solid #8a6326;
+    border-radius: calc(var(--u) * 4);
+    background: linear-gradient(180deg, #f6dc9a, #c9973f 55%, #a87a2c);
+    color: #3b2410;
+    font-family: Lora, Georgia, serif;
+    font-size: max(11px, calc(var(--u) * 15));
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 50%), 0 2px 4px rgb(0 0 0 / 40%);
+}
+
+.bookcase--library .tree-shelf {
+    background:
+        radial-gradient(70% 55% at 50% 0%, rgb(255 205 140 / 16%), transparent 70%),
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0%) 0 calc(var(--u) * 80), rgb(0 0 0 / 25%) calc(var(--u) * 80) calc(var(--u) * 82)),
+        linear-gradient(180deg, #24100a, #34170e);
+    box-shadow: inset 0 calc(var(--u) * 22) calc(var(--u) * 28) calc(var(--u) * -12) rgb(0 0 0 / 70%), inset calc(var(--u) * 10) 0 calc(var(--u) * 16) calc(var(--u) * -8) rgb(0 0 0 / 50%), inset calc(var(--u) * -10) 0 calc(var(--u) * 16) calc(var(--u) * -8) rgb(0 0 0 / 50%);
+}
+
+.bookcase--library .bookcase__plank {
+    background:
+        linear-gradient(180deg, #9a5233 0 calc(var(--u) * 3), #6e3220 calc(var(--u) * 3), #561f12 70%, #3d150b);
+    box-shadow: 0 calc(var(--u) * 8) calc(var(--u) * 10) calc(var(--u) * -4) rgb(0 0 0 / 60%);
+}
+
+.bookcase--library .tree-shelf__name {
+    border-color: #8a6326;
+    border-radius: calc(var(--u) * 3);
+    background: linear-gradient(180deg, #f6dc9a, #c9973f 55%, #a87a2c);
+    color: #3b2410;
+    font-variant: small-caps;
+    letter-spacing: .04em;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 55%), 0 1px 3px rgb(0 0 0 / 50%);
+    backdrop-filter: none;
+}
+
+.bookcase--library .tree-shelf__name svg {
+    color: #5b3a12;
+}
+
+.bookcase--library button.tree-shelf__name:hover {
+    background: linear-gradient(180deg, #fbe6b2, #d9a754 55%, #b8893b);
+    border-color: #6b4a18;
+}
+
+.bookcase__base {
+    height: calc(var(--u) * 54);
+    margin: calc(var(--u) * 10) calc(var(--u) * -30) 0;
+    background:
+        linear-gradient(180deg, #7a3a22 0 calc(var(--u) * 6), #3a160d calc(var(--u) * 6) calc(var(--u) * 10), #5b2617 calc(var(--u) * 10), #3a160d);
+}
+
+.bookcase--library .tree-slot-empty {
+    border-color: rgb(242 195 139 / 45%);
+    background: rgb(255 240 220 / 6%);
+    color: #e9c27d;
+}
+
+/* =====================================================================
+   🔥 Christmas mantel: festive shelves above a crackling fireplace
+   ===================================================================== */
+
+.bookcase--mantel .bookcase__frame {
+    padding: calc(var(--u) * 70) calc(var(--u) * 46) 0;
+    background:
+        radial-gradient(circle at 50% 50%, rgb(255 255 255 / 5%) 0 calc(var(--u) * 6), transparent calc(var(--u) * 7)) 0 0 / calc(var(--u) * 46) calc(var(--u) * 46),
+        linear-gradient(180deg, #2c4a3a, #1f3a2c 60%, #183024);
+}
+
+.bookcase--mantel .tree-shelf {
+    padding: 0 calc(var(--u) * 6);
+}
+
+.bookcase--mantel .bookcase__plank {
+    height: calc(var(--u) * 22);
+    border-radius: calc(var(--u) * 3);
+    background: linear-gradient(180deg, #fffaf2 0 calc(var(--u) * 4), #efe4d3 calc(var(--u) * 4), #d9c9b2);
+    box-shadow: 0 calc(var(--u) * 10) calc(var(--u) * 12) calc(var(--u) * -6) rgb(0 0 0 / 55%);
+}
+
+/* Pine garland with little lights along each shelf */
+.bookcase--mantel .bookcase__plank::after,
+.bookcase__garland {
+    content: "";
+    position: absolute;
+    left: calc(var(--u) * -6);
+    right: calc(var(--u) * -6);
+    top: calc(var(--u) * 14);
+    height: calc(var(--u) * 30);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 30'%3E%3Cpath d='M0 8 Q20 26 40 8 T80 8' fill='none' stroke='%23234d33' stroke-width='9' stroke-linecap='round'/%3E%3Cpath d='M0 8 Q20 26 40 8 T80 8' fill='none' stroke='%23316b46' stroke-width='5' stroke-dasharray='2 3' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='16' r='3' fill='%23FFD36B'/%3E%3Ccircle cx='30' cy='18' r='3' fill='%23FF6F7D'/%3E%3Ccircle cx='52' cy='15' r='3' fill='%23FFD36B'/%3E%3Ccircle cx='68' cy='12' r='3' fill='%23FF6F7D'/%3E%3C/svg%3E");
+    background-size: calc(var(--u) * 80) 100%;
+    background-repeat: repeat-x;
+    filter: drop-shadow(0 0 calc(var(--u) * 4) rgb(255 210 120 / 70%));
+    animation: tree-twinkle 2.6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.bookcase--mantel .tree-shelf:nth-child(even) .bookcase__plank::after {
+    animation-delay: -1.3s;
+}
+
+.bookcase--mantel .tree-shelf__name {
+    bottom: calc(var(--u) * -34);
+    background: rgb(122 33 51 / 92%);
+    border-color: #e9c27d;
+}
+
+.bookcase--mantel .tree-shelf {
+    margin-bottom: calc(var(--u) * 40);
+}
+
+.bookcase__garland--top {
+    position: absolute;
+    top: calc(var(--u) * 2);
+    height: calc(var(--u) * 34);
+}
+
+.bookcase__wreath {
+    position: absolute;
+    top: calc(var(--u) * 12);
+    left: 50%;
+    width: calc(var(--u) * 64);
+    height: calc(var(--u) * 64);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 30% 25%, #c8303f 0 calc(var(--u) * 4), transparent calc(var(--u) * 4.5)),
+        radial-gradient(circle at 72% 30%, #c8303f 0 calc(var(--u) * 4), transparent calc(var(--u) * 4.5)),
+        radial-gradient(circle at 60% 78%, #c8303f 0 calc(var(--u) * 4), transparent calc(var(--u) * 4.5)),
+        radial-gradient(circle, transparent 42%, #2f6b46 43%, #234d33 62%, #316b46 70%, transparent 72%);
+    filter: drop-shadow(0 calc(var(--u) * 4) calc(var(--u) * 6) rgb(0 0 0 / 45%));
+    transform: translateX(-50%);
+}
+
+.bookcase__wreath::after {
+    /* bow */
+    content: "";
+    position: absolute;
+    bottom: calc(var(--u) * -2);
+    left: 50%;
+    width: calc(var(--u) * 26);
+    height: calc(var(--u) * 14);
+    border-radius: calc(var(--u) * 7) calc(var(--u) * 7) calc(var(--u) * 3) calc(var(--u) * 3);
+    background: linear-gradient(90deg, #a3324a 0 42%, #7a2133 42% 58%, #a3324a 58%);
+    transform: translateX(-50%);
+}
+
+.bookcase--mantel .tree-slot-empty {
+    border-color: rgb(255 248 239 / 45%);
+    background: rgb(255 255 255 / 6%);
+    color: #f2d49a;
+}
+
+/* The fireplace */
+.bookcase__fireplace {
+    position: relative;
+    width: min(100%, calc(var(--u) * 640));
+    margin: calc(var(--u) * 10) auto 0;
+}
+
+.bookcase__mantel {
+    position: relative;
+    z-index: 2;
+    height: calc(var(--u) * 30);
+    margin: 0 calc(var(--u) * -30);
+    border-radius: calc(var(--u) * 4);
+    background: linear-gradient(180deg, #fffaf2 0 calc(var(--u) * 5), #eadfce calc(var(--u) * 5), #cdbca4);
+    box-shadow: 0 calc(var(--u) * 10) calc(var(--u) * 14) calc(var(--u) * -6) rgb(0 0 0 / 60%);
+}
+
+.bookcase__mantel .bookcase__garland {
+    top: calc(var(--u) * 16);
+}
+
+.bookcase__stockings {
+    position: absolute;
+    top: calc(var(--u) * 26);
+    left: 12%;
+    right: 12%;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+}
+
+.bookcase__stocking {
+    position: relative;
+    width: calc(var(--u) * 44);
+    height: calc(var(--u) * 70);
+    transform-origin: 50% 0;
+    animation: tree-sway 5s ease-in-out var(--delay, 0s) infinite;
+}
+
+.bookcase__stocking::before {
+    /* the sock */
+    content: "";
+    position: absolute;
+    inset: calc(var(--u) * 12) calc(var(--u) * 4) 0;
+    background: var(--sock);
+    clip-path: polygon(8% 0, 72% 0, 72% 62%, 100% 74%, 100% 100%, 30% 100%, 8% 82%);
+    border-radius: 0 0 calc(var(--u) * 10) calc(var(--u) * 10);
+    box-shadow: inset calc(var(--u) * -6) 0 0 rgb(0 0 0 / 15%);
+}
+
+.bookcase__stocking::after {
+    /* fluffy cuff */
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80%;
+    height: calc(var(--u) * 16);
+    border-radius: calc(var(--u) * 6);
+    background: radial-gradient(circle at 30% 40%, #fff, #ece6dd);
+}
+
+.bookcase__stocking b {
+    position: absolute;
+    top: calc(var(--u) * 26);
+    left: 0;
+    width: 72%;
+    color: #fff8ef;
+    font-family: Lora, Georgia, serif;
+    font-size: max(9px, calc(var(--u) * 16));
+    font-weight: 700;
+    text-align: center;
+}
+
+.bookcase__hearth {
+    position: relative;
+    height: calc(var(--u) * 210);
+    padding: calc(var(--u) * 26) calc(var(--u) * 46) 0;
+    background:
+        repeating-linear-gradient(0deg, transparent 0 calc(var(--u) * 34), rgb(0 0 0 / 14%) calc(var(--u) * 34) calc(var(--u) * 36)),
+        linear-gradient(180deg, #b7a58c, #9d8a70);
+}
+
+.bookcase__firebox {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border-radius: calc(var(--u) * 90) calc(var(--u) * 90) 0 0;
+    background: radial-gradient(70% 60% at 50% 100%, #6b2a0e, #1b0d08 70%);
+    box-shadow: inset 0 calc(var(--u) * 12) calc(var(--u) * 24) rgb(0 0 0 / 80%);
+}
+
+.bookcase__flame {
+    position: absolute;
+    bottom: calc(var(--u) * 24);
+    left: 50%;
+    width: calc(var(--u) * 70);
+    height: calc(var(--u) * 110);
+    border-radius: 50% 50% 35% 35% / 65% 65% 35% 35%;
+    background: radial-gradient(ellipse at 50% 85%, #fff3b0 0 18%, #ffbf3f 38%, #f06a1d 62%, rgb(200 40 10 / 0%) 74%);
+    filter: blur(calc(var(--u) * 1.5));
+    transform-origin: 50% 100%;
+    mix-blend-mode: screen;
+    animation: hearth-flame 1.4s ease-in-out infinite alternate;
+}
+
+.bookcase__flame--1 { margin-left: calc(var(--u) * -70); }
+.bookcase__flame--2 { margin-left: calc(var(--u) * -35); height: calc(var(--u) * 140); animation-duration: 1.1s; animation-delay: -.4s; }
+.bookcase__flame--3 { margin-left: calc(var(--u) * 2); animation-duration: 1.7s; animation-delay: -.8s; }
+
+@keyframes hearth-flame {
+    0% { transform: scale(1, 1) skewX(-3deg); opacity: .9; }
+    50% { transform: scale(.92, 1.08) skewX(4deg); opacity: 1; }
+    100% { transform: scale(1.05, .9) skewX(-2deg); opacity: .85; }
+}
+
+.bookcase__logs {
+    position: absolute;
+    bottom: calc(var(--u) * 10);
+    left: 50%;
+    width: calc(var(--u) * 170);
+    height: calc(var(--u) * 26);
+    border-radius: calc(var(--u) * 13);
+    background: linear-gradient(180deg, #6b4128, #3e2414);
+    box-shadow: calc(var(--u) * -20) calc(var(--u) * -14) 0 calc(var(--u) * -4) #5a3520;
+    transform: translateX(-50%);
+}
+
+.bookcase__embers {
+    position: absolute;
+    inset: auto 20% 0;
+    height: calc(var(--u) * 14);
+    background: radial-gradient(ellipse at 50% 100%, #ff7a2a, transparent 70%);
+    animation: tree-flicker 2s ease-in-out infinite;
+}
+
+.bookcase__count {
+    position: absolute;
+    right: calc(var(--u) * -20);
+    bottom: calc(var(--u) * 10);
+    z-index: 3;
+    padding: calc(var(--u) * 3) calc(var(--u) * 12);
+    border-radius: calc(var(--u) * 5);
+    background: #2a1a12;
+    color: #f7e6c4;
+    font-family: Caveat, cursive;
+    font-size: max(14px, calc(var(--u) * 22));
+    transform: rotate(-4deg);
+    box-shadow: 0 3px 6px rgb(0 0 0 / 40%);
+}
+
+.bookcase__snow {
+    position: absolute;
+    inset: -100% 0 0;
+    z-index: 4;
+    background-image:
+        radial-gradient(circle, rgb(255 255 255 / 85%) 0 1.4px, transparent 1.8px),
+        radial-gradient(circle, rgb(255 255 255 / 60%) 0 1px, transparent 1.4px);
+    background-size: 130px 150px, 80px 100px;
+    opacity: .55;
+    pointer-events: none;
+    animation: tree-snow 18s linear infinite;
+}
+
+/* A warm glow from the fire over the room */
+.bookcase--mantel .bookcase__frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(60% 40% at 50% 100%, rgb(255 150 60 / 22%), transparent 70%);
+    pointer-events: none;
+    animation: tree-flicker 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bookcase__flame,
+    .bookcase__stocking,
+    .bookcase__snow,
+    .bookcase--mantel .bookcase__plank::after,
+    .bookcase--mantel .bookcase__frame::after { animation: none; }
+}
+
+/* =====================================================================
+   Shelf style picker
+   ===================================================================== */
+
+.shelf-styles {
+    width: min(46rem, calc(100vw - 1.5rem));
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+}
+
+.shelf-style-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+    padding: .55rem;
+    border: 1px solid #e6d9d0;
+    border-radius: 1.1rem;
+    text-align: left;
+    transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.dark .shelf-style-card {
+    border-color: #4b3035;
+}
+
+.shelf-style-card:hover {
+    border-color: #6d1a2b;
+    transform: translateY(-2px);
+}
+
+.shelf-style-card.is-current {
+    border-color: #6d1a2b;
+    box-shadow: 0 0 0 2px #6d1a2b;
+}
+
+.shelf-style-thumb {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: .75rem;
+    background: var(--tree) 52% 40% / 165% auto no-repeat, #efdcc0;
+}
+
+.shelf-style-thumb--christmas { filter: saturate(.85); }
+.shelf-style-thumb--christmas::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle, #fff 0 1.5px, transparent 2px) 0 0 / 18px 20px,
+        radial-gradient(circle at 50% 4%, #f4c64e 0 5px, transparent 6px),
+        radial-gradient(circle at 30% 40%, #c8303f 0 3px, transparent 3.5px),
+        radial-gradient(circle at 74% 34%, #d9a53a 0 3px, transparent 3.5px),
+        radial-gradient(circle at 68% 62%, #3f6fb5 0 3px, transparent 3.5px),
+        linear-gradient(180deg, rgb(205 225 245 / 30%), transparent);
+}
+
+.shelf-style-thumb--autumn { filter: sepia(.32) saturate(1.45) hue-rotate(-24deg); }
+.shelf-style-thumb--autumn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 4px 2.5px at 22% 30%, #b8402b 98%, transparent),
+        radial-gradient(ellipse 4px 2.5px at 64% 55%, #e3a63b 98%, transparent),
+        radial-gradient(ellipse 4px 2.5px at 80% 22%, #e07b2a 98%, transparent),
+        radial-gradient(ellipse 4px 2.5px at 40% 75%, #e07b2a 98%, transparent);
+}
+
+.shelf-style-thumb--night { filter: brightness(.45) saturate(.7); }
+.shelf-style-thumb--night::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 25% 35%, #fff7a8 0 2px, transparent 5px),
+        radial-gradient(circle at 70% 25%, #fff7a8 0 2px, transparent 5px),
+        radial-gradient(circle at 60% 60%, #fff7a8 0 2px, transparent 5px),
+        linear-gradient(180deg, rgb(40 55 120 / 55%), rgb(20 25 60 / 35%));
+    filter: brightness(2.2);
+}
+
+.shelf-style-thumb--library {
+    background:
+        linear-gradient(180deg, transparent 0 18%, #6e3220 18% 21%, transparent 21% 47%, #6e3220 47% 50%, transparent 50% 76%, #6e3220 76% 79%, transparent 79%),
+        linear-gradient(90deg, #4a1d11 0 8%, transparent 8% 48%, #4a1d11 48% 52%, transparent 52% 92%, #4a1d11 92%),
+        repeating-linear-gradient(90deg, #7a2133 0 6px, #2f6b4f 6px 11px, #c99a45 11px 15px, #3f6fb5 15px 20px, #8a5a36 20px 26px, transparent 26px 34px),
+        linear-gradient(180deg, #24100a, #34170e);
+}
+
+.shelf-style-thumb--mantel {
+    background:
+        radial-gradient(ellipse 22% 26% at 50% 100%, #ffbf3f, #f06a1d 45%, transparent 70%),
+        linear-gradient(180deg, transparent 0 66%, #efe4d3 66% 70%, #b7a58c 70%),
+        linear-gradient(180deg, transparent 0 22%, #efe4d3 22% 25%, transparent 25% 44%, #efe4d3 44% 47%, transparent 47%),
+        repeating-linear-gradient(90deg, transparent 0 14px, #a3324a 14px 19px, #e9c27d 19px 23px, #2f6b4f 23px 28px, transparent 28px 40px),
+        linear-gradient(180deg, #2c4a3a, #183024);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 42%, 100% 100%;
+    background-repeat: no-repeat;
+    background-position: 0 0, 0 0, 0 0, 0 10%, 0 0;
+}
+
+.shelf-style-thumb__badge {
+    position: absolute;
+    right: .4rem;
+    bottom: .35rem;
+    padding: .1rem .4rem;
+    border-radius: 999px;
+    background: rgb(255 253 249 / 90%);
+    font-size: .75rem;
+}
+
+/* =====================================================================
+   Shared: a row of books + decor, and books shown as spines
+   ===================================================================== */
+
+.bookcase__row {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: calc(var(--u) * 10);
+    padding: 0 calc(var(--u) * 10);
+}
+
+.bookcase__row > .tree-shelf__books {
+    flex: 0 1 auto;
+}
+
+.bookcase__decor {
+    display: flex;
+    flex-shrink: 0;
+    align-items: flex-end;
+    gap: calc(var(--u) * 6);
+}
+
+.tree-book__spine {
+    display: none;
+}
+
+/* Spine view: the book stands side-on, showing its spine */
+.bookcase__cell--spines .tree-book,
+.booktree .tree-book {
+    background: transparent;
+    box-shadow: none;
+}
+
+.bookcase__cell--spines .tree-book__cover,
+.booktree .tree-book__cover,
+.bookcase__cell--stack .tree-book__cover {
+    display: none;
+}
+
+.bookcase__cell--spines .tree-book {
+    width: calc(var(--u) * var(--thick, 32));
+    height: calc(var(--book-w) * 1.55);
+    aspect-ratio: auto;
+    border-radius: calc(var(--u) * 2);
+}
+
+.bookcase__cell--spines .tree-book__spine,
+.bookcase__cell--stack .tree-book__spine,
+.booktree .tree-book__spine {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    background:
+        linear-gradient(90deg, rgb(0 0 0 / 22%), transparent 18%, rgb(255 255 255 / 12%) 50%, transparent 82%, rgb(0 0 0 / 25%)),
+        var(--spine);
+    color: #fff8ef;
+    font-family: Lora, Georgia, serif;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 15%);
+}
+
+.tree-book__spine--light {
+    color: #2a1a1d !important;
+}
+
+/* Upright spines: text runs top to bottom */
+.bookcase__cell--spines .tree-book__spine {
+    inset: auto 0 0;
+    height: var(--spine-size);
+    flex-direction: column;
+    padding: calc(var(--u) * 10) 0 calc(var(--u) * 8);
+    border-radius: calc(var(--u) * 2);
+    writing-mode: vertical-rl;
+}
+
+.bookcase__cell--spines .tree-book__spine::before,
+.bookcase__cell--spines .tree-book__spine::after {
+    /* gold bands */
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: calc(var(--u) * 3);
+    background: rgb(233 194 125 / 75%);
+}
+
+.bookcase__cell--spines .tree-book__spine::before { top: calc(var(--u) * 6); }
+.bookcase__cell--spines .tree-book__spine::after { bottom: calc(var(--u) * 6); }
+
+.bookcase__cell--spines .tree-book__spine-title {
+    overflow: hidden;
+    max-height: 78%;
+    font-size: max(8px, calc(var(--u) * 11));
+    font-weight: 600;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bookcase__cell--spines .tree-book__spine-author {
+    font-family: Figtree, sans-serif;
+    font-size: max(6px, calc(var(--u) * 8));
+    opacity: .8;
+    white-space: nowrap;
+}
+
+.bookcase__cell--spines .tree-book:nth-child(1) { --thick: 34; }
+.bookcase__cell--spines .tree-book:nth-child(2) { --thick: 28; }
+.bookcase__cell--spines .tree-book:nth-child(3) { --thick: 38; }
+
+.bookcase__cell--spines .tree-slot-empty {
+    width: calc(var(--u) * 32);
+    height: calc(var(--book-w) * 1.4);
+}
+
+.bookcase__cell--spines .tree-book:hover,
+.bookcase__cell--spines .tree-book:focus-visible {
+    transform: translateY(calc(var(--u) * -10));
+}
+
+/* Lying in a stack: spines face out, text runs left to right */
+.bookcase__cell--stack .tree-shelf__books {
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 0;
+}
+
+.bookcase__cell--stack .tree-book {
+    width: calc(var(--book-w) * 1.6);
+    height: calc(var(--u) * 24);
+    aspect-ratio: auto;
+    border-radius: calc(var(--u) * 2);
+    background: transparent;
+    box-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 3) rgb(0 0 0 / 25%);
+}
+
+.bookcase__cell--stack .tree-book:nth-child(2) { width: calc(var(--book-w) * 1.45); margin-left: calc(var(--u) * 10); }
+.bookcase__cell--stack .tree-book:nth-child(3) { width: calc(var(--book-w) * 1.55); margin-right: calc(var(--u) * 8); }
+
+.bookcase__cell--stack .tree-book__spine {
+    inset: 0;
+    padding: 0 calc(var(--u) * 10);
+    border-radius: calc(var(--u) * 2);
+}
+
+.bookcase__cell--stack .tree-book__spine-title {
+    overflow: hidden;
+    font-size: max(8px, calc(var(--u) * 11));
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bookcase__cell--stack .tree-book__spine-author {
+    flex-shrink: 0;
+    font-family: Figtree, sans-serif;
+    font-size: max(6px, calc(var(--u) * 8));
+    opacity: .8;
+}
+
+.bookcase__cell--stack .tree-slot-empty {
+    width: calc(var(--book-w) * 1.5);
+    height: calc(var(--u) * 24);
+    aspect-ratio: auto;
+}
+
+.bookcase__cell--stack .tree-book:hover,
+.bookcase__cell--stack .tree-book:focus-visible {
+    transform: translateX(calc(var(--u) * 8));
+}
+
+.bookcase__cell--spines .tree-book__ribbon,
+.bookcase__cell--stack .tree-book__ribbon,
+.booktree .tree-book__ribbon {
+    display: none;
+}
+
+/* Little shelf objects */
+.shelf-decor {
+    display: block;
+    flex-shrink: 0;
+}
+
+.shelf-decor svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 calc(var(--u) * 3) calc(var(--u) * 3) rgb(0 0 0 / 22%));
+}
+
+.shelf-decor--plant { width: calc(var(--u) * 70); margin-bottom: calc(var(--u) * -40); }
+.shelf-decor--succulent { width: calc(var(--u) * 52); }
+.shelf-decor--candles { width: calc(var(--u) * 56); }
+.shelf-decor--candle { width: calc(var(--u) * 26); }
+.shelf-decor--globe { width: calc(var(--u) * 54); }
+.shelf-decor--frame { width: calc(var(--u) * 46); }
+.shelf-decor--mug { width: calc(var(--u) * 40); }
+.shelf-decor--cactus { width: calc(var(--u) * 40); }
+.shelf-decor--bowl { width: calc(var(--u) * 62); }
+.shelf-decor--painting { width: calc(var(--u) * 50); transform: rotate(-4deg); }
+.shelf-decor--shell { width: calc(var(--u) * 34); }
+.shelf-decor--lantern { width: calc(var(--u) * 32); }
+
+.shelf-decor__flame {
+    transform-origin: 50% 100%;
+    transform-box: fill-box;
+    animation: hearth-flame 1.3s ease-in-out infinite alternate;
+}
+
+.shelf-decor__glow {
+    animation: tree-flicker 3s ease-in-out infinite;
+}
+
+.shelf-decor--letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--u) * 74);
+    height: calc(var(--u) * 92);
+}
+
+.shelf-decor__letter {
+    font-family: Georgia, serif;
+    font-size: calc(var(--u) * 96);
+    font-weight: 700;
+    line-height: 1;
+    color: #fffaf0;
+    -webkit-text-stroke: calc(var(--u) * 2) #e8dcc8;
+    text-shadow: 0 0 calc(var(--u) * 6) #ffd98a, 0 0 calc(var(--u) * 18) rgb(255 200 100 / 80%);
+    animation: tree-flicker 4s ease-in-out infinite;
+}
+
+/* =====================================================================
+   🎄 Book Christmas tree: books stacked into a cone
+   ===================================================================== */
+
+.booktree .bookcase__frame {
+    --u: calc(100cqw / 900);
+    --row: calc(var(--u) * 24);
+    padding: calc(var(--u) * 40) calc(var(--u) * 30) 0;
+    background:
+        linear-gradient(180deg, transparent 0 84%, #e9e1d5 84%),
+        radial-gradient(60% 50% at 50% 35%, #fff4e2, transparent 70%),
+        linear-gradient(180deg, #e8dccb, #d9c9b2);
+}
+
+@container (max-width: 640px) {
+    .booktree .bookcase__frame {
+        --u: calc(100cqw / 480);
+    }
+}
+
+.booktree__garland {
+    position: absolute;
+    top: calc(var(--u) * 10);
+    left: 0;
+    right: 0;
+    height: calc(var(--u) * 30);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 30'%3E%3Cpath d='M0 8 Q20 26 40 8 T80 8' fill='none' stroke='%23234d33' stroke-width='9' stroke-linecap='round'/%3E%3Cpath d='M0 8 Q20 26 40 8 T80 8' fill='none' stroke='%23316b46' stroke-width='5' stroke-dasharray='2 3' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='16' r='2.6' fill='%23FFF4C9'/%3E%3Ccircle cx='30' cy='18' r='2.6' fill='%23FFF4C9'/%3E%3Ccircle cx='52' cy='15' r='2.6' fill='%23FFF4C9'/%3E%3Ccircle cx='68' cy='12' r='2.6' fill='%23FFF4C9'/%3E%3C/svg%3E");
+    background-size: calc(var(--u) * 80) 100%;
+    filter: drop-shadow(0 0 calc(var(--u) * 4) rgb(255 230 160 / 80%));
+    opacity: .9;
+    animation: tree-twinkle 3s ease-in-out infinite;
+}
+
+.booktree__tree {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: calc(var(--u) * 70);
+}
+
+.booktree__bow {
+    position: absolute;
+    top: calc(var(--u) * 6);
+    left: 50%;
+    z-index: 3;
+    width: calc(var(--u) * 110);
+    transform: translateX(-50%);
+    filter: drop-shadow(0 calc(var(--u) * 4) calc(var(--u) * 4) rgb(80 0 10 / 40%));
+}
+
+.booktree .booktree__layer {
+    position: relative;
+    width: var(--w);
+    margin-top: -1px;
+    filter: drop-shadow(0 calc(var(--u) * 3) calc(var(--u) * 4) rgb(60 30 10 / 22%));
+}
+
+.booktree .booktree__layer .tree-shelf__books {
+    /* plain books fill the rest of the layer, so the tree always looks full;
+       the layer is cut as a trapezoid so the whole stack forms a smooth cone */
+    background:
+        repeating-linear-gradient(180deg, transparent 0 calc(var(--row) - 2px), rgb(0 0 0 / 25%) calc(var(--row) - 2px) var(--row)),
+        linear-gradient(90deg, rgb(0 0 0 / 22%), transparent 12%, rgb(255 255 255 / 10%) 50%, transparent 88%, rgb(0 0 0 / 25%)),
+        repeating-linear-gradient(180deg, #7a2133 0 var(--row), #2f5d48 var(--row) calc(var(--row) * 2), #c99a45 calc(var(--row) * 2) calc(var(--row) * 3), #1f3a5f calc(var(--row) * 3) calc(var(--row) * 4), #e8dcc4 calc(var(--row) * 4) calc(var(--row) * 5), #8a5a36 calc(var(--row) * 5) calc(var(--row) * 6));
+    background-position: 0 0, 0 0, 0 calc(var(--row) * var(--shift, 0));
+    clip-path: polygon(var(--inset, 0%) 0, calc(100% - var(--inset, 0%)) 0, 100% 100%, 0 100%);
+}
+
+.booktree .booktree__layer:nth-child(3n) { --shift: 2; }
+.booktree .booktree__layer:nth-child(3n + 1) { --shift: 4; }
+
+/* Fairy lights draped across each layer */
+.booktree .booktree__layer::after {
+    content: "";
+    position: absolute;
+    z-index: 3;
+    left: -3%;
+    right: -3%;
+    top: 40%;
+    height: calc(var(--u) * 16);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 16'%3E%3Cpath d='M0 4 Q15 12 30 4 T60 4' fill='none' stroke='%23C9C2B5' stroke-width='.8'/%3E%3Ccircle cx='10' cy='8.5' r='2.6' fill='%23FFF6CF'/%3E%3Ccircle cx='30' cy='4.5' r='2.6' fill='%23FFF6CF'/%3E%3Ccircle cx='50' cy='8.5' r='2.6' fill='%23FFF6CF'/%3E%3C/svg%3E");
+    background-size: calc(var(--u) * 60) 100%;
+    filter: drop-shadow(0 0 calc(var(--u) * 4) rgb(255 236 170 / 95%));
+    transform: rotate(var(--tilt, 2deg));
+    pointer-events: none;
+    animation: tree-twinkle 2.2s ease-in-out infinite;
+}
+
+.booktree .booktree__layer:nth-child(even)::after {
+    animation-delay: -1.1s;
+}
+
+.booktree .tree-shelf__books {
+    flex-direction: column-reverse;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 0;
+    min-height: calc(var(--row) * 3);
+    padding: 0;
+}
+
+.booktree .tree-book {
+    width: 100%;
+    height: var(--row);
+    aspect-ratio: auto;
+    border-radius: calc(var(--u) * 2);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+}
+
+.booktree .tree-book:nth-child(2) { width: 96%; margin-left: 3%; }
+.booktree .tree-book:nth-child(3) { width: 98%; margin-left: 1%; }
+
+.booktree .tree-book__spine {
+    inset: 0;
+    gap: calc(var(--u) * 8);
+    /* keep the title clear of the cone's slanted edges */
+    padding: 0 calc(var(--inset, 0%) + var(--u) * 10);
+    border-radius: calc(var(--u) * 2);
+}
+
+.booktree .tree-book__spine-title {
+    overflow: hidden;
+    font-size: max(8px, calc(var(--u) * 12));
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.booktree .tree-book__spine-author {
+    flex-shrink: 0;
+    font-family: Figtree, sans-serif;
+    font-size: max(6px, calc(var(--u) * 9));
+    opacity: .85;
+}
+
+.booktree .tree-book:hover,
+.booktree .tree-book:focus-visible {
+    transform: translateX(calc(var(--u) * -10));
+}
+
+.booktree .tree-slot-empty {
+    width: 100%;
+    height: var(--row);
+    aspect-ratio: auto;
+    border-radius: calc(var(--u) * 2);
+    background: rgb(255 253 249 / 75%);
+    font-size: max(12px, calc(var(--u) * 16));
+}
+
+.booktree .tree-book__progress {
+    left: 0;
+    right: auto;
+    bottom: 0;
+    width: 100%;
+    height: max(2px, calc(var(--u) * 3));
+}
+
+/* Gift tag with the layer name: shows when you point at (or tab into) a layer */
+.booktree .tree-shelf__name {
+    top: auto;
+    bottom: calc(100% + var(--u) * 2);
+    left: 50%;
+    z-index: 5;
+    max-width: none;
+    padding: calc(var(--u) * 1) calc(var(--u) * 10);
+    border-color: #c99a45;
+    border-radius: calc(var(--u) * 4);
+    background: #fffaf2;
+    color: #6d1a2b;
+    font-size: max(10px, calc(var(--u) * 12));
+    opacity: 0;
+    transform: translate(-50%, calc(var(--u) * 4));
+    transition: opacity .15s ease, transform .15s ease;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 25%);
+    backdrop-filter: none;
+    pointer-events: none;
+}
+
+.booktree .booktree__layer:hover .tree-shelf__name,
+.booktree .booktree__layer:focus-within .tree-shelf__name,
+.booktree .tree-shelf__name:focus-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+}
+
+.booktree .tree-shelf__name svg { color: #b8893b; }
+.booktree button.tree-shelf__name:hover { background: #fff3dc; border-color: #6d1a2b; }
+
+.booktree__rug {
+    position: relative;
+    z-index: 0;
+    height: calc(var(--u) * 90);
+    margin: calc(var(--u) * -30) calc(var(--u) * -30) 0;
+    background: radial-gradient(48% 70% at 50% 30%, #fbf8f3 0 60%, #efe9e0 61%, #e9e1d5 72%, transparent 73%);
+}
+
+.booktree__gift {
+    position: absolute;
+    bottom: calc(var(--u) * 26);
+    left: 14%;
+    width: calc(var(--u) * 80);
+    filter: drop-shadow(0 calc(var(--u) * 4) calc(var(--u) * 5) rgb(40 20 10 / 30%));
+}
+
+.booktree__gift--right {
+    left: auto;
+    right: 14%;
+    width: calc(var(--u) * 64);
+}
+
+.booktree__count {
+    right: calc(var(--u) * 20);
+    bottom: calc(var(--u) * 20);
+    z-index: 2;
+}
+
+/* =====================================================================
+   🪟 Reading nook: white built-ins around a window seat, with a ladder
+   ===================================================================== */
+
+.bookcase--nook .bookcase__frame {
+    --u: calc(100cqw / 1100);
+    --book-w: calc(var(--u) * 80);
+    padding: calc(var(--u) * 46) calc(var(--u) * 24) 0;
+    background: linear-gradient(180deg, #f3eee7, #e9e2d8);
+}
+
+@container (max-width: 640px) {
+    .bookcase--nook .bookcase__frame {
+        --u: calc(100cqw / 560);
+    }
+}
+
+.nook {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, .82fr) 1fr;
+    gap: 0;
+    padding: calc(var(--u) * 14);
+    border-radius: calc(var(--u) * 6) calc(var(--u) * 6) 0 0;
+    background: #fbf9f6;
+    box-shadow: inset 0 0 0 calc(var(--u) * 10) #f7f4ef, 0 calc(var(--u) * 10) calc(var(--u) * 30) rgb(90 70 50 / 18%);
+}
+
+.nook__column {
+    display: flex;
+    flex-direction: column;
+}
+
+.bookcase--nook .tree-shelf {
+    background: linear-gradient(180deg, #ece6dd, #f6f2ec 30%);
+    box-shadow: inset calc(var(--u) * 8) 0 calc(var(--u) * 10) calc(var(--u) * -6) rgb(0 0 0 / 12%), inset calc(var(--u) * -8) 0 calc(var(--u) * 10) calc(var(--u) * -6) rgb(0 0 0 / 12%);
+}
+
+.bookcase--nook .bookcase__row {
+    justify-content: space-between;
+    padding-top: calc(var(--u) * 18);
+}
+
+.bookcase--nook .tree-shelf__books {
+    justify-content: flex-start;
+    gap: calc(var(--u) * 2);
+}
+
+.bookcase--nook .bookcase__plank {
+    height: calc(var(--u) * 18);
+    background: linear-gradient(180deg, #ffffff 0 calc(var(--u) * 4), #efe9e1 calc(var(--u) * 4), #e3dcd2);
+    box-shadow: 0 calc(var(--u) * 6) calc(var(--u) * 8) calc(var(--u) * -4) rgb(80 60 40 / 30%);
+}
+
+.bookcase--nook .tree-shelf__name {
+    bottom: calc(var(--u) * 1);
+    padding: 0 calc(var(--u) * 8);
+    border-color: #d9cfc2;
+    background: #fffdf9;
+    color: #6b5847;
+    font-size: max(9px, calc(var(--u) * 11));
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.bookcase--nook .tree-shelf__name svg { color: #b8a58f; }
+.bookcase--nook button.tree-shelf__name:hover { background: #fff; border-color: #6d1a2b; }
+
+.bookcase--nook .tree-slot-empty {
+    border-color: #cfc2b2;
+    background: rgb(255 255 255 / 60%);
+    color: #a08a74;
+}
+
+.nook__middle {
+    display: flex;
+    flex-direction: column;
+    padding: calc(var(--u) * 20) calc(var(--u) * 16) 0;
+    background: #fbf9f6;
+}
+
+.nook__window {
+    position: relative;
+    flex: 1;
+    min-height: calc(var(--u) * 260);
+    padding: calc(var(--u) * 12);
+    border: calc(var(--u) * 10) solid #ffffff;
+    border-radius: calc(var(--u) * 3);
+    background: #fff;
+    box-shadow: 0 0 0 1px #e6ded3, inset 0 0 0 1px #e6ded3;
+}
+
+.nook__sky {
+    position: absolute;
+    inset: calc(var(--u) * 6);
+    background:
+        linear-gradient(90deg, transparent calc(50% - var(--u) * 3), #fff calc(50% - var(--u) * 3), #fff calc(50% + var(--u) * 3), transparent calc(50% + var(--u) * 3)),
+        linear-gradient(0deg, transparent calc(50% - var(--u) * 4), #fff calc(50% - var(--u) * 4), #fff calc(50% + var(--u) * 4), transparent calc(50% + var(--u) * 4)),
+        linear-gradient(90deg, transparent calc(25% - var(--u) * 1.5), #fff calc(25% - var(--u) * 1.5), #fff calc(25% + var(--u) * 1.5), transparent calc(25% + var(--u) * 1.5), transparent calc(75% - var(--u) * 1.5), #fff calc(75% - var(--u) * 1.5), #fff calc(75% + var(--u) * 1.5), transparent calc(75% + var(--u) * 1.5)),
+        radial-gradient(120% 60% at 30% 100%, #6f8f5e 0 35%, transparent 36%),
+        radial-gradient(100% 50% at 80% 100%, #86a873 0 38%, transparent 39%),
+        linear-gradient(180deg, #a8c8e4, #dbe9f3 70%, #eef4f8);
+}
+
+.nook__seat {
+    position: relative;
+    height: calc(var(--u) * 70);
+    margin: calc(var(--u) * 10) calc(var(--u) * -16) 0;
+    border-radius: calc(var(--u) * 4) calc(var(--u) * 4) 0 0;
+    background: linear-gradient(180deg, transparent 0 55%, #ffffff 55%, #f1ece5);
+}
+
+.nook__seat::before {
+    /* seat cushion */
+    content: "";
+    position: absolute;
+    left: calc(var(--u) * 6);
+    right: calc(var(--u) * 6);
+    top: 40%;
+    height: calc(var(--u) * 16);
+    border-radius: calc(var(--u) * 8);
+    background: linear-gradient(180deg, #f7efe4, #e6d8c5);
+}
+
+.nook__cushion {
+    position: absolute;
+    bottom: 48%;
+    width: calc(var(--u) * 54);
+    height: calc(var(--u) * 46);
+    border-radius: calc(var(--u) * 12);
+    transform: rotate(-8deg);
+}
+
+.nook__cushion--1 { left: 6%; background: radial-gradient(circle at 40% 35%, #c9707f, #a3324a); }
+.nook__cushion--2 { left: 26%; width: calc(var(--u) * 46); height: calc(var(--u) * 40); background: radial-gradient(circle at 40% 35%, #a7c6a0, #6f9a6a); transform: rotate(6deg); }
+
+.nook__cat {
+    position: absolute;
+    right: 12%;
+    bottom: 48%;
+    width: calc(var(--u) * 70);
+    height: calc(var(--u) * 34);
+    border-radius: calc(var(--u) * 30) calc(var(--u) * 30) calc(var(--u) * 10) calc(var(--u) * 10);
+    background: #3a3330;
+}
+
+.nook__cat::before {
+    /* head with ears */
+    content: "";
+    position: absolute;
+    right: calc(var(--u) * -6);
+    top: calc(var(--u) * -6);
+    width: calc(var(--u) * 28);
+    height: calc(var(--u) * 24);
+    border-radius: 50% 50% 45% 45%;
+    background: #3a3330;
+    clip-path: polygon(0 30%, 15% 0, 35% 22%, 65% 22%, 85% 0, 100% 30%, 100% 100%, 0 100%);
+}
+
+.nook__cat::after {
+    /* tail */
+    content: "";
+    position: absolute;
+    left: calc(var(--u) * -10);
+    bottom: 0;
+    width: calc(var(--u) * 30);
+    height: calc(var(--u) * 10);
+    border-radius: calc(var(--u) * 6);
+    background: #3a3330;
+    transform: rotate(-8deg);
+    transform-origin: 100% 50%;
+    animation: nook-tail 4s ease-in-out infinite;
+}
+
+@keyframes nook-tail {
+    0%, 100% { transform: rotate(-8deg); }
+    50% { transform: rotate(-22deg); }
+}
+
+.nook__blanket {
+    position: absolute;
+    left: 48%;
+    bottom: 40%;
+    width: calc(var(--u) * 46);
+    height: calc(var(--u) * 26);
+    border-radius: calc(var(--u) * 6);
+    background: repeating-linear-gradient(90deg, #e9c27d 0 calc(var(--u) * 6), #f6e3bd calc(var(--u) * 6) calc(var(--u) * 12));
+}
+
+.nook__drawers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(var(--u) * 6);
+    height: calc(var(--u) * 70);
+    margin: 0 calc(var(--u) * -16);
+    padding: calc(var(--u) * 8);
+    background: #f4efe8;
+}
+
+.nook__drawers span {
+    position: relative;
+    border-radius: calc(var(--u) * 3);
+    background: #fffdf9;
+    box-shadow: inset 0 0 0 1px #e6ded3;
+}
+
+.nook__drawers span::after {
+    content: "";
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    width: calc(var(--u) * 26);
+    height: calc(var(--u) * 4);
+    border-radius: 999px;
+    background: #c99a45;
+    transform: translateX(-50%);
+}
+
+.nook__ladder {
+    position: absolute;
+    top: calc(var(--u) * -30);
+    right: calc(var(--u) * 26);
+    bottom: calc(var(--u) * -40);
+    z-index: 2;
+    width: calc(var(--u) * 54);
+    background:
+        linear-gradient(90deg, #8a5a36 0 calc(var(--u) * 7), transparent calc(var(--u) * 7) calc(100% - var(--u) * 7), #8a5a36 calc(100% - var(--u) * 7)),
+        repeating-linear-gradient(180deg, transparent 0 calc(var(--u) * 46), #9a6a44 calc(var(--u) * 46) calc(var(--u) * 54));
+    transform: rotate(6deg);
+    transform-origin: 50% 0;
+    filter: drop-shadow(calc(var(--u) * -6) calc(var(--u) * 6) calc(var(--u) * 6) rgb(60 40 20 / 25%));
+    pointer-events: none;
+}
+
+.nook__chandelier {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 2;
+    width: calc(var(--u) * 90);
+    height: calc(var(--u) * 40);
+    transform: translateX(-50%);
+    background:
+        radial-gradient(circle at 15% 70%, #fff 0 calc(var(--u) * 3), transparent calc(var(--u) * 4)),
+        radial-gradient(circle at 35% 85%, #fff 0 calc(var(--u) * 3), transparent calc(var(--u) * 4)),
+        radial-gradient(circle at 50% 95%, #fff 0 calc(var(--u) * 4), transparent calc(var(--u) * 5)),
+        radial-gradient(circle at 65% 85%, #fff 0 calc(var(--u) * 3), transparent calc(var(--u) * 4)),
+        radial-gradient(circle at 85% 70%, #fff 0 calc(var(--u) * 3), transparent calc(var(--u) * 4)),
+        linear-gradient(90deg, transparent calc(50% - 1px), #c9c2b8 calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
+    filter: drop-shadow(0 0 calc(var(--u) * 4) rgb(255 240 200 / 90%));
+}
+
+.nook__floor {
+    position: relative;
+    height: calc(var(--u) * 54);
+    margin: 0 calc(var(--u) * -24);
+    background:
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0%) 0 calc(var(--u) * 140), rgb(0 0 0 / 18%) calc(var(--u) * 140) calc(var(--u) * 142)),
+        linear-gradient(180deg, #6e4a33, #5a3a28);
+}
+
+.nook__count {
+    position: absolute;
+    right: calc(var(--u) * 30);
+    bottom: calc(var(--u) * 12);
+    padding: calc(var(--u) * 2) calc(var(--u) * 12);
+    border-radius: calc(var(--u) * 5);
+    background: #fffaf2;
+    color: #6d1a2b;
+    font-family: Caveat, cursive;
+    font-size: max(14px, calc(var(--u) * 22));
+    transform: rotate(-3deg);
+    box-shadow: 0 2px 5px rgb(0 0 0 / 25%);
+}
+
+@container (max-width: 640px) {
+    .nook {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .nook__middle {
+        display: none;
+    }
+
+    .nook__ladder {
+        display: none;
+    }
+}
+
+/* =====================================================================
+   🪴 Styled shelf: white open shelves mixing books with decor
+   ===================================================================== */
+
+.bookcase--styled .bookcase__frame {
+    --u: calc(100cqw / 1000);
+    padding: calc(var(--u) * 70) calc(var(--u) * 30) 0;
+    background: linear-gradient(180deg, #f6f1ea, #ede5da);
+}
+
+@container (max-width: 640px) {
+    .bookcase--styled .bookcase__frame {
+        --u: calc(100cqw / 480);
+    }
+}
+
+.bookcase--styled .bookcase__shelves {
+    padding: calc(var(--u) * 14);
+    background: #ffffff;
+    box-shadow: 0 calc(var(--u) * 14) calc(var(--u) * 30) rgb(90 70 50 / 18%);
+    gap: 0 calc(var(--u) * 14);
+}
+
+.bookcase--styled .tree-shelf {
+    background: linear-gradient(180deg, #f2ede6, #faf8f4 35%);
+    box-shadow: inset 0 calc(var(--u) * 10) calc(var(--u) * 12) calc(var(--u) * -8) rgb(0 0 0 / 10%);
+}
+
+.bookcase--styled .bookcase__row {
+    justify-content: space-around;
+    padding-top: calc(var(--u) * 24);
+}
+
+.bookcase--styled .bookcase__plank {
+    height: calc(var(--u) * 16);
+    background: linear-gradient(180deg, #ffffff 0 calc(var(--u) * 3), #f0ebe4 calc(var(--u) * 3), #e5ded5);
+    box-shadow: 0 calc(var(--u) * 4) calc(var(--u) * 6) calc(var(--u) * -3) rgb(80 60 40 / 22%);
+}
+
+.bookcase--styled .tree-shelf__name {
+    bottom: 0;
+    padding: 0 calc(var(--u) * 8);
+    border-color: #e2d8cb;
+    background: #fff;
+    color: #8a6a55;
+    font-family: Figtree, sans-serif;
+    font-size: max(9px, calc(var(--u) * 11));
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.bookcase--styled .tree-shelf__name svg { color: #c4b19c; }
+.bookcase--styled button.tree-shelf__name:hover { border-color: #6d1a2b; }
+
+.bookcase--styled .tree-slot-empty {
+    border-color: #d9cdbf;
+    background: rgb(255 255 255 / 70%);
+    color: #a08a74;
+}
+
+/* Covers facing out stand a little smaller beside the decor */
+.bookcase--styled .bookcase__cell--covers {
+    --book-w: calc(var(--u) * 70);
+}
+
+/* Geometric string lights across the top */
+.styled__lights {
+    position: absolute;
+    top: calc(var(--u) * 12);
+    left: 4%;
+    right: 4%;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    height: calc(var(--u) * 54);
+}
+
+.styled__lights::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: calc(var(--u) * 30);
+    border-bottom: 1.5px solid #c9a462;
+    border-radius: 0 0 50% 50% / 0 0 100% 100%;
+}
+
+.styled__lights span {
+    position: relative;
+    top: calc(var(--u) * 18);
+    width: calc(var(--u) * 26);
+    height: calc(var(--u) * 34);
+    /* a little gold geometric lantern with a glowing bulb */
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 34'%3E%3Cpath d='M13 0v4' stroke='%23C9A462' stroke-width='1.2'/%3E%3Cpath d='M13 4L24 11v12L13 30 2 23V11z' fill='none' stroke='%23C9A462' stroke-width='1.3' stroke-linejoin='round'/%3E%3Cpath d='M2 11l11 6 11-6M13 17v13' fill='none' stroke='%23C9A462' stroke-width='.9'/%3E%3Ccircle cx='13' cy='18' r='4.2' fill='%23FFF1C2'/%3E%3C/svg%3E") center / contain no-repeat;
+    filter: drop-shadow(0 0 calc(var(--u) * 6) rgb(255 220 140 / 90%));
+    animation: tree-twinkle 3s ease-in-out infinite;
+}
+
+.styled__lights span:nth-child(odd) { top: calc(var(--u) * 26); animation-delay: -1.5s; }
+.styled__lights span:nth-child(4) { top: calc(var(--u) * 30); }
+
+.styled__base {
+    position: relative;
+    height: calc(var(--u) * 60);
+    margin: 0 calc(var(--u) * -30);
+    background: linear-gradient(180deg, #d9cfc2, #cbbfaf);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .booktree__garland,
+    .booktree .booktree__layer::after,
+    .styled__lights span,
+    .shelf-decor__flame,
+    .shelf-decor__glow,
+    .shelf-decor__letter,
+    .nook__cat::after { animation: none; }
+}
+
+
+/* Picker previews for the whole-shelf styles */
+.shelf-style-thumb--booktree {
+    background:
+        radial-gradient(circle at 50% 12%, #c8203a 0 7%, transparent 7.5%),
+        conic-gradient(from 160deg at 50% 8%, transparent 0 0deg, transparent 0),
+        linear-gradient(180deg, transparent 0 84%, #f3eee6 84%),
+        linear-gradient(180deg, #e8dccb, #d9c9b2);
+}
+
+.shelf-style-thumb--booktree::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 18%;
+    width: 52%;
+    height: 66%;
+    transform: translateX(-50%);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    background:
+        radial-gradient(circle, #fff6cf 0 1.5px, transparent 2px) 0 0 / 12px 9px,
+        repeating-linear-gradient(180deg, #7a2133 0 5px, #2f5d48 5px 10px, #c99a45 10px 14px, #1f3a5f 14px 19px, #e8dcc4 19px 23px, #8a5a36 23px 28px);
+}
+
+.shelf-style-thumb--nook {
+    background:
+        linear-gradient(90deg, transparent 0 36%, #fff 36% 64%, transparent 64%),
+        linear-gradient(180deg, transparent 0 18%, #fff 18% 22%, transparent 22% 46%, #fff 46% 50%, transparent 50% 74%, #fff 74% 78%, transparent 78%),
+        repeating-linear-gradient(90deg, #7a2133 0 5px, #1f3a5f 5px 9px, #2f5d48 9px 14px, #c99a45 14px 17px, #6c3b85 17px 22px, transparent 22px 24px),
+        #fbf9f6;
+}
+
+.shelf-style-thumb--nook::after {
+    content: "";
+    position: absolute;
+    left: 39%;
+    top: 14%;
+    width: 22%;
+    height: 50%;
+    border: 3px solid #fff;
+    background: linear-gradient(180deg, #a8c8e4, #dbe9f3);
+    box-shadow: 0 0 0 1px #e6ded3, 0 30px 0 -6px #e9c27d;
+}
+
+.shelf-style-thumb--styled {
+    background:
+        radial-gradient(circle at 74% 34%, #6aa164 0 6%, transparent 6.5%),
+        radial-gradient(circle at 30% 70%, #fffaf0 0 7%, transparent 7.5%),
+        linear-gradient(180deg, transparent 0 44%, #f0ebe4 44% 48%, transparent 48% 86%, #f0ebe4 86% 90%, transparent 90%),
+        repeating-linear-gradient(180deg, transparent 0 18%, transparent 18%),
+        linear-gradient(90deg, transparent 0 8%, #7a2133 8% 11%, #e8dcc4 11% 14%, #2f5d48 14% 17%, transparent 17%),
+        #fff;
+}
+
+.shelf-style-thumb--styled::after {
+    content: "";
+    position: absolute;
+    inset: 6% 6% auto;
+    height: 14%;
+    border-bottom: 1.5px solid #c9a462;
+    border-radius: 0 0 50% 50%;
+}
