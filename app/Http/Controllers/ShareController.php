@@ -24,7 +24,9 @@ class ShareController extends Controller
 
         return view('share.tree', [
             'profile' => $user,
-            'treeShelves' => BookTree::build($user, $items, false, ($scene = ShelfStyle::for($user)['scene']) ? ShelfScene::slotCount($scene) : null, $scene ? ShelfScene::capacities($scene) : []),
+            'treeShelves' => ($scene = ShelfStyle::for($user)['scene'])
+                ? ShelfScene::shelves($scene, $user, $items, false)
+                : BookTree::build($user, $items, false),
             'treeBookCount' => $items->count(),
             'isOwnProfile' => false,
             'shelfStatuses' => UserBookShelf::STATUSES,

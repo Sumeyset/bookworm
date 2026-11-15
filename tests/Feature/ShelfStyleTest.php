@@ -28,15 +28,42 @@ test('a reader can switch between the tree and the photo shelves, and visitors s
     $this->get(route('share.tree', $me->username))->assertOk()->assertSee('photo-shelf--window', false)->assertSee('data-window-scene', false);
 });
 
-test('photo shelves show every scene shelf, and extra books go to "More shelves"', function () {
+test('photo shelves keep every book in the picture, with no "More shelves"', function () {
     $me = User::factory()->create(['shelf_style' => 'christmas']);
     $slots = ShelfScene::slotCount('christmas');
     $book = Book::create(['ol_id' => 'OL-STYLE-2', 'title' => 'Far Away Book']);
     $me->shelfItems()->create(['book_id' => $book->id, 'status' => 'read', 'shelf_slot' => $slots + 2, 'shelf_order' => 0]);
 
     $page = $this->actingAs($me)->get(route('users.show', $me->username))->assertOk();
-    $page->assertSee('More shelves')->assertSee('Far Away Book');
-    expect(substr_count($page->getContent(), 'photo-shelf__shelf '))->toBe($slots);
+    $page->assertDontSee('More shelves')->assertSee('Far Away Book');
+    expect(substr_count($page->getContent(), 'photo-shelf__shelf '))->toBe($slots)
+        ->and($me->shelfItems()->first()->shelf_slot)->toBeLessThan($slots);
+});
+
+test('wall shelves and the window nook grow as books are added', function () {
+    expect(ShelfScene::bandsFor('wall', 12))->toBe(0)
+        ->and(ShelfScene::bandsFor('wall', 13))->toBe(1)
+        ->and(ShelfScene::slotCount('wall', 2))->toBe(18)
+        ->and(ShelfScene::bandsFor('window', 25))->toBe(2)
+        ->and(ShelfScene::bandsFor('christmas', 60))->toBe(0);
+
+    $me = User::factory()->create(['shelf_style' => 'wall']);
+    foreach (range(1, 40) as $i) {
+        $book = Book::create(['ol_id' => "OL-GROW-$i", 'title' => "Grow Book $i"]);
+        $me->shelfItems()->create(['book_id' => $book->id, 'status' => 'read', 'shelf_slot' => intdiv($i - 1, 3), 'shelf_order' => ($i - 1) % 3]);
+    }
+
+    $page = $this->actingAs($me)->get(route('users.show', $me->username))->assertOk();
+    $page->assertSee('Grow Book 40')->assertSee('photo-shelf__img--grown', false);
+    expect(substr_count($page->getContent(), 'photo-shelf__shelf '))->toBe(15);
+});
+
+test('snow from the Christmas set shows on photo shelves too', function () {
+    $me = User::factory()->create(['shelf_style' => 'wall']);
+    $me->decorations()->create(['item' => 'snow', 'enabled' => true]);
+
+    $this->actingAs($me)->get(route('users.show', $me->username))
+        ->assertSee('decor-snow', false)->assertSee('tree-fx__snow', false);
 });
 
 test('the window view follows the season', function () {

@@ -188,7 +188,9 @@ class UserController extends Controller
             ? $allUserShelfItems
             : $allUserShelfItems->filter(fn ($item) => $item->status === 'read' && $item->book->reviews->isNotEmpty());
         $scene = ShelfStyle::for($user)['scene'];
-        $treeShelves = BookTree::build($user, $treeItems, $isOwnProfile, $scene ? ShelfScene::slotCount($scene) : null, $scene ? ShelfScene::capacities($scene) : []);
+        $treeShelves = $scene
+            ? ShelfScene::shelves($scene, $user, $treeItems, $isOwnProfile)
+            : BookTree::build($user, $treeItems, $isOwnProfile);
 
         // Books that no longer fit where they were (a shelf that holds fewer
         // books in this style) were moved on screen; remember where they went.

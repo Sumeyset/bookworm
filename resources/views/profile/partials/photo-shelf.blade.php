@@ -2,25 +2,26 @@
     A photo bookshelf (App\Support\ShelfScene): the reader's books placed on
     the picture's real shelves. Uses the same .tree-shelf / .tree-book pieces
     as the tree, so dragging, the book popup and renaming all work the same.
-    Shelves beyond the picture's own appear underneath ("More shelves").
+    When the books outgrow the picture, the picture grows (ShelfScene 'grow').
+    With the Christmas set from the Tree shop, snow falls on every style.
 --}}
 @php
-    $scene = \App\Support\ShelfScene::layout($sceneKey);
+    $scene = \App\Support\ShelfScene::layout($sceneKey, \App\Support\ShelfScene::bandsFor($sceneKey, $treeShelves->count()));
     $sceneShelfCount = count($scene['shelves']);
     $inScene = $treeShelves->filter(fn ($s) => $s['slot'] < $sceneShelfCount);
-    $extra = $treeShelves->filter(fn ($s) => $s['slot'] >= $sceneShelfCount);
+    $snow = $snow ?? false;
     $firstEmptySlot = $treeShelves->first(fn ($s) => $s['items']->isEmpty())['slot'] ?? null;
     $season = \App\Support\ShelfStyle::season(now());
     $hour = (int) now()->format('G');
     $part = match (true) { $hour >= 5 && $hour < 8 => 'dawn', $hour >= 8 && $hour < 17 => 'day', $hour >= 17 && $hour < 20 => 'dusk', default => 'night' };
 @endphp
-<div class="book-tree photo-shelf photo-shelf--{{ $sceneKey }} photo-shelf--{{ $scene['view'] }}" role="region" aria-label="{{ \App\Support\ShelfStyle::STYLES[$sceneKey][0] }}"
+<div class="book-tree photo-shelf photo-shelf--{{ $sceneKey }} photo-shelf--{{ $scene['view'] }} {{ $snow ? 'decor-snow' : '' }}" role="region" aria-label="{{ \App\Support\ShelfStyle::STYLES[$sceneKey][0] }}"
      data-book-tree
      data-editable="{{ $isOwnProfile ? 'true' : 'false' }}"
      data-capacity="{{ $capacity }}"
      data-shelves='@json($shelfOptions)'
      @if ($scene['glass']) data-window-scene data-time="{{ $part }}" data-season="{{ $season }}" data-view-base="{{ asset('images/shelves/window') }}" @endif
-     style="--scene-w: {{ $scene['width'] }}; --scene-ar: {{ $scene['width'] }} / {{ $scene['height'] }}; --min-w: {{ $scene['min_width'] }}px; --spine-px: {{ $scene['spine'] ?? 20 }}; --book-px: {{ $scene['book'] ?? 74 }};">
+     style="--scene-w: {{ $scene['width'] }}; --scene-ar: {{ $scene['width'] }} / {{ $scene['height'] }};@if ($scene['glass']) --glass-l: {{ $scene['glass']['left'] }}%; --glass-t: {{ $scene['glass']['top'] }}%; --glass-r: {{ $scene['glass']['left'] + $scene['glass']['width'] }}%; --glass-b: {{ $scene['glass']['top'] + $scene['glass']['height'] }}%;@endif --min-w: {{ $scene['min_width'] }}px; --spine-px: {{ $scene['spine'] ?? 20 }}; --book-px: {{ $scene['book'] ?? 74 }};">
     <div class="book-tree__frame photo-shelf__frame" data-scroll-frame>
         <div class="book-tree__scene photo-shelf__scene">
             @if ($scene['glass'])
@@ -30,7 +31,25 @@
                     <img alt="" data-window-view-next class="is-waiting">
                 </div>
             @endif
-            <img class="photo-shelf__img" src="{{ asset($scene['image']) }}" alt="" width="{{ $scene['width'] }}" height="{{ $scene['height'] }}" decoding="async" fetchpriority="high" draggable="false">
+            @if ($scene['glass'] && $snow)
+                {{-- snow falling outside the window --}}
+                <div class="photo-shelf__view photo-shelf__outside-snow" style="left: {{ $scene['glass']['left'] }}%; top: {{ $scene['glass']['top'] }}%; width: {{ $scene['glass']['width'] }}%; height: {{ $scene['glass']['height'] }}%;" aria-hidden="true">
+                    <span class="tree-fx__snow"></span>
+                    <span class="tree-fx__snow tree-fx__snow--far"></span>
+                </div>
+            @endif
+            @if ($scene['pieces'])
+                {{-- the picture, grown: top, repeated bands of shelves, then the rest --}}
+                <div class="photo-shelf__img photo-shelf__img--grown" aria-hidden="true">
+                    @foreach ($scene['pieces'] as $piece)
+                        <div class="photo-shelf__piece" style="top: {{ $piece['top'] }}%; height: calc({{ $piece['height'] }}% + 1px);">
+                            <img src="{{ asset($piece['image']) }}" alt="" style="margin-top: -{{ $piece['shift'] }}%;" decoding="async" draggable="false">
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <img class="photo-shelf__img" src="{{ asset($scene['image']) }}" alt="" width="{{ $scene['width'] }}" height="{{ $scene['height'] }}" decoding="async" fetchpriority="high" draggable="false">
+            @endif
             @if ($scene['glass'])
                 <span class="photo-shelf__light" aria-hidden="true"></span>
             @endif
@@ -42,7 +61,7 @@
                     $quiet = $shelf['items']->isEmpty() && $slot !== $firstEmptySlot;
                     $emptyCount = max(0, $pos['cap'] - $shelf['items']->count());
                 @endphp
-                <div class="tree-shelf photo-shelf__shelf photo-shelf__shelf--{{ $pos['align'] }} {{ $pos['cap'] === 1 ? 'photo-shelf__shelf--single' : '' }} {{ $pos['lean'] ? 'photo-shelf__shelf--leans photo-shelf__shelf--lean-' . ($pos['lean'] > 0 ? 'right' : 'left') : '' }} {{ $quiet ? 'tree-shelf--quiet' : '' }}" data-capacity="{{ $pos['cap'] }}"
+                <div class="tree-shelf photo-shelf__shelf photo-shelf__shelf--{{ $pos['align'] }} {{ $pos['cap'] === 1 ? 'photo-shelf__shelf--single' : '' }} {{ $pos['pile'] ? 'photo-shelf__shelf--pile' : '' }} {{ $pos['lean'] ? 'photo-shelf__shelf--leans photo-shelf__shelf--lean-' . ($pos['lean'] > 0 ? 'right' : 'left') : '' }} {{ $quiet ? 'tree-shelf--quiet' : '' }}" data-capacity="{{ $pos['cap'] }}"
                      data-slot="{{ $slot }}" role="group" aria-label="{{ $shelf['title'] }}"
                      style="left: {{ $pos['left'] }}%; bottom: {{ $pos['bottom'] }}%; width: {{ $pos['width'] }}%; --max-h: {{ $pos['h'] }};@if ($pos['lean']) --lean: {{ $pos['lean'] }}deg; --lean-room: {{ $pos['room'] }}; --lean-gap: {{ $pos['lean_gap'] }};@endif">
                     <div class="tree-shelf__books">
@@ -66,6 +85,13 @@
                 </div>
             @endforeach
 
+            @if ($snow && ! $scene['glass'])
+                <div class="tree-fx" aria-hidden="true">
+                    <span class="tree-fx__snow"></span>
+                    <span class="tree-fx__snow tree-fx__snow--far"></span>
+                </div>
+            @endif
+
             <span class="book-tree__sign" aria-hidden="true">{{ $treeBookCount }} {{ Str::plural('book', $treeBookCount) }}</span>
         </div>
 
@@ -79,35 +105,6 @@
             </div>
         @endif
     </div>
-
-    @if ($extra->isNotEmpty())
-        {{-- More books than the picture has shelves for --}}
-        <div class="photo-shelf__more {{ $extra->every(fn ($s) => $s['items']->isEmpty()) ? 'photo-shelf__more--empty' : '' }}">
-            <p class="photo-shelf__more-title">More shelves</p>
-            <div class="photo-shelf__more-list">
-                @foreach ($extra as $shelf)
-                    @php $emptyCount = max(0, $capacity - $shelf['items']->count()); @endphp
-                    <div class="tree-shelf photo-shelf__extra" data-slot="{{ $shelf['slot'] }}" role="group" aria-label="{{ $shelf['title'] }}">
-                        <div class="tree-shelf__books">
-                            @foreach ($shelf['items'] as $item)
-                                @include('profile.partials.shelf-book', ['item' => $item, 'isOwnProfile' => $isOwnProfile])
-                            @endforeach
-                            @if ($isOwnProfile)
-                                @for ($i = 0; $i < $emptyCount; $i++)
-                                    <a href="{{ route('books.index') }}" class="tree-slot-empty" title="Add a book to this shelf"><span aria-hidden="true">+</span><span class="sr-only">Add a book</span></a>
-                                @endfor
-                            @endif
-                        </div>
-                        @if ($isOwnProfile)
-                            <button type="button" class="tree-shelf__name" data-rename-slot="{{ $shelf['slot'] }}" data-title="{{ $shelf['title'] }}" aria-label="Rename shelf {{ $shelf['title'] }}"><span>{{ $shelf['title'] }}</span></button>
-                        @else
-                            <span class="tree-shelf__name"><span>{{ $shelf['title'] }}</span></span>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
 
     @if ($isOwnProfile)
         <template data-empty-slot-template>
