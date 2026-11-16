@@ -40,13 +40,18 @@ test('series: readers mark the series, the page lists it, finishing suggests the
     $one = Book::create(['ol_id' => 'OL-S1', 'title' => 'The First']);
     $two = Book::create(['ol_id' => 'OL-S2', 'title' => 'The Second']);
 
+    $stranger = User::factory()->create();
+    $this->actingAs($stranger)->post(route('books.series', $one), ['series_name' => 'Vandalised'])->assertForbidden();
+    $me->shelfItems()->create(['book_id' => $one->id, 'status' => 'want_to_read']);
     $this->actingAs($me)->post(route('books.series', $one), ['series_name' => 'The Saga', 'series_number' => 1]);
-    $this->actingAs($me)->post(route('books.series', $two), ['series_name' => 'the saga', 'series_number' => 2]);
+    $admin = User::factory()->create(['is_admin' => true]);
+    $this->actingAs($admin)->post(route('books.series', $two), ['series_name' => 'the saga', 'series_number' => 2]);
     expect($two->fresh()->series_name)->toBe('The Saga');
 
     $this->actingAs($me)->get(route('books.show', $one))->assertSee('The Saga')->assertSee('The Second')->assertSee('You’ve read 0 of 2');
 
-    $item = $me->shelfItems()->create(['book_id' => $one->id, 'status' => 'reading']);
+    $item = $me->shelfItems()->where('book_id', $one->id)->first();
+    $item->update(['status' => 'reading']);
     $item->update(['status' => 'read', 'read_at' => now()]);
     expect($me->notifications()->where('data->kind', 'series')->first()->data['message'])->toContain('The Second');
 });

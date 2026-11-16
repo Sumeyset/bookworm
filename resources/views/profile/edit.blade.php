@@ -14,6 +14,7 @@
             ['reading-reminders-form', 'Reminders & notifications', 'A nudge before your reading streak ends, streak freezes, and notifications on your phone.', 'M10 2c3 3 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3 0-5 1-8Z'],
             ['privacy-form', 'Privacy & safety', 'Who sees your reading life, what followers are told, and readers you blocked.', 'M10 2 4 4.5v4.8c0 4 2.6 6.9 6 8.7 3.4-1.8 6-4.7 6-8.7V4.5L10 2Z'],
             ['update-password-form', 'Password', 'Use a long, unique password to keep your shelf safe.', 'M6 9V6a4 4 0 1 1 8 0v3M5 9h10v8H5z'],
+            ['other-devices-form', 'Signed-in devices', 'Sign out of Bookworm on every other phone and computer.', 'M3 4h14v9H3zM7 17h6M10 13v4'],
             ['delete-user-form', 'Delete account', 'Permanently remove your account, shelf, notes and PDFs.', 'M4 6h12M8 6V4h4v2m-6 0 1 11h6l1-11'],
         ] as [$partial, $heading, $copy, $icon])
             <section class="bw-card grid gap-6 p-6 sm:p-8 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-12 {{ $partial === 'delete-user-form' ? 'border-red-200/70 dark:border-red-900/40' : '' }}">

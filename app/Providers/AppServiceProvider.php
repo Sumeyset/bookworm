@@ -31,6 +31,11 @@ class AppServiceProvider extends ServiceProvider
             'user' => \App\Models\User::class,
         ]);
 
+        // Passwords: at least 8 characters; in production also letters + numbers and not in a known data breach.
+        \Illuminate\Validation\Rules\Password::defaults(fn () => app()->isProduction()
+            ? \Illuminate\Validation\Rules\Password::min(8)->letters()->numbers()->uncompromised()
+            : \Illuminate\Validation\Rules\Password::min(8));
+
         // Rate limits: keep searches, posting and imports from being abused.
         $key = fn (Request $request) => $request->user()?->id ?: $request->ip();
         RateLimiter::for('search', fn (Request $request) => Limit::perMinute(40)->by($key($request)));

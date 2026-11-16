@@ -11,6 +11,8 @@ class SeriesController extends Controller
 {
     public function update(Request $request, Book $book): RedirectResponse
     {
+        // Only readers who have this book on their shelf (or admins) can set its series.
+        abort_unless($request->user()->is_admin || $request->user()->shelfItems()->where('book_id', $book->id)->exists(), 403);
         $validated = $request->validate([
             'series_name' => ['nullable', 'string', 'max:120'],
             'series_number' => ['nullable', 'numeric', 'min:0', 'max:999'],

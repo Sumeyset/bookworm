@@ -239,7 +239,9 @@
             <section class="bw-card p-5" aria-labelledby="series-heading" x-data="{ edit: false }">
                 <div class="flex items-start justify-between gap-2">
                     <h2 id="series-heading" class="font-serif text-xl font-semibold text-ink dark:text-[#f4e9e2]">{{ $book->series_name ?: 'Part of a series?' }}</h2>
-                    <button type="button" class="text-xs font-semibold text-burgundy underline underline-offset-2 dark:text-[#F0A8B4]" @click="edit = !edit">{{ $book->series_name ? 'Edit' : 'Add series' }}</button>
+                    @if ($myShelfItem || auth()->user()?->is_admin)
+                        <button type="button" class="text-xs font-semibold text-burgundy underline underline-offset-2 dark:text-[#F0A8B4]" @click="edit = !edit">{{ $book->series_name ? 'Edit' : 'Add series' }}</button>
+                    @endif
                 </div>
                 @if ($series->count() > 1)
                     @php($readInSeries = $series->filter(fn ($b) => ($seriesStatus[$b->id] ?? null) === 'read')->count())
@@ -262,6 +264,7 @@
                 @else
                     <p class="mt-1 text-sm text-tan">Tell Bookworm which series this belongs to, and readers can follow it in order.</p>
                 @endif
+                @if ($myShelfItem || auth()->user()?->is_admin)
                 <form method="POST" action="{{ route('books.series', $book) }}" class="mt-3 space-y-2" x-show="edit" x-cloak>
                     @csrf
                     <input name="series_name" value="{{ $book->series_name }}" maxlength="120" placeholder="Series name" class="bw-input w-full py-2" aria-label="Series name">
@@ -270,6 +273,7 @@
                         <button class="btn-primary min-h-0 flex-1 py-2">Save</button>
                     </div>
                 </form>
+                @endif
             </section>
             @if ($feel['voters'] > 0)
                 <section class="bw-card p-5" aria-labelledby="feel-heading">
