@@ -10,11 +10,11 @@ class Review extends Model
 {
     use HasReactions;
 
-    protected $fillable = ['user_id', 'book_id', 'rating', 'body'];
+    protected $fillable = ['user_id', 'book_id', 'rating', 'body', 'moods', 'pace'];
 
     protected function casts(): array
     {
-        return ['rating' => 'decimal:1'];
+        return ['rating' => 'decimal:1', 'moods' => 'array'];
     }
 
     protected static function booted(): void

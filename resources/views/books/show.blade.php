@@ -123,6 +123,26 @@
                                   class="mt-1 block w-full rounded-lg border-warmborder bg-paper text-sm text-ink shadow-sm focus:border-burgundy focus:ring-burgundy/20 dark:border-[#4B3035] dark:bg-[#201317] dark:text-[#f4e9e2]">{{ old('body', $myReview->body ?? '') }}</textarea>
                         <x-input-error :messages="$errors->get('body')" class="mt-2" />
                     </div>
+                    @php($myMoods = old('moods', $myReview->moods ?? []))
+                    <fieldset>
+                        <legend class="text-sm font-semibold text-ink dark:text-[#f4e9e2]">How did it feel? <span class="font-normal text-tan">(up to 3)</span></legend>
+                        <div class="mt-2 flex flex-wrap gap-1.5" x-data="{ picked: @js(array_values((array) $myMoods)) }">
+                            @foreach (\App\Support\BookInsights::MOODS as $key => $label)
+                                <label class="mood-chip" :class="picked.includes('{{ $key }}') && 'is-on'">
+                                    <input type="checkbox" name="moods[]" value="{{ $key }}" class="sr-only" x-model="picked" :disabled="!picked.includes('{{ $key }}') && picked.length >= 3">{{ $label }}
+                                </label>
+                            @endforeach
+                        </div>
+                        <x-input-error :messages="$errors->get('moods')" class="mt-2" />
+                    </fieldset>
+                    <fieldset>
+                        <legend class="text-sm font-semibold text-ink dark:text-[#f4e9e2]">Pace</legend>
+                        <div class="mt-2 flex flex-wrap gap-1.5" x-data="{ pace: @js(old('pace', $myReview->pace ?? '')) }">
+                            @foreach (\App\Support\BookInsights::PACES as $key => $label)
+                                <label class="mood-chip" :class="pace === '{{ $key }}' && 'is-on'"><input type="radio" name="pace" value="{{ $key }}" class="sr-only" x-model="pace">{{ $label }}</label>
+                            @endforeach
+                        </div>
+                    </fieldset>
                     <x-primary-button>{{ $myReview ? 'Update review' : 'Save review' }}</x-primary-button>
                 </form>
                 @if ($myReview)
@@ -216,6 +236,28 @@
             </section>
                 </div>
                 <aside class="space-y-8 lg:sticky lg:top-28 lg:self-start">
+            @if ($feel['voters'] > 0)
+                <section class="bw-card p-5" aria-labelledby="feel-heading">
+                    <h2 id="feel-heading" class="font-serif text-xl font-semibold text-ink dark:text-[#f4e9e2]">Readers say it’s…</h2>
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                        @foreach ($feel['moods'] as $mood => $votes)
+                            <span class="mood-chip is-on" title="{{ $votes }} {{ Str::plural('reader', $votes) }}">{{ \App\Support\BookInsights::MOODS[$mood] }} <b class="ml-1 opacity-60">{{ $votes }}</b></span>
+                        @endforeach
+                    </div>
+                    @if ($feel['pace']->isNotEmpty())
+                        @php($paceTotal = max(1, $feel['pace']->sum()))
+                        <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-tan">Pace</p>
+                        <div class="pace-bar mt-1.5" aria-label="Pace">
+                            @foreach (\App\Support\BookInsights::PACES as $key => $label)
+                                @if ($feel['pace'][$key] ?? 0)
+                                    <span class="pace-bar__{{ $key }}" style="width: {{ round($feel['pace'][$key] / $paceTotal * 100) }}%">{{ $label }}</span>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+                    <p class="mt-3 text-xs text-tan">From {{ $feel['voters'] }} {{ Str::plural('review', $feel['voters']) }}.</p>
+                </section>
+            @endif
             <section id="private-pdfs" aria-labelledby="private-pdfs-heading" class="bw-card scroll-mt-28 overflow-hidden">
                 <div class="p-5 pb-4">
                     <div class="flex items-start justify-between gap-3">
@@ -327,5 +369,23 @@
             </section>
                 </aside>
             </div>
+
+            @if ($alsoLoved->isNotEmpty())
+                <section aria-labelledby="also-loved-heading" class="space-y-4">
+                    <div>
+                        <h2 id="also-loved-heading" class="font-display text-4xl font-bold leading-none text-ink dark:text-[#F4E9E2]">Readers who loved this also loved</h2>
+                        <p class="mt-1 text-sm text-tan">From the shelves of Bookworm readers who gave it 4★ or more.</p>
+                    </div>
+                    <div class="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0">
+                        @foreach ($alsoLoved as $other)
+                            <a href="{{ route('books.show', $other) }}" class="group w-32 shrink-0 snap-start sm:w-36">
+                                <x-book-cover :book="$other" class="w-full transition duration-300 group-hover:-translate-y-1" />
+                                <span class="mt-2 line-clamp-2 block font-serif text-sm font-semibold leading-5 text-ink group-hover:text-burgundy dark:text-[#F4E9E2]">{{ $other->title }}</span>
+                                <span class="block truncate text-xs text-tan">{{ $other->fans }} {{ Str::plural('reader', $other->fans) }} loved both</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
     </div>
 </x-app-layout>

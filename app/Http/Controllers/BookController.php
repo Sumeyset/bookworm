@@ -88,6 +88,8 @@ class BookController extends Controller
                 ->latest()
                 ->paginate(12, ['*'], 'quotes_page'),
             'reviews' => $book->reviews()->with('user')->latest()->paginate(10, ['*'], 'reviews_page'),
+            'feel' => \App\Support\BookInsights::feel($book),
+            'alsoLoved' => \App\Support\BookInsights::alsoLoved($book),
         ]);
     }
 }

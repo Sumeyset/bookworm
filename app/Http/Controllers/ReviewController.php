@@ -14,13 +14,18 @@ class ReviewController extends Controller
         $validated = $request->validate([
             'rating' => ['required', 'numeric', 'between:0.5,5', 'multiple_of:0.5'],
             'body' => ['nullable', 'string', 'max:3000'],
-        ]);
+            'moods' => ['nullable', 'array', 'max:3'],
+            'moods.*' => [\Illuminate\Validation\Rule::in(array_keys(\App\Support\BookInsights::MOODS))],
+            'pace' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(\App\Support\BookInsights::PACES))],
+        ], ['moods.max' => 'Pick up to 3 moods.']);
 
         $book->reviews()->updateOrCreate(
             ['user_id' => $request->user()->id],
             [
                 'rating' => $validated['rating'],
                 'body' => $validated['body'] ?? null,
+                'moods' => array_values(array_unique($validated['moods'] ?? [])) ?: null,
+                'pace' => $validated['pace'] ?? null,
             ],
         );
         $request->user()->shelfItems()
