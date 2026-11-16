@@ -200,6 +200,31 @@ class UserBookShelf extends Model
         return min(100, (int) round(($this->current_page ?? 0) / $this->total_pages * 100));
     }
 
+    public function stickyNotes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ShelfNote::class, 'user_book_shelf_id')->latest();
+    }
+
+    /** Sticky notes this viewer may see: all of them for the shelf's owner, their own for friends. */
+    public function stickyNotesFor(?User $viewer): array
+    {
+        if (! $viewer) {
+            return [];
+        }
+        $notes = $this->relationLoaded('stickyNotes') ? $this->stickyNotes : $this->stickyNotes()->with('author')->get();
+        $hidden = $viewer->blockedWithIds();
+
+        return $notes
+            ->filter(fn ($n) => ($this->user_id === $viewer->id || $n->author_id === $viewer->id) && ! $hidden->contains($n->author_id))
+            ->map(fn ($n) => [
+                'body' => $n->body,
+                'color' => $n->color,
+                'author' => $n->author_id === $viewer->id ? 'You' : $n->author?->name,
+                'when' => $n->created_at->diffForHumans(short: true),
+                'delete_url' => route('shelf-notes.destroy', $n),
+            ])->values()->all();
+    }
+
     /**
      * Data for the book popup on the tree. Private details (notes, progress)
      * are only included for the shelf's owner.

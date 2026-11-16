@@ -1,6 +1,10 @@
 @php
     $book = $item->book;
     $payload = $item->treePayload($isOwnProfile ?? false);
+    // Sticky notes: friends can leave one on this book; the owner sees them all.
+    $payload['notes'] = $item->stickyNotesFor(auth()->user());
+    $payload['note_url'] = auth()->check() && auth()->id() !== $item->user_id ? route('shelf-notes.store', $item) : null;
+    $noteCount = auth()->id() === $item->user_id ? count($payload['notes']) : 0;
     $statusKey = $payload['status'];
     $progress = ($isOwnProfile ?? false) ? $payload['progress'] : null;
     $label = $book->title . ($book->author_name ? ' by ' . $book->author_name : '') . ', ' . ($payload['status_label'] === 'Currently reading' ? 'Reading' : $payload['status_label']);
@@ -41,6 +45,7 @@
         @if ($book->author_name)<span class="tree-book__spine-author">{{ Str::limit(Str::afterLast($book->author_name, ' '), 12) }}</span>@endif
     </span>
     <span class="tree-book__ribbon" aria-hidden="true"></span>
+    @if ($noteCount)<span class="tree-book__sticky" title="{{ $noteCount }} sticky {{ Str::plural('note', $noteCount) }}">{{ $noteCount }}</span>@endif
     <span class="tree-book__progress" aria-hidden="true" @if ($progress === null || $statusKey !== 'reading') hidden @endif>
         <span style="width: {{ $progress ?? 0 }}%"></span>
     </span>

@@ -140,6 +140,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/share/toggle', [ShareController::class, 'toggle'])->name('share.toggle');
     Route::post('/shelf-style', ShelfStyleController::class)->name('shelf.style');
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+    Route::post('/shelf-notes/{item}', [\App\Http\Controllers\ShelfNoteController::class, 'store'])->middleware('throttle:20,1')->name('shelf-notes.store');
+    Route::delete('/shelf-notes/{note}', [\App\Http\Controllers\ShelfNoteController::class, 'destroy'])->name('shelf-notes.destroy');
     Route::post('/decor-positions', [\App\Http\Controllers\DecorPositionController::class, 'store'])->middleware('throttle:60,1')->name('decor.positions');
     Route::delete('/decor-positions', [\App\Http\Controllers\DecorPositionController::class, 'destroy'])->name('decor.positions.reset');
     Route::post('/shop/streak-freeze', [ShopController::class, 'freeze'])->name('shop.freeze');

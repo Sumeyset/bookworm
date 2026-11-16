@@ -53,6 +53,23 @@
                 <blockquote class="mt-5 font-serif text-lg italic leading-8 text-walnut dark:text-[#e3d3ca]" data-pop="review"></blockquote>
             @endif
 
+            {{-- Sticky notes from friends --}}
+            <div class="sticky-notes" data-pop-notes-box hidden>
+                <p class="book-popup__label">{{ $isOwnProfile ? 'Sticky notes from friends' : 'Leave a sticky note' }}</p>
+                <div class="sticky-notes__list" data-pop-notes></div>
+                @unless ($isOwnProfile)
+                    <div class="sticky-notes__form" data-pop-note-form>
+                        <textarea maxlength="200" rows="2" placeholder="“You’ll love the ending!”" data-pop-note-body aria-label="Your note"></textarea>
+                        <div class="mt-2 flex items-center gap-1.5">
+                            @foreach (\App\Models\ShelfNote::COLORS as $color)
+                                <button type="button" class="sticky-notes__swatch sticky-notes__swatch--{{ $color }}" data-pop-note-color="{{ $color }}" aria-label="{{ ucfirst($color) }} note"></button>
+                            @endforeach
+                            <button type="button" class="btn-primary ml-auto min-h-0 py-1.5 text-sm" data-pop-note-send>Stick it</button>
+                        </div>
+                    </div>
+                @endunless
+            </div>
+
             <p class="book-popup__folio" aria-hidden="true">— i —</p>
         </section>
 

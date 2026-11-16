@@ -122,6 +122,7 @@ class UserController extends Controller
             ->with([
                 'book.bookPdfs' => fn ($pdfs) => $pdfs->where('user_id', $user->id),
                 'book.reviews' => fn ($reviews) => $reviews->where('user_id', $user->id),
+                'stickyNotes.author',
             ])
             ->when(! $isOwnProfile, fn ($items) => $items
                 ->where('status', 'read')

@@ -321,7 +321,51 @@ function initTree(tree) {
         error.textContent = invalid ? 'Your bookmark can’t be past the last page.' : '';
     };
 
+    // Sticky notes on the left page
+    const notesBox = popup.querySelector('[data-pop-notes-box]');
+    const notesList = popup.querySelector('[data-pop-notes]');
+    const noteBody = popup.querySelector('[data-pop-note-body]');
+    let noteColor = 'yellow';
+    const renderNotes = (notes, noteUrl) => {
+        if (!notesBox) return;
+        notesBox.hidden = !(notes?.length || noteUrl);
+        notesList.replaceChildren(...(notes || []).map((note) => {
+            const card = document.createElement('div');
+            card.className = `sticky-note sticky-note--${note.color}`;
+            const body = document.createElement('p');
+            body.textContent = note.body;
+            const meta = document.createElement('small');
+            meta.textContent = `— ${note.author} · ${note.when}`;
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'sticky-note__remove';
+            remove.setAttribute('aria-label', 'Remove note');
+            remove.textContent = '×';
+            remove.addEventListener('click', async () => {
+                const result = await api(note.delete_url, 'DELETE');
+                current.data.notes = result.notes;
+                renderNotes(result.notes, current.data.note_url);
+            });
+            card.append(body, meta, remove);
+            return card;
+        }));
+    };
+    popup.querySelectorAll('[data-pop-note-color]').forEach((swatch) => swatch.addEventListener('click', () => {
+        noteColor = swatch.dataset.popNoteColor;
+        popup.querySelectorAll('[data-pop-note-color]').forEach((s) => s.classList.toggle('is-on', s === swatch));
+    }));
+    popup.querySelector('[data-pop-note-send]')?.addEventListener('click', async () => {
+        const text = noteBody.value.trim();
+        if (!text || !current?.data?.note_url) return;
+        const result = await api(current.data.note_url, 'POST', { body: text, color: noteColor });
+        noteBody.value = '';
+        current.data.notes = result.notes;
+        renderNotes(result.notes, current.data.note_url);
+    });
+
     const fill = (data) => {
+        current.data = data;
+        renderNotes(data.notes, data.note_url);
         current.data = data;
         current.rating = data.rating ?? 0;
         setText('title', data.title);

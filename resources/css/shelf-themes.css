@@ -1531,3 +1531,41 @@ svg.tree-lantern {
 .decor-cat__zz { animation: cat-zz 3s ease-in-out infinite; }
 @keyframes cat-zz { 0%, 100% { opacity: .2; transform: translateY(2px); } 50% { opacity: .9; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .decor-candle__flame, .decor-candle__glow, .decor-cat__tail, .decor-cat__zz { animation: none; } }
+
+/* ---- Sticky notes (book popup and a little tab on the book) ---- */
+.tree-book__sticky {
+    position: absolute;
+    z-index: 4;
+    top: -6%;
+    left: -10%;
+    display: flex;
+    min-width: max(14px, calc(var(--u) * 22));
+    height: max(14px, calc(var(--u) * 22));
+    align-items: center;
+    justify-content: center;
+    background: #ffe27a;
+    font-size: max(9px, calc(var(--u) * 12));
+    font-weight: 800;
+    color: #6b4a12;
+    box-shadow: 0 2px 3px rgb(0 0 0 / 30%);
+    transform: rotate(-8deg);
+}
+.sticky-notes { margin-top: 1.25rem; }
+.sticky-notes__list { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .6rem; }
+.sticky-note { position: relative; width: 10.5rem; min-height: 6rem; padding: .7rem .75rem .55rem; font-family: Caveat, cursive; font-size: 1.2rem; line-height: 1.15; color: #3a2a1d; box-shadow: 0 6px 12px -6px rgb(0 0 0 / 40%); transform: rotate(-1.5deg); }
+.sticky-note:nth-child(2n) { transform: rotate(1.8deg); }
+.sticky-note small { display: block; margin-top: .35rem; font-family: Figtree, sans-serif; font-size: .68rem; opacity: .7; }
+.sticky-note--yellow { background: #fff1a6; }
+.sticky-note--pink { background: #ffd3df; }
+.sticky-note--mint { background: #cdf0d9; }
+.sticky-note--blue { background: #d3e6ff; }
+.sticky-note__remove { position: absolute; top: .1rem; right: .35rem; font-family: Figtree, sans-serif; font-size: 1rem; opacity: 0; color: #3a2a1d; }
+.sticky-note:hover .sticky-note__remove, .sticky-note__remove:focus-visible { opacity: .7; }
+.sticky-notes__form { margin-top: .6rem; }
+.sticky-notes__form textarea { width: 100%; resize: none; border: 0; background: #fff1a6; padding: .6rem .7rem; font-family: Caveat, cursive; font-size: 1.25rem; color: #3a2a1d; box-shadow: 0 6px 12px -6px rgb(0 0 0 / 40%); }
+.sticky-notes__swatch { width: 1.4rem; height: 1.4rem; border-radius: .3rem; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 12%); }
+.sticky-notes__swatch.is-on { outline: 2px solid #8b2a3d; outline-offset: 1px; }
+.sticky-notes__swatch--yellow { background: #fff1a6; }
+.sticky-notes__swatch--pink { background: #ffd3df; }
+.sticky-notes__swatch--mint { background: #cdf0d9; }
+.sticky-notes__swatch--blue { background: #d3e6ff; }
