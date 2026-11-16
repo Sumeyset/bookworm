@@ -18,6 +18,7 @@ class SettingsController extends Controller
 
         $request->user()->forceFill([
             'streak_reminder' => $request->boolean('streak_reminder'),
+            'weekly_email' => $request->boolean('weekly_email'),
             'reminder_hour' => (int) $validated['reminder_hour'],
             'timezone' => $validated['timezone'] ?? $request->user()->timezone,
         ])->save();

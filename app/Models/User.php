@@ -62,6 +62,8 @@ class User extends Authenticatable
             'is_private' => 'boolean',
             'decor_positions' => 'array',
             'pro_until' => 'datetime',
+            'weekly_email' => 'boolean',
+            'last_digest_at' => 'datetime',
             'hide_activity' => 'boolean',
             'is_admin' => 'boolean',
             'suspended_at' => 'datetime',

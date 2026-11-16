@@ -20,3 +20,6 @@ Schedule::call(fn () => \App\Support\Streak::sendReminders())->name('streaks:rem
 
 // Barnaby's pick of the week, Monday morning, for readers who read in the last two weeks.
 Schedule::call(fn () => \App\Support\Barnaby\WeeklyPicks::send())->name('barnaby:weekly')->weeklyOn(1, '10:17');
+
+// The weekly email, Sunday evening.
+Schedule::call(fn () => \App\Support\Digest::sendAll())->name('email:weekly')->weeklyOn(0, '17:23');

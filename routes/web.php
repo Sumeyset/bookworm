@@ -37,6 +37,11 @@ use App\Http\Controllers\ReportController;
 
 Route::get('/', WelcomeController::class)->name('home');
 Route::view('/offline', 'offline')->name('offline');
+Route::match(['get', 'post'], '/email/unsubscribe/{user}', function (\App\Models\User $user) {
+    $user->forceFill(['weekly_email' => false])->save();
+
+    return view('emails.unsubscribed');
+})->middleware('signed')->name('email.unsubscribe');
 Route::post('/stripe/webhook', [\App\Http\Controllers\ProController::class, 'webhook'])->middleware('throttle:120,1')->name('stripe.webhook');
 Route::get('/quotes/{quote:share_token}', [QuoteController::class, 'showPublic'])->name('quotes.public');
 Route::get('/covers/{book}', [CoverController::class, 'show'])->name('covers.show');

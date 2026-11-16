@@ -11,6 +11,14 @@
         </span>
     </label>
 
+    <label class="flex items-start gap-3">
+        <input type="checkbox" name="weekly_email" value="1" class="mt-1 rounded border-warmborder text-burgundy focus:ring-burgundy" @checked($user->weekly_email)>
+        <span>
+            <span class="block font-semibold text-ink dark:text-[#F4E9E2]">📬 Weekly email</span>
+            <span class="block text-sm text-walnut dark:text-[#d4c2b9]">On Sunday evening: what your friends finished, your week in books and your challenges. Only when there’s something new.</span>
+        </span>
+    </label>
+
     <div>
         <label for="reminder_hour" class="block text-sm font-semibold text-ink dark:text-[#F4E9E2]">Remind me at</label>
         <select id="reminder_hour" name="reminder_hour" class="bw-input mt-1 w-40">
