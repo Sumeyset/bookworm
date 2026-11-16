@@ -4,6 +4,9 @@
     $shareUrl = route('year.show', [$profile->username, $recap['year']]);
 @endphp
 <x-app-layout>
+    @push('scripts')
+        @vite('resources/js/year-story.js')
+    @endpush
     <x-slot name="title">{{ $firstName }}’s {{ $recap['year'] }} in books · Bookworm</x-slot>
 
     <div class="page-section space-y-8">
@@ -29,6 +32,9 @@
                     @endif
                 </p>
                 <div class="mt-8 flex flex-wrap gap-2">
+                    @if ($recap['books'])
+                        <button type="button" data-story-open class="rounded-full bg-[#F2C38B] px-5 py-2.5 text-sm font-semibold text-burgundy-deep shadow-lg transition hover:-translate-y-0.5">▶ Play my year story</button>
+                    @endif
                     @if ($isOwner && ! $profile->is_public)
                         <form method="POST" action="{{ route('share.toggle') }}">@csrf<button class="rounded-full bg-[#FFF8EF] px-5 py-2.5 text-sm font-semibold text-burgundy-deep">Turn on sharing</button></form>
                     @else
@@ -143,4 +149,7 @@
             </div>
         @endif
     </div>
+    @if ($recap['books'])
+        @include('year.partials.story')
+    @endif
 </x-app-layout>

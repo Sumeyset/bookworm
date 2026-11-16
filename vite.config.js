@@ -20,6 +20,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/tree-shelf.js',
                 'resources/js/pdf-reader.js',
+                'resources/js/year-story.js',
                 'resources/css/reader.css',
             ],
             refresh: true,

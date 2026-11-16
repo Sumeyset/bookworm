@@ -54,6 +54,18 @@
             </div>
         </section>
 
+        @if ($isOwnProfile && in_array((int) now()->format('n'), [12, 1], true))
+            @php $storyYear = now()->month === 12 ? now()->year : now()->year - 1; @endphp
+            <a href="{{ route('year.show', [$profile->username, $storyYear]) }}#story" class="year-banner">
+                <span class="year-banner__emoji" aria-hidden="true">📚</span>
+                <span class="min-w-0 flex-1">
+                    <span class="year-banner__title">Your {{ $storyYear }} in books is ready</span>
+                    <span class="year-banner__text">Tap through your year: books, pages, streaks, favourites and your reading type.</span>
+                </span>
+                <span class="year-banner__play">▶ Play</span>
+            </a>
+        @endif
+
         @include('users.partials.post-grid')
 
         {{-- The living tree --}}

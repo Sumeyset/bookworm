@@ -44,3 +44,12 @@ test('the challenges page and profile badges render', function () {
     $this->actingAs($me)->get(route('challenges.index'))->assertOk()->assertSee('This month')->assertSee('Milestones');
     $this->actingAs($me)->get(route('users.show', $me->username))->assertOk()->assertSee('First book');
 });
+
+test('the year page offers the story when there are finished books', function () {
+    $me = User::factory()->create();
+    $book = Book::create(['ol_id' => 'OL-YEAR', 'title' => 'Year Book', 'page_count' => 300]);
+    $me->shelfItems()->create(['book_id' => $book->id, 'status' => 'read', 'read_at' => now()]);
+
+    $this->actingAs($me)->get(route('year.show', [$me->username, now()->year]))
+        ->assertOk()->assertSee('Play my year story')->assertSee('data-year-story', false)->assertSee('Your reading type');
+});

@@ -61,7 +61,30 @@ class YearInReading
             'average_rating' => round((float) $rated->pluck('my_rating')->filter()->avg(), 1),
             'quote' => $favouriteQuote,
             'covers' => $finished->pluck('book')->filter(fn ($book) => $book->cover_url)->take(24),
+            'authors_count' => $finished->pluck('book.author_name')->filter()->unique()->count(),
+            'badges' => $user->badges()->whereYear('created_at', $year)->latest()->get(),
+            'personality' => self::personality($finished, $pages),
         ];
+    }
+
+    /** A playful reading type for the year story: [name, emoji, line]. */
+    private static function personality($finished, int $pages): array
+    {
+        $count = $finished->count();
+        if ($count === 0) {
+            return ['The Dreamer', '🌙', 'Your best reading year is still ahead of you.'];
+        }
+        $average = $pages / $count;
+        $authors = $finished->pluck('book.author_name')->filter()->unique()->count();
+        $old = $finished->filter(fn ($i) => $i->book?->first_publish_year && $i->book->first_publish_year < 1950)->count();
+
+        return match (true) {
+            $old >= max(2, $count / 3) => ['The Time Traveller', '🕰️', 'You spent the year with the classics.'],
+            $average >= 420 => ['The Marathoner', '🏔️', 'Big books never scared you.'],
+            $count >= 20 && $average < 300 => ['The Sprinter', '⚡', 'Book after book after book.'],
+            $authors >= max(3, $count * .8) => ['The Explorer', '🧭', 'A new voice with almost every book.'],
+            default => ['The Devoted Reader', '📖', 'Steady, curious and always mid-chapter.'],
+        };
     }
 
     private static function longestRun($days): int
