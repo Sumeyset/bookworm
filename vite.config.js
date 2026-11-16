@@ -23,6 +23,7 @@ export default defineConfig({
                 'resources/js/pdf-reader.js',
                 'resources/js/epub-reader.js',
                 'resources/js/year-story.js',
+                'resources/js/rooms.js',
                 'resources/css/reader.css',
             ],
             refresh: true,

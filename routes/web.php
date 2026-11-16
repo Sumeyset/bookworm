@@ -149,6 +149,15 @@ Route::middleware('auth')->group(function () {
     // Monthly reading challenges and badges
     Route::get('/challenges', [ChallengeController::class, 'index'])->name('challenges.index');
 
+    // Reading rooms
+    Route::get('/rooms', [\App\Http\Controllers\ReadingRoomController::class, 'index'])->name('rooms.index');
+    Route::post('/rooms', [\App\Http\Controllers\ReadingRoomController::class, 'store'])->middleware('throttle:10,1')->name('rooms.store');
+    Route::get('/rooms/{room}', [\App\Http\Controllers\ReadingRoomController::class, 'show'])->name('rooms.show');
+    Route::post('/rooms/{room}/join', [\App\Http\Controllers\ReadingRoomController::class, 'join'])->name('rooms.join');
+    Route::delete('/rooms/{room}/leave', [\App\Http\Controllers\ReadingRoomController::class, 'leave'])->name('rooms.leave');
+    Route::get('/rooms/{room}/state', [\App\Http\Controllers\ReadingRoomController::class, 'state'])->middleware('throttle:60,1')->name('rooms.state');
+    Route::post('/rooms/{room}/messages', [\App\Http\Controllers\ReadingRoomController::class, 'message'])->middleware('throttle:30,1')->name('rooms.message');
+
     // Book clubs
     Route::get('/clubs', [BookClubController::class, 'index'])->name('clubs.index');
     Route::post('/clubs', [BookClubController::class, 'store'])->middleware('throttle:posting')->name('clubs.store');

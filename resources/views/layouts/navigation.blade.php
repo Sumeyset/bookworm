@@ -143,6 +143,7 @@
                                 ['🌰 ' . number_format(Auth::user()->acorns) . ' acorns · Tree shop', route('shop.index')],
                                 ['🎯 Reading challenges', route('challenges.index')],
                                 ['📚 Book clubs', route('clubs.index')],
+                                ['🕯️ Reading rooms', route('rooms.index')],
                                 ['Buddy reads', route('buddy.index')],
                                 ['Quote wall', route('quotes.index')],
                                 ['Import books', route('import.show')],
@@ -199,6 +200,7 @@
                 'Community' => [
                     ['Reading feed', route('feed.index'), '✍️', 'activity feed reviews posts write', 'rose'],
                     ['Book clubs', route('clubs.index'), '📖', 'book club clubs group schedule discussion', 'green'],
+                    ['Reading rooms', route('rooms.index'), '🕯️', 'reading room together timer live silent', 'gold'],
                     ['Buddy reads', route('buddy.index'), '🤝', 'buddy read together friends', 'gold'],
                     ['Quote wall', route('quotes.index'), '❝', 'quotes wall passages', 'rose'],
                     ['Messages', route('messages.index'), '✉️', 'messages dm direct chat inbox send', 'blue'],
