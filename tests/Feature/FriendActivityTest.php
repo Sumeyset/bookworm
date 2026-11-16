@@ -50,7 +50,7 @@ test('followers are told when a friend starts, finishes, rates or reviews a book
     expect($me->notifications()->count())->toBe(4);
 
     // The reader themselves isn't notified.
-    expect($friend->notifications()->count())->toBe(0);
+    expect($friend->notifications()->where('data->kind', '!=', 'badge')->count())->toBe(0);
 });
 
 test('a review when finishing a book sends one notification, not two', function () {

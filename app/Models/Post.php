@@ -29,6 +29,13 @@ class Post extends Model
 
     protected static function booted(): void
     {
+        // Sharing a quote can complete a monthly challenge.
+        static::created(function (Post $post): void {
+            if ($post->type === 'quote' && $post->user) {
+                \App\Support\Challenges::check($post->user);
+            }
+        });
+
         // Remove the photo files too (the rows go with the post).
         static::deleting(function (Post $post): void {
             $post->photos()->get()->each->delete();

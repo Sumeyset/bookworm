@@ -29,7 +29,20 @@
                 </div>
             </div>
             <div class="relative grid gap-5 border-t border-warmborder px-5 py-5 dark:border-[#4B3035] sm:grid-cols-[1fr_auto] sm:items-center sm:px-8">
-                <p class="whitespace-pre-line break-words font-serif text-lg italic leading-8 text-walnut dark:text-[#e3d3ca]">{{ $profile->bio ?: 'No introduction yet.' }}</p>
+                <div class="min-w-0 space-y-3">
+                    <p class="whitespace-pre-line break-words font-serif text-lg italic leading-8 text-walnut dark:text-[#e3d3ca]">{{ $profile->bio ?: 'No introduction yet.' }}</p>
+                    @php $profileBadges = $profile->badges()->latest()->take(8)->get(); @endphp
+                    @if ($profileBadges->isNotEmpty() || $isOwnProfile)
+                        <div class="badge-strip" aria-label="Badges">
+                            @foreach ($profileBadges as $badge)
+                                <span class="badge-chip" title="{{ $badge->description }}"><span aria-hidden="true">{{ $badge->emoji }}</span>{{ $badge->name }}</span>
+                            @endforeach
+                            @if ($isOwnProfile)
+                                <a href="{{ route('challenges.index') }}" class="badge-chip">🎯 {{ $profileBadges->isEmpty() ? 'Earn your first badge' : 'Challenges' }}</a>
+                            @endif
+                        </div>
+                    @endif
+                </div>
                 <dl class="grid grid-cols-3 gap-2 text-center">
                     @foreach (['Posts' => $profile->posts_count, 'Followers' => $profile->followers_count, 'Following' => $profile->following_count] as $label => $value)
                         <div class="rounded-2xl bg-parchment/70 px-4 py-2.5 dark:bg-white/5">

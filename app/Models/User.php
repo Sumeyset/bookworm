@@ -188,6 +188,11 @@ class User extends Authenticatable
         return $this->hasMany(UserDecoration::class);
     }
 
+    public function badges(): HasMany
+    {
+        return $this->hasMany(UserBadge::class);
+    }
+
     public function conversations(): BelongsToMany
     {
         return $this->belongsToMany(Conversation::class)->withPivot(['last_read_at', 'accepted_at'])->withTimestamps();

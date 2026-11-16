@@ -85,6 +85,11 @@ class UserBookShelf extends Model
                 }
             }
 
+            // Monthly challenges and badges.
+            if ($item->user && ($finished || $pagesForward > 0 || ($item->wasRecentlyCreated && $item->status === 'read'))) {
+                \App\Support\Challenges::check($item->user);
+            }
+
             // Tell followers when a book is started or finished.
             $statusMoved = $item->wasRecentlyCreated || $item->wasChanged('status');
             if ($statusMoved && in_array($item->status, ['reading', 'read'], true) && $item->user && $item->book) {

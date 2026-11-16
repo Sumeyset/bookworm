@@ -1,0 +1,79 @@
+/* =====================================================================
+   Community and reading-habit features: challenges, badges, clubs,
+   year story, streaks, moderation.
+   ===================================================================== */
+
+/* ---- Challenges ---- */
+.challenge-card {
+    border: 1px solid rgb(184 137 59 / 25%);
+    border-radius: 1.5rem;
+    background: rgb(255 253 249 / 85%);
+    padding: 1.25rem;
+    box-shadow: 0 14px 30px -24px rgb(70 35 20 / 45%);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.dark .challenge-card { border-color: #4B3035; background: rgb(255 255 255 / 4%); }
+.challenge-card.is-done { border-color: rgb(109 154 98 / 55%); background: linear-gradient(135deg, rgb(237 247 232 / 90%), rgb(255 253 249 / 85%)); }
+.dark .challenge-card.is-done { background: rgb(109 154 98 / 12%); }
+
+.challenge-card__emoji {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 1rem;
+    background: #fbf0dd;
+    font-size: 1.6rem;
+}
+.dark .challenge-card__emoji { background: rgb(255 255 255 / 8%); }
+
+.challenge-card__bar {
+    height: .55rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgb(122 79 51 / 14%);
+}
+.challenge-card__bar > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #d5a469, #e8b85a);
+    transition: width .6s ease;
+}
+.challenge-card.is-done .challenge-card__bar > span { background: linear-gradient(90deg, #6d9a62, #8cbc77); }
+
+/* ---- Badges ---- */
+.badge-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .2rem;
+    border: 1px solid rgb(184 137 59 / 25%);
+    border-radius: 1.25rem;
+    background: rgb(255 253 249 / 80%);
+    padding: 1rem .75rem;
+    text-align: center;
+}
+.dark .badge-tile { border-color: #4B3035; background: rgb(255 255 255 / 4%); }
+.badge-tile__emoji { font-size: 2rem; line-height: 1.2; }
+.badge-tile__name { font-family: Lora, Georgia, serif; font-weight: 600; color: #2a1a1d; }
+.dark .badge-tile__name { color: #f4e9e2; }
+.badge-tile__desc { font-size: .75rem; color: #9b7b62; }
+.badge-tile.is-locked { opacity: .5; filter: grayscale(1); }
+
+.badge-strip { display: flex; flex-wrap: wrap; gap: .4rem; }
+.badge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    border: 1px solid rgb(184 137 59 / 30%);
+    border-radius: 999px;
+    background: #fffaf2;
+    padding: .2rem .65rem .2rem .45rem;
+    font-size: .8rem;
+    font-weight: 600;
+    color: #5a3a28;
+}
+.dark .badge-chip { border-color: #4B3035; background: rgb(255 255 255 / 6%); color: #e9d6c8; }

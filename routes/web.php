@@ -28,6 +28,7 @@ use App\Http\Controllers\ShareController;
 use App\Http\Controllers\ShelfStyleController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\BuddyReadController;
+use App\Http\Controllers\ChallengeController;
 
 Route::get('/', WelcomeController::class)->name('home');
 Route::get('/quotes/{quote:share_token}', [QuoteController::class, 'showPublic'])->name('quotes.public');
@@ -115,6 +116,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
     Route::post('/shop/{item}', [ShopController::class, 'buy'])->whereAlpha('item')->name('shop.buy');
     Route::post('/shop/{item}/toggle', [ShopController::class, 'toggle'])->whereAlpha('item')->name('shop.toggle');
+
+    // Monthly reading challenges and badges
+    Route::get('/challenges', [ChallengeController::class, 'index'])->name('challenges.index');
 
     // Buddy reads
     Route::get('/buddy-reads', [BuddyReadController::class, 'index'])->name('buddy.index');

@@ -23,6 +23,7 @@ class Review extends Model
         static::created(function (Review $review): void {
             filled($review->body) ? FriendActivity::reviewed($review) : FriendActivity::rated($review);
             \App\Support\Acorns::reviewed($review);
+            $review->user && \App\Support\Challenges::check($review->user);
         });
 
         // A star rating that later gets written words counts as a review.
@@ -30,6 +31,7 @@ class Review extends Model
             if ($review->wasChanged('body') && blank($review->getOriginal('body')) && filled($review->body)) {
                 FriendActivity::reviewed($review);
                 \App\Support\Acorns::reviewed($review);
+                $review->user && \App\Support\Challenges::check($review->user);
             }
         });
     }

@@ -140,6 +140,7 @@ class BuddyReadController extends Controller
         $buddyRead->members()->updateExistingPivot($user->id, ['joined_at' => now()]);
         $this->ensureReading($user, $buddyRead->book_id);
         BookwormNotification::send($buddyRead->creator, 'buddy', $user->name . ' joined your buddy read of “' . $buddyRead->book->title . '”.', route('buddy.show', $buddyRead), $user);
+        \App\Support\Challenges::check($user);
 
         return to_route('buddy.show', $buddyRead)->with('status', 'You joined the buddy read. Happy reading!');
     }
