@@ -15,6 +15,19 @@
     $shelfStyle = \App\Support\ShelfStyle::for($profile);
     $decorations = $shelfStyle['scene'] ? [] : \App\Support\Acorns::enabled($profile);
     $decorClasses = collect($decorations)->map(fn ($item) => 'decor-' . $item)->implode(' ');
+
+    // Growth: how far to the next stage of the tree.
+    $stages = [[1, 'Sapling'], [9, 'Young oak'], [18, 'Grand oak'], [30, 'Ancient arbor']];
+    $next = collect($stages)->first(fn ($s) => $treeBookCount < $s[0]);
+    $previous = collect($stages)->last(fn ($s) => $treeBookCount >= $s[0]);
+    $stageProgress = $next ? (int) round(($treeBookCount - ($previous[0] ?? 0)) / max(1, $next[0] - ($previous[0] ?? 0)) * 100) : 100;
+    $shelfCounts = collect($treeShelves)->flatMap(fn ($s) => $s['items'])->countBy('status');
+    $styleThumb = match ($shelfStyle['scene']) {
+        'christmas' => 'images/shelves/christmas-tree-shelf.webp',
+        'wall' => 'images/shelves/wall-shelf.webp',
+        'window' => 'images/shelves/window-nook.webp',
+        default => \App\Support\TreeBackdrop::IMAGE,
+    };
 @endphp
 
 @push('scripts')
@@ -22,49 +35,77 @@
 @endpush
 
 <div class="space-y-5">
-    {{-- Growth banner --}}
-    <div class="flex flex-col gap-4 rounded-3xl border border-warmborder bg-paper/80 p-5 shadow-bookplate backdrop-blur dark:border-[#4B3035] dark:bg-raised/80 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-center gap-4">
-            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7FA35B] to-[#4E6B39] text-white shadow-md" aria-hidden="true">
-                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4 3-7 7-7 0 4-3 7-7 7Z"/><path d="M12 15c0-3.3-2.7-6-6-6 0 3.3 2.7 6 6 6Z"/></svg>
-            </span>
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tan dark:text-[#c7a491]">{{ $stageName }} · {{ $branchCount }} {{ Str::plural('branch', $branchCount) }}</p>
-                <h3 class="mt-0.5 font-serif text-2xl font-semibold text-ink dark:text-[#f4e9e2]">{{ $isOwnProfile ? 'Your living library' : $profile->name . '’s living library' }}</h3>
-                <p class="mt-0.5 text-sm text-walnut dark:text-[#d4c2b9]">{{ $stageText }}</p>
+    {{-- The shelf hub: how the library is growing, and everything you can do with it --}}
+    <section class="shelf-hub" aria-label="Your library">
+        <div class="shelf-hub__top">
+            <div class="shelf-hub__badge" aria-hidden="true">
+                <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="4"/><circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{ round(138.2 * $stageProgress / 100, 1) }} 138.2" transform="rotate(-90 24 24)"/></svg>
+                <span>🌱</span>
             </div>
+            <div class="min-w-0 flex-1">
+                <p class="shelf-hub__eyebrow">{{ $stageName }} · {{ $treeBookCount }} {{ Str::plural('book', $treeBookCount) }}</p>
+                <h3 class="shelf-hub__title">{{ $isOwnProfile ? 'Your living library' : $profile->name . '’s living library' }}</h3>
+                <p class="shelf-hub__text">
+                    @if ($next)
+                        {{ $next[0] - $treeBookCount }} more {{ Str::plural('book', $next[0] - $treeBookCount) }} until it grows into a <b>{{ $next[1] }}</b>.
+                    @else
+                        {{ $stageText }}
+                    @endif
+                </p>
+            </div>
+            <dl class="shelf-hub__stats">
+                @foreach ([['reading', 'Reading', '#E0A74A'], ['read', 'Read', '#6D9A62'], ['want_to_read', 'Want to read', '#6F9EC4']] as [$key, $label, $color])
+                    <div style="--dot: {{ $color }}">
+                        <dd>{{ $shelfCounts[$key] ?? 0 }}</dd>
+                        <dt>{{ $label }}</dt>
+                    </div>
+                @endforeach
+            </dl>
         </div>
+
         @if ($isOwnProfile)
-            <div class="flex flex-wrap items-center gap-2 text-xs text-tan dark:text-[#c7a491]">
-                <span class="tree-legend tree-legend--want_to_read">Want to read</span>
-                <span class="tree-legend tree-legend--reading">Reading</span>
-                <span class="tree-legend tree-legend--read">Read</span>
+            <div class="shelf-hub__actions">
+                <button type="button" class="shelf-hub__action" data-open-shelf-styles>
+                    <span class="shelf-hub__thumb" style="background-image: url('{{ \App\Support\StaticAsset::url($styleThumb) }}')" aria-hidden="true"></span>
+                    <span class="min-w-0"><span class="shelf-hub__label">Shelf style</span><span class="shelf-hub__sub">{{ $shelfStyle['name'] }}</span></span>
+                </button>
+                <a href="{{ route('shop.index') }}" class="shelf-hub__action">
+                    <span class="shelf-hub__icon shelf-hub__icon--acorn" aria-hidden="true">🌰</span>
+                    <span class="min-w-0"><span class="shelf-hub__label">Tree shop</span><span class="shelf-hub__sub">{{ number_format($profile->acorns) }} acorns to spend</span></span>
+                </a>
+                <a href="{{ route('year.show', $profile->username) }}" class="shelf-hub__action">
+                    <span class="shelf-hub__icon shelf-hub__icon--year" aria-hidden="true">✨</span>
+                    <span class="min-w-0"><span class="shelf-hub__label">{{ now()->year }} in books</span><span class="shelf-hub__sub">Your year so far</span></span>
+                </a>
+                <div class="shelf-hub__action shelf-hub__action--share">
+                    <span class="shelf-hub__icon {{ $profile->is_public ? 'shelf-hub__icon--on' : '' }}" aria-hidden="true">{{ $profile->is_public ? '🌍' : '🔒' }}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="shelf-hub__label">Public link</span>
+                        <span class="shelf-hub__sub">
+                            @if ($profile->is_public)
+                                <button type="button" class="shelf-hub__link" data-copy-link="{{ route('share.tree', $profile->username) }}">Copy link</button>
+                                @unless ($shelfStyle['scene'])
+                                    · <button type="button" class="shelf-hub__link" data-share-tree-image data-name="{{ $profile->name }}" data-count="{{ $treeBookCount }}">Save image</button>
+                                @endunless
+                            @else
+                                Only you can see your shelf
+                            @endif
+                        </span>
+                    </span>
+                    <form method="POST" action="{{ route('share.toggle') }}">
+                        @csrf
+                        <button type="submit" class="shop-toggle" role="switch" aria-checked="{{ $profile->is_public ? 'true' : 'false' }}" aria-label="Public link">
+                            <span class="shop-toggle__track"><span class="shop-toggle__dot"></span></span>
+                        </button>
+                    </form>
+                </div>
+                <a href="{{ route('import.show') }}" class="shelf-hub__action">
+                    <span class="shelf-hub__icon shelf-hub__icon--import" aria-hidden="true">⬆️</span>
+                    <span class="min-w-0"><span class="shelf-hub__label">Import books</span><span class="shelf-hub__sub">Goodreads, StoryGraph…</span></span>
+                </a>
             </div>
         @endif
-    </div>
-
-    @if ($isOwnProfile)
-        {{-- Share & grow --}}
-        <div class="flex flex-wrap items-center gap-2 rounded-3xl border border-dashed border-warmborder px-4 py-3 dark:border-[#4B3035]">
-            <span class="mr-1 text-xs font-semibold uppercase tracking-[0.18em] text-tan">Share</span>
-            <form method="POST" action="{{ route('share.toggle') }}">
-                @csrf
-                <button type="submit" class="bw-chip {{ $profile->is_public ? '!border-[#6d9a62] !text-[#4f7a46]' : '' }}" aria-pressed="{{ $profile->is_public ? 'true' : 'false' }}">
-                    {{ $profile->is_public ? '🌍 Public link on' : '🔒 Turn on public link' }}
-                </button>
-            </form>
-            @if ($profile->is_public)
-                <button type="button" class="bw-chip" data-copy-link="{{ route('share.tree', $profile->username) }}">🔗 Copy link</button>
-            @endif
-            @if (! $shelfStyle['scene'])
-                <button type="button" class="bw-chip" data-share-tree-image data-name="{{ $profile->name }}" data-count="{{ $treeBookCount }}">🖼️ Save tree as image</button>
-            @endif
-            <button type="button" class="bw-chip" data-open-shelf-styles>🎨 Shelf style: {{ $shelfStyle['name'] }}</button>
-            <a href="{{ route('shop.index') }}" class="bw-chip">🌰 {{ number_format($profile->acorns) }} acorns · Tree shop</a>
-            <a href="{{ route('year.show', $profile->username) }}" class="bw-chip">✨ {{ now()->year }} in books</a>
-            <a href="{{ route('import.show') }}" class="bw-chip ml-auto">⬆️ Import from Goodreads</a>
-        </div>
-    @endif
+    </section>
 
     @if ($isOwnProfile && $treeBookCount > 0)
         <p class="flex items-center gap-2 px-1 text-sm text-tan dark:text-[#c7a491]">
@@ -78,7 +119,7 @@
     @else
     @php
         $scene = \App\Support\TreeBackdrop::layout($branchCount);
-        $treeImage = asset(\App\Support\TreeBackdrop::IMAGE);
+        $treeImage = \App\Support\StaticAsset::url(\App\Support\TreeBackdrop::IMAGE);
         $sceneW = $scene['width'];
         $sceneH = $scene['height'];
         $cropW = \App\Support\TreeBackdrop::CROP_TO - \App\Support\TreeBackdrop::CROP_FROM;

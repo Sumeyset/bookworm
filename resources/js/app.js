@@ -76,13 +76,33 @@ if (palette) {
         list.forEach((item, i) => item.classList.toggle('is-active', i === active));
         list[active]?.scrollIntoView({ block: 'nearest' });
     };
+    const askRow = palette.querySelector('[data-palette-ask]');
+    const askButton = palette.querySelector('[data-palette-ask-button]');
+    const headings = [...palette.querySelectorAll('[data-palette-heading]')];
     const filter = () => {
         const query = input.value.trim().toLowerCase();
         entries.forEach((entry) => { entry.hidden = query !== '' && !entry.dataset.keywords.includes(query); });
         searchRow.hidden = query === '';
         queryLabel.textContent = input.value.trim();
+        // Ask Barnaby the question as typed (it opens his chat).
+        if (askRow) {
+            askRow.hidden = query.length < 3;
+            askButton.dataset.askBarnaby = input.value.trim();
+            askRow.querySelector('[data-palette-ask-query]').textContent = input.value.trim();
+        }
+        // A group heading shows only while something under it does.
+        headings.forEach((heading) => {
+            let next = heading.nextElementSibling;
+            let any = false;
+            while (next && !next.hasAttribute('data-palette-heading')) {
+                if (next.hasAttribute('data-palette-entry') && !next.hidden) any = true;
+                next = next.nextElementSibling;
+            }
+            heading.hidden = !any;
+        });
         highlight(0);
     };
+    askButton?.addEventListener('click', () => palette.close());
     const open = () => {
         if (palette.open) return;
         input.value = '';

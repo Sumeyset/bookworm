@@ -1,10 +1,10 @@
 {{-- Pick how your shelf looks. Expects $current (style key). --}}
 @php
     $thumbs = [
-        'tree' => [asset(\App\Support\TreeBackdrop::IMAGE), '52% 35%'],
-        'christmas' => [asset('images/shelves/christmas-tree-shelf.webp'), '50% 45%'],
-        'wall' => [asset('images/shelves/wall-shelf.webp'), '50% 50%'],
-        'window' => [asset('images/shelves/window-nook.webp'), '50% 40%'],
+        'tree' => [\App\Support\StaticAsset::url(\App\Support\TreeBackdrop::IMAGE), '52% 35%'],
+        'christmas' => [\App\Support\StaticAsset::url('images/shelves/christmas-tree-shelf.webp'), '50% 45%'],
+        'wall' => [\App\Support\StaticAsset::url('images/shelves/wall-shelf.webp'), '50% 50%'],
+        'window' => [\App\Support\StaticAsset::url('images/shelves/window-nook.webp'), '50% 40%'],
     ];
 @endphp
 <dialog id="shelf-style-dialog" class="bw-dialog shelf-styles" aria-labelledby="shelf-style-title">

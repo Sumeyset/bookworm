@@ -26,14 +26,14 @@
      data-editable="{{ $isOwnProfile ? 'true' : 'false' }}"
      data-capacity="{{ $capacity }}"
      data-shelves='@json($shelfOptions)'
-     @if ($scene['glass']) data-window-scene data-time="{{ $part }}" data-season="{{ $season }}" data-view-base="{{ asset('images/shelves/window') }}" @if ($fixedTime) data-fixed-time="{{ $fixedTime }}" @endif @if ($fixedSeason) data-fixed-season="{{ $fixedSeason }}" @endif @endif
+     @if ($scene['glass']) data-window-scene data-time="{{ $part }}" data-season="{{ $season }}" data-view-base="{{ asset('images/shelves/window') }}" data-view-version="{{ \App\Support\StaticAsset::folderVersion('images/shelves/window') }}" @if ($fixedTime) data-fixed-time="{{ $fixedTime }}" @endif @if ($fixedSeason) data-fixed-season="{{ $fixedSeason }}" @endif @endif
      style="--scene-w: {{ $scene['width'] }}; --scene-ar: {{ $scene['width'] }} / {{ $scene['height'] }};@if ($scene['glass']) --glass-l: {{ $scene['glass']['left'] }}%; --glass-t: {{ $scene['glass']['top'] }}%; --glass-r: {{ $scene['glass']['left'] + $scene['glass']['width'] }}%; --glass-b: {{ $scene['glass']['top'] + $scene['glass']['height'] }}%;@endif --min-w: {{ $scene['min_width'] }}px; --decor-scale: {{ $scene['decor_scale'] ?? 1 }}; --spine-px: {{ $scene['spine'] ?? 20 }}; --book-px: {{ $scene['book'] ?? 74 }};">
     <div class="book-tree__frame photo-shelf__frame" data-scroll-frame>
         <div class="book-tree__scene photo-shelf__scene">
             @if ($scene['glass'])
                 {{-- The view outside, behind the glass --}}
                 <div class="photo-shelf__view" style="left: {{ $scene['glass']['left'] }}%; top: {{ $scene['glass']['top'] }}%; width: {{ $scene['glass']['width'] }}%; height: {{ $scene['glass']['height'] }}%;" aria-hidden="true">
-                    <img src="{{ asset("images/shelves/window/{$season}-{$part}.webp") }}" alt="" data-window-view>
+                    <img src="{{ \App\Support\StaticAsset::url("images/shelves/window/{$season}-{$part}.webp") }}" alt="" data-window-view>
                     <img alt="" data-window-view-next class="is-waiting">
                 </div>
             @endif
@@ -49,12 +49,12 @@
                 <div class="photo-shelf__img photo-shelf__img--grown" aria-hidden="true">
                     @foreach ($scene['pieces'] as $piece)
                         <div class="photo-shelf__piece" style="top: {{ $piece['top'] }}%; height: calc({{ $piece['height'] }}% + 1px);">
-                            <img src="{{ asset($piece['image']) }}" alt="" style="margin-top: -{{ $piece['shift'] }}%;" decoding="async" draggable="false">
+                            <img src="{{ \App\Support\StaticAsset::url($piece['image']) }}" alt="" style="margin-top: -{{ $piece['shift'] }}%;" decoding="async" draggable="false">
                         </div>
                     @endforeach
                 </div>
             @else
-                <img class="photo-shelf__img" src="{{ asset($scene['image']) }}" alt="" width="{{ $scene['width'] }}" height="{{ $scene['height'] }}" decoding="async" fetchpriority="high" draggable="false">
+                <img class="photo-shelf__img" src="{{ \App\Support\StaticAsset::url($scene['image']) }}" alt="" width="{{ $scene['width'] }}" height="{{ $scene['height'] }}" decoding="async" fetchpriority="high" draggable="false">
             @endif
             @if ($scene['glass'])
                 <span class="photo-shelf__light" aria-hidden="true"></span>

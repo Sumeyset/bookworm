@@ -181,47 +181,80 @@
 @auth
     {{-- Search palette --}}
     <dialog id="command-palette" class="bw-palette" aria-label="Search and jump">
-        <form method="GET" action="{{ route('books.index') }}" class="flex items-center gap-3 border-b border-warmborder px-5 py-4 dark:border-[#4B3035]" data-palette-form>
-            <svg class="h-5 w-5 shrink-0 text-tan" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8.5 3a5.5 5.5 0 1 0 3.46 9.78l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 8.5 3ZM4.5 8.5a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"/></svg>
+        <form method="GET" action="{{ route('books.index') }}" class="bw-palette__search" data-palette-form>
+            <x-barnaby-avatar class="bw-palette__worm" />
             <label for="palette-input" class="sr-only">Search readers and books, or jump to a page</label>
-            <input id="palette-input" name="q" type="search" autocomplete="off" placeholder="Search readers and books, or jump to a page…" class="min-w-0 flex-1 border-0 bg-transparent p-0 text-lg text-ink placeholder:text-tan/70 focus:outline-none focus:ring-0 dark:text-[#F4E9E2]" data-palette-input>
-            <kbd class="rounded-md border border-warmborder px-1.5 py-0.5 text-[10px] font-semibold text-tan dark:border-[#4B3035]">Esc</kbd>
+            <input id="palette-input" name="q" type="search" autocomplete="off" placeholder="Find a book, a reader or a page…" class="bw-palette__input" data-palette-input>
+            <kbd class="bw-palette__key">Esc</kbd>
         </form>
-        <ul class="max-h-96 overflow-y-auto p-2" role="listbox" data-palette-list>
-            <li data-palette-readers hidden></li>
+        @php
+            $paletteGroups = [
+                'Your reading' => [
+                    ['My bookshelf', route('users.show', Auth::user()->username), '🌳', 'tree shelf bookshelf my library', 'green'],
+                    ['Reading challenges', route('challenges.index'), '🎯', 'challenges badges monthly goals achievements', 'rose'],
+                    [now()->year . ' in books', route('year.show', Auth::user()->username), '✨', 'year recap wrapped stats story', 'gold'],
+                    ['Tree shop', route('shop.index'), '🌰', 'shop acorns coins decorations tree store', 'gold'],
+                    ['Search books', route('books.index'), '📚', 'books find add discover', 'blue'],
+                ],
+                'Community' => [
+                    ['Reading feed', route('feed.index'), '✍️', 'activity feed reviews posts write', 'rose'],
+                    ['Book clubs', route('clubs.index'), '📖', 'book club clubs group schedule discussion', 'green'],
+                    ['Buddy reads', route('buddy.index'), '🤝', 'buddy read together friends', 'gold'],
+                    ['Quote wall', route('quotes.index'), '❝', 'quotes wall passages', 'rose'],
+                    ['Messages', route('messages.index'), '✉️', 'messages dm direct chat inbox send', 'blue'],
+                    ['Notifications', route('notifications.index'), '🔔', 'notifications alerts', 'gold'],
+                    ['Find readers', route('users.index'), '👋', 'readers people follow', 'green'],
+                ],
+                'Tools & settings' => [
+                    ['Import books', route('import.show'), '⬆️', 'import goodreads storygraph librarything csv spreadsheet', 'blue'],
+                    ['Reading preferences', route('onboarding.show'), '🎛️', 'goal genres preferences', 'rose'],
+                    ['Settings', route('profile.edit'), '⚙️', 'settings profile account password bio privacy notifications reminders', 'stone'],
+                ],
+            ];
+        @endphp
+        <ul class="bw-palette__list" role="listbox" data-palette-list>
             <li data-palette-search hidden>
                 <button type="button" class="bw-palette__item" data-palette-submit>
-                    <span class="bw-palette__icon">⌕</span>
-                    <span>Search books for “<b data-palette-query></b>”</span>
+                    <span class="bw-palette__icon bw-palette__icon--blue">⌕</span>
+                    <span class="min-w-0 truncate">Search books for “<b data-palette-query></b>”</span>
+                    <span class="bw-palette__go" aria-hidden="true">↵</span>
                 </button>
             </li>
-            @foreach ([
-                ['My book tree', route('users.show', Auth::user()->username), '🌳', 'tree shelf bookshelf my'],
-                ['Search books', route('books.index'), '📚', 'books find add discover'],
-                ['Reading feed', route('feed.index'), '✍️', 'activity feed reviews posts write'],
-                ['Quote wall', route('quotes.index'), '❝', 'quotes wall passages'],
-                ['Book clubs', route('clubs.index'), '📚', 'book club clubs group schedule discussion'],
-                ['Buddy reads', route('buddy.index'), '🤝', 'buddy read together club friends'],
-                ['Tree shop', route('shop.index'), '🌰', 'shop acorns coins decorations tree store'],
-                ['Reading challenges', route('challenges.index'), '🎯', 'challenges badges monthly goals achievements'],
-                [now()->year . ' in books', route('year.show', Auth::user()->username), '✨', 'year recap wrapped stats'],
-                ['Import books', route('import.show'), '⬆️', 'import goodreads storygraph librarything csv spreadsheet'],
-                ['Notifications', route('notifications.index'), '🔔', 'notifications alerts'],
-                ['Messages', route('messages.index'), '✉️', 'messages dm direct chat inbox send'],
-                ['Find readers', route('users.index'), '👋', 'readers people follow'],
-                ['Reading preferences', route('onboarding.show'), '🎯', 'goal genres preferences'],
-                ['Profile settings', route('profile.edit'), '⚙️', 'settings profile account password bio'],
-            ] as [$label, $url, $emoji, $keywords])
-                <li data-palette-entry data-keywords="{{ Str::lower($label . ' ' . $keywords) }}">
-                    <a href="{{ $url }}" class="bw-palette__item"><span class="bw-palette__icon">{{ $emoji }}</span><span>{{ $label }}</span><span class="ml-auto text-xs text-tan">Jump</span></a>
-                </li>
-            @endforeach
+            <li data-palette-ask hidden>
+                <button type="button" class="bw-palette__item" data-ask-barnaby="" data-palette-ask-button>
+                    <x-barnaby-avatar class="bw-palette__icon bw-palette__icon--worm" />
+                    <span class="min-w-0 truncate">Ask Barnaby: “<b data-palette-ask-query></b>”</span>
+                    <span class="bw-palette__go" aria-hidden="true">↵</span>
+                </button>
+            </li>
+            <li data-palette-readers hidden></li>
             @if ($readingNow)
+                <li class="bw-palette__group" data-palette-heading>Pick up where you left off</li>
                 <li data-palette-entry data-keywords="{{ Str::lower('continue reading now ' . $readingNow->book->title) }}">
-                    <a href="{{ route('books.show', $readingNow->book) }}" class="bw-palette__item"><span class="bw-palette__icon">🔖</span><span>Continue “{{ $readingNow->book->title }}”</span><span class="ml-auto text-xs text-tan">{{ $readingPercent }}%</span></a>
+                    <a href="{{ route('books.show', $readingNow->book) }}" class="bw-palette__item bw-palette__item--continue">
+                        <span class="bw-palette__icon bw-palette__icon--gold">🔖</span>
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate">{{ $readingNow->book->title }}</span>
+                            <span class="bw-palette__bar"><span style="width: {{ $readingPercent }}%"></span></span>
+                        </span>
+                        <span class="text-xs font-semibold text-tan">{{ $readingPercent }}%</span>
+                    </a>
                 </li>
             @endif
+            @foreach ($paletteGroups as $group => $links)
+                <li class="bw-palette__group" data-palette-heading>{{ $group }}</li>
+                @foreach ($links as [$label, $url, $emoji, $keywords, $tone])
+                    <li data-palette-entry data-keywords="{{ Str::lower($label . ' ' . $keywords) }}">
+                        <a href="{{ $url }}" class="bw-palette__item"><span class="bw-palette__icon bw-palette__icon--{{ $tone }}">{{ $emoji }}</span><span class="min-w-0 truncate">{{ $label }}</span><span class="bw-palette__go" aria-hidden="true">Jump ↵</span></a>
+                    </li>
+                @endforeach
+            @endforeach
         </ul>
-        <p class="border-t border-warmborder px-5 py-2.5 text-xs text-tan dark:border-[#4B3035]">Tip: press <kbd class="font-semibold">/</kbd> or <kbd class="font-semibold" data-kbd-hint>Ctrl K</kbd> anywhere to open this.</p>
+        <p class="bw-palette__foot">
+            <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
+            <span><kbd>↵</kbd> open</span>
+            <span><kbd>Esc</kbd> close</span>
+            <span class="ml-auto">Open anywhere with <kbd>/</kbd> or <kbd data-kbd-hint>Ctrl K</kbd></span>
+        </p>
     </dialog>
 @endauth

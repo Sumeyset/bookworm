@@ -3,6 +3,100 @@
    year story, streaks, moderation.
    ===================================================================== */
 
+/* ---- Shelf hub (above the bookshelf on a profile) ---- */
+.shelf-hub {
+    overflow: hidden;
+    border: 1px solid rgb(184 137 59 / 22%);
+    border-radius: 1.75rem;
+    background:
+        radial-gradient(60% 140% at 0% 0%, rgb(127 163 91 / 12%), transparent 60%),
+        radial-gradient(50% 120% at 100% 0%, rgb(242 195 139 / 16%), transparent 60%),
+        #fffdf9;
+    box-shadow: 0 24px 48px -36px rgb(70 35 20 / 55%);
+}
+.dark .shelf-hub { border-color: #4b3035; background: radial-gradient(60% 140% at 0% 0%, rgb(127 163 91 / 10%), transparent 60%), #24151a; }
+
+.shelf-hub__top { display: flex; flex-wrap: wrap; align-items: center; gap: 1.1rem 1.5rem; padding: 1.25rem 1.5rem; }
+
+.shelf-hub__badge { position: relative; flex: none; width: 4rem; height: 4rem; color: #6d9a62; }
+.shelf-hub__badge svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.shelf-hub__badge span { position: absolute; inset: .55rem; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: linear-gradient(140deg, #8fb86a, #4e6b39); font-size: 1.35rem; box-shadow: inset 0 -3px 6px rgb(0 0 0 / 15%); }
+
+.shelf-hub__eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #8a6a55; }
+.shelf-hub__title { margin-top: .1rem; font-family: Lora, Georgia, serif; font-size: 1.55rem; font-weight: 700; line-height: 1.15; color: #2a1a1d; }
+.shelf-hub__text { margin-top: .2rem; font-size: .92rem; color: #5a3a2e; }
+.shelf-hub__text b { color: #4e6b39; }
+.dark .shelf-hub__title { color: #f4e9e2; }
+.dark .shelf-hub__text { color: #d4c2b9; }
+.dark .shelf-hub__text b { color: #a8cf88; }
+
+.shelf-hub__stats { display: grid; grid-template-columns: repeat(3, minmax(4.6rem, auto)); gap: .5rem; }
+.shelf-hub__stats > div {
+    border-radius: 1rem;
+    background: rgb(243 230 212 / 55%);
+    padding: .5rem .8rem;
+    text-align: center;
+}
+.dark .shelf-hub__stats > div { background: rgb(255 255 255 / 5%); }
+.shelf-hub__stats dd { font-family: Lora, Georgia, serif; font-size: 1.5rem; font-weight: 700; line-height: 1.1; color: #2a1a1d; }
+.dark .shelf-hub__stats dd { color: #f4e9e2; }
+.shelf-hub__stats dt { display: flex; align-items: center; justify-content: center; gap: .35rem; font-size: .72rem; font-weight: 600; color: #8a6a55; white-space: nowrap; }
+.shelf-hub__stats dt::before { content: ""; width: .5rem; height: .5rem; border-radius: 2px; background: var(--dot); }
+
+.shelf-hub__actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1px;
+    border-top: 1px solid rgb(184 137 59 / 18%);
+    background: rgb(184 137 59 / 18%);
+}
+.dark .shelf-hub__actions { border-color: #4b3035; background: #4b3035; }
+
+.shelf-hub__action {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    min-width: 0;
+    background: #fffdf9;
+    padding: .85rem 1.1rem;
+    text-align: left;
+    transition: background-color .15s ease;
+}
+.dark .shelf-hub__action { background: #24151a; }
+a.shelf-hub__action:hover, button.shelf-hub__action:hover { background: #fbf3e8; }
+.dark a.shelf-hub__action:hover, .dark button.shelf-hub__action:hover { background: #2e1b21; }
+
+.shelf-hub__icon, .shelf-hub__thumb {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: .9rem;
+    background: #f3e6d4;
+    font-size: 1.2rem;
+}
+.shelf-hub__thumb { background-position: center; background-size: cover; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 10%); }
+.shelf-hub__icon--acorn { background: #f6e3c8; }
+.shelf-hub__icon--year { background: #f7dfe5; }
+.shelf-hub__icon--import { background: #dfe9f5; }
+.shelf-hub__icon--on { background: #e2f0da; }
+.dark .shelf-hub__icon { background: rgb(255 255 255 / 8%); }
+
+.shelf-hub__label { display: block; overflow: hidden; font-weight: 600; color: #2a1a1d; text-overflow: ellipsis; white-space: nowrap; }
+.shelf-hub__action--share { gap: .6rem; }
+.shelf-hub__action--share .shop-toggle { padding: 0; }
+.shelf-hub__sub { display: block; overflow: hidden; font-size: .78rem; color: #8a6a55; text-overflow: ellipsis; white-space: nowrap; }
+.dark .shelf-hub__label { color: #f4e9e2; }
+.shelf-hub__link { font-weight: 600; color: #8b2a3d; text-decoration: underline; text-underline-offset: 2px; }
+.dark .shelf-hub__link { color: #f0a8b4; }
+
+@media (max-width: 640px) {
+    .shelf-hub__top { padding: 1rem; }
+    .shelf-hub__stats { width: 100%; grid-template-columns: repeat(3, 1fr); }
+}
+
 /* ---- Challenges ---- */
 .challenge-card {
     border: 1px solid rgb(184 137 59 / 25%);

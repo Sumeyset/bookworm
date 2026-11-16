@@ -597,7 +597,7 @@ document.querySelectorAll('[data-window-scene]').forEach((scene) => {
         const time = scene.dataset.fixedTime || timeOfDay(now.getHours());
         const season = scene.dataset.fixedSeason || seasonOf(now.getMonth());
         if (scene.dataset.time === time && scene.dataset.season === season && view.src) return;
-        const src = `${scene.dataset.viewBase}/${season}-${time}.webp`;
+        const src = `${scene.dataset.viewBase}/${season}-${time}.webp${scene.dataset.viewVersion ? `?v=${scene.dataset.viewVersion}` : ''}`;
         // Crossfade to the new view once it has loaded.
         next.onload = () => {
             next.classList.remove('is-waiting');
