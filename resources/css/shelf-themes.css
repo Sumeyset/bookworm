@@ -1294,3 +1294,19 @@ svg.tree-lantern {
 }
 .photo-shelf--spines .tree-book.tree-book--cover-spine .tree-book__spine-title { text-shadow: 0 1px 1px rgb(0 0 0 / 20%); }
 .photo-shelf--spines .tree-book.tree-book--cover-spine .tree-book__spine--light .tree-book__spine-title { text-shadow: none; }
+
+/* ---- Arranging decorations ---- */
+.book-tree.is-arranging .tree-decor,
+.book-tree.is-arranging .tree-fx { z-index: 6; overflow: visible; }
+.book-tree.is-arranging [data-decor-piece] {
+    pointer-events: auto;
+    cursor: grab;
+    touch-action: none;
+    outline: 2px dashed rgb(255 236 200 / 85%);
+    outline-offset: 3px;
+    border-radius: 6px;
+    animation: none !important;
+}
+.book-tree.is-arranging [data-decor-piece]:hover { outline-color: #f5d590; }
+.book-tree.is-arranging [data-decor-piece].is-moving { cursor: grabbing; outline-style: solid; outline-color: #f5d590; filter: drop-shadow(0 10px 14px rgb(0 0 0 / 40%)); }
+.book-tree.is-arranging .tree-book { opacity: .55; pointer-events: none; }

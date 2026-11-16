@@ -621,3 +621,85 @@ document.querySelectorAll('[data-scroll-frame]').forEach((frame) => {
         frame.scrollLeft = (frame.scrollWidth - frame.clientWidth) / 2;
     }
 });
+
+// Arrange decorations: drag them anywhere on the shelf picture, then save (per shelf style).
+(() => {
+    const button = document.querySelector('[data-arrange-decor]');
+    const bar = document.querySelector('[data-arrange-bar]');
+    const tree = document.querySelector('[data-book-tree]');
+    if (!button || !bar || !tree) return;
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+    let original = null;
+    let drag = null;
+
+    const pieces = () => [...tree.querySelectorAll('[data-decor-piece]')];
+    const sceneOf = (piece) => piece.closest('.book-tree__scene');
+
+    const start = () => {
+        original = pieces().map((p) => [p, p.style.left, p.style.top]);
+        tree.classList.add('is-arranging');
+        bar.hidden = false;
+        bar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+    const stop = () => {
+        tree.classList.remove('is-arranging');
+        bar.hidden = true;
+    };
+
+    const save = async (body, method = 'POST') => {
+        const response = await fetch(bar.dataset.saveUrl, {
+            method,
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': csrf },
+            body: JSON.stringify(body),
+        });
+        return response.ok;
+    };
+
+    button.addEventListener('click', start);
+    bar.querySelector('[data-arrange-done]').addEventListener('click', async () => {
+        const positions = {};
+        pieces().forEach((p) => {
+            positions[p.dataset.decorPiece] = [parseFloat(p.style.left) || 0, parseFloat(p.style.top) || 0];
+        });
+        await save({ style: bar.dataset.style, positions });
+        stop();
+    });
+    bar.querySelector('[data-arrange-reset]').addEventListener('click', async () => {
+        await save({ style: bar.dataset.style }, 'DELETE');
+        window.location.reload();
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && tree.classList.contains('is-arranging')) {
+            original?.forEach(([p, left, top]) => { p.style.left = left; p.style.top = top; });
+            stop();
+        }
+    });
+
+    tree.addEventListener('pointerdown', (event) => {
+        if (!tree.classList.contains('is-arranging')) return;
+        const piece = event.target.closest('[data-decor-piece]');
+        if (!piece) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const rect = sceneOf(piece).getBoundingClientRect();
+        drag = { piece, rect, id: event.pointerId, dx: event.clientX - (rect.left + (parseFloat(piece.style.left) / 100) * rect.width), dy: event.clientY - (rect.top + (parseFloat(piece.style.top) / 100) * rect.height) };
+        piece.classList.add('is-moving');
+        piece.setPointerCapture?.(event.pointerId);
+    }, true);
+    tree.addEventListener('pointermove', (event) => {
+        if (!drag || event.pointerId !== drag.id) return;
+        const { rect, piece } = drag;
+        const left = Math.min(100, Math.max(0, ((event.clientX - drag.dx - rect.left) / rect.width) * 100));
+        const top = Math.min(100, Math.max(0, ((event.clientY - drag.dy - rect.top) / rect.height) * 100));
+        piece.style.left = `${left.toFixed(2)}%`;
+        piece.style.top = `${top.toFixed(2)}%`;
+    });
+    const end = (event) => {
+        if (!drag || event.pointerId !== drag.id) return;
+        drag.piece.classList.remove('is-moving');
+        drag = null;
+    };
+    tree.addEventListener('pointerup', end);
+    tree.addEventListener('pointercancel', end);
+})();

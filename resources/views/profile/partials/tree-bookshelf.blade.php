@@ -73,6 +73,12 @@
                     <span class="shelf-hub__icon shelf-hub__icon--acorn" aria-hidden="true">🌰</span>
                     <span class="min-w-0"><span class="shelf-hub__label">Tree shop</span><span class="shelf-hub__sub">{{ number_format($profile->acorns) }} acorns to spend</span></span>
                 </a>
+                @if (\App\Support\Acorns::enabled($profile))
+                    <button type="button" class="shelf-hub__action" data-arrange-decor>
+                        <span class="shelf-hub__icon shelf-hub__icon--year" aria-hidden="true">✋</span>
+                        <span class="min-w-0"><span class="shelf-hub__label">Arrange decorations</span><span class="shelf-hub__sub">Drag them where you like</span></span>
+                    </button>
+                @endif
                 <div class="shelf-hub__action shelf-hub__action--share">
                     <span class="shelf-hub__icon {{ $profile->is_public ? 'shelf-hub__icon--on' : '' }}" aria-hidden="true">{{ $profile->is_public ? '🌍' : '🔒' }}</span>
                     <span class="min-w-0 flex-1">
@@ -98,6 +104,16 @@
             </div>
         @endif
     </section>
+
+    @if ($isOwnProfile)
+        {{-- Shown while arranging decorations --}}
+        <div class="decor-arrange-bar" data-arrange-bar data-style="{{ $shelfStyle['key'] }}" data-save-url="{{ route('decor.positions') }}" hidden>
+            <span class="text-lg" aria-hidden="true">✋</span>
+            <p class="min-w-0 flex-1"><b>Arrange your decorations.</b> Drag any of them to a new spot on this shelf.</p>
+            <button type="button" class="btn-ghost min-h-0 py-2" data-arrange-reset>Reset</button>
+            <button type="button" class="btn-primary min-h-0 py-2" data-arrange-done>Done</button>
+        </div>
+    @endif
 
     @if ($isOwnProfile && $treeBookCount > 0)
         <p class="flex items-center gap-2 px-1 text-sm text-tan dark:text-[#c7a491]">
@@ -134,7 +150,7 @@
                     </div>
                 @endforeach
 
-                @include('profile.partials.tree-decor', ['decorations' => $decorations ?? [], 'branchCount' => $branchCount])
+                @include('profile.partials.tree-decor', ['decorations' => $decorations ?? [], 'branchCount' => $branchCount, 'positions' => ($profile->decor_positions ?? [])['tree'] ?? []])
 
                 @php
                     // Only the lowest empty shelf shows "+" slots; the others keep the picture clean until you drag a book.

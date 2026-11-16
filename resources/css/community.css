@@ -515,3 +515,22 @@ a.shelf-hub__action:hover, button.shelf-hub__action:hover { background: #fbf3e8;
 @keyframes decor-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
 .shop-item:hover .tree-owl__eyes { animation: tree-blink 1.2s ease-in-out 1; }
 @media (prefers-reduced-motion: reduce) { .decor-scene__twinkle { animation: none; } }
+
+.decor-arrange-bar {
+    position: sticky;
+    top: 6rem;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+    border: 1px solid rgb(184 137 59 / 35%);
+    border-radius: 1.25rem;
+    background: #fffaf2;
+    padding: .7rem 1rem;
+    font-size: .92rem;
+    color: #3a2a2d;
+    box-shadow: 0 18px 40px -20px rgb(70 35 20 / 55%);
+}
+.decor-arrange-bar[hidden] { display: none; }
+.dark .decor-arrange-bar { border-color: #4b3035; background: #2a1d20; color: #f4e9e2; }

@@ -30,7 +30,16 @@
             'window' => 'left: ' . $winTop['left'] . '%; top: ' . $winTop['top'] . '%; width: ' . round(($wx2 - $wx1) / Tree::WIDTH * 100, 3) . '%; height: ' . round($winBottom['top'] - $winTop['top'], 3) . '%;',
         ];
     }
-    $style = fn (array $p) => 'left: ' . $p['left'] . '%; top: ' . $p['top'] . '%;';
+    // Where each piece goes: its default spot, or where the reader moved it ($positions: key => [left, top]).
+    $positions = $positions ?? [];
+    $style = function (array $p, ?string $key = null) use ($positions) {
+        if ($key !== null && isset($positions[$key][0], $positions[$key][1])) {
+            $p = ['left' => (float) $positions[$key][0], 'top' => (float) $positions[$key][1]];
+        }
+
+        return 'left: ' . $p['left'] . '%; top: ' . $p['top'] . '%;';
+    };
+    $piece = fn (string $key) => ' data-decor-piece="' . $key . '"';
     $windowTheme = empty($spots['window']) ? null : ($on('evening') ? 'night' : ($on('snow') ? 'christmas' : ($on('autumn') ? 'autumn' : null)));
     $tones = ['orange', 'red', 'gold'];
     // A steady pseudo-random spread for falling things and fireflies.
@@ -76,54 +85,54 @@
     @if ($on('snow'))
         <span class="tree-decor__floor tree-decor__floor--snow"></span>
         {{-- a glowing star --}}
-        @include('decor.parts.star', ['attrs' => 'class="tree-decor__star" style="' . $style($spots['star']) . '"'])
+        @include('decor.parts.star', ['attrs' => 'class="tree-decor__star" style="' . $style($spots['star'], 'star') . '"' . $piece('star')])
 
         {{-- glass baubles --}}
         @foreach ($spots['ornaments'] as $i => $point)
-            @include('decor.parts.bauble', ['attrs' => 'class="tree-ornament" style="' . $style($point) . ' --sway: ' . (2.6 + ($i % 4) * 0.4) . 's; --delay: -' . ($i * 0.7) . 's;"', 'tone' => ['red', 'gold', 'green', 'blue'][$i % 4], 'pattern' => $i])
+            @include('decor.parts.bauble', ['attrs' => 'class="tree-ornament" style="' . $style($point, 'ornament-' . $i) . ' --sway: ' . (2.6 + ($i % 4) * 0.4) . 's; --delay: -' . ($i * 0.7) . 's;"' . $piece('ornament-' . $i), 'tone' => ['red', 'gold', 'green', 'blue'][$i % 4], 'pattern' => $i])
         @endforeach
 
         {{-- presents --}}
         @foreach ([['wine', ''], ['forest', 'tree-decor__gift--small'], ['cream', '']] as $g => [$tone, $size])
-            @include('decor.parts.gift', ['attrs' => 'class="tree-decor__gift ' . $size . '" style="' . $style($spots['gifts'][$g]) . '"', 'tone' => $tone])
+            @include('decor.parts.gift', ['attrs' => 'class="tree-decor__gift ' . $size . '" style="' . $style($spots['gifts'][$g], 'gift-' . $g) . '"' . $piece('gift-' . $g), 'tone' => $tone])
         @endforeach
     @endif
 
     @if ($on('autumn'))
         @foreach ($spots['leaves'] as $i => $leaf)
-            <svg class="tree-leaf tree-leaf--{{ $tones[$i % 3] }} tree-leaf--fallen" style="{{ $style($leaf['at']) }} --turn: {{ $leaf['turn'] }}deg;" viewBox="0 0 24 24"><path d="{{ $maple }}" fill="currentColor" stroke="#3E1A1C" stroke-width=".9" stroke-linejoin="round"/><path d="M12 21v-9M12 12l-4-4M12 12l4-4M12 14l-5 1M12 14l5 1" stroke="rgb(0 0 0 / 25%)" stroke-width=".8" fill="none"/></svg>
+            <svg class="tree-leaf tree-leaf--{{ $tones[$i % 3] }} tree-leaf--fallen" style="{{ $style($leaf['at'], 'leaf-' . $i) }} --turn: {{ $leaf['turn'] }}deg;" data-decor-piece="leaf-{{ $i }}" viewBox="0 0 24 24"><path d="{{ $maple }}" fill="currentColor" stroke="#3E1A1C" stroke-width=".9" stroke-linejoin="round"/><path d="M12 21v-9M12 12l-4-4M12 12l4-4M12 14l-5 1M12 14l5 1" stroke="rgb(0 0 0 / 25%)" stroke-width=".8" fill="none"/></svg>
         @endforeach
         @unless ($on('snow'))
             @foreach ([0 => '', 1 => 'tree-decor__pumpkin--small'] as $p => $size)
-                @include('decor.parts.pumpkin', ['attrs' => 'class="tree-decor__pumpkin ' . $size . '" style="' . $style($spots['pumpkins'][$p]) . '"', 'tone' => $p ? 'gold' : 'orange'])
+                @include('decor.parts.pumpkin', ['attrs' => 'class="tree-decor__pumpkin ' . $size . '" style="' . $style($spots['pumpkins'][$p], 'pumpkin-' . $p) . '"' . $piece('pumpkin-' . $p), 'tone' => $p ? 'gold' : 'orange'])
             @endforeach
         @endunless
     @endif
 
     @if ($on('lanterns'))
         @foreach ($spots['lanterns'] as $i => $point)
-            @include('decor.parts.lantern', ['attrs' => 'class="tree-lantern" style="' . $style($point) . ' --delay: -' . ($i * 1.3) . 's;"'])
+            @include('decor.parts.lantern', ['attrs' => 'class="tree-lantern" style="' . $style($point, 'lantern-' . $i) . ' --delay: -' . ($i * 1.3) . 's;"' . $piece('lantern-' . $i)])
         @endforeach
     @endif
 
     @if ($on('nest'))
         {{-- a robin in its nest, with an egg --}}
-        @include('decor.parts.nest', ['attrs' => 'class="tree-creature tree-creature--nest" style="' . $style($spots['nest']) . '"'])
+        @include('decor.parts.nest', ['attrs' => 'class="tree-creature tree-creature--nest" style="' . $style($spots['nest'], 'nest') . '"' . $piece('nest')])
     @endif
 
     @if ($on('swing'))
         {{-- a wooden swing on twisted ropes, with a few flowers --}}
-        @include('decor.parts.swing', ['attrs' => 'class="tree-creature tree-creature--swing" style="' . $style($spots['swing']) . '"'])
+        @include('decor.parts.swing', ['attrs' => 'class="tree-creature tree-creature--swing" style="' . $style($spots['swing'], 'swing') . '"' . $piece('swing')])
     @endif
 
     @if ($on('squirrel'))
         {{-- a red squirrel holding an acorn --}}
-        @include('decor.parts.squirrel', ['attrs' => 'class="tree-creature tree-creature--squirrel" style="' . $style($spots['squirrel']) . '"'])
+        @include('decor.parts.squirrel', ['attrs' => 'class="tree-creature tree-creature--squirrel" style="' . $style($spots['squirrel'], 'squirrel') . '"' . $piece('squirrel')])
     @endif
 
     @if ($on('owl'))
         {{-- a brown owl; it blinks --}}
-        @include('decor.parts.owl', ['attrs' => 'class="tree-creature tree-creature--owl" style="' . $style($spots['owl']) . '"'])
+        @include('decor.parts.owl', ['attrs' => 'class="tree-creature tree-creature--owl" style="' . $style($spots['owl'], 'owl') . '"' . $piece('owl')])
     @endif
 </div>
 
@@ -147,7 +156,7 @@
     @endif
     @if ($on('butterflies'))
         @foreach ($spots['butterflies'] as $i => $point)
-            <span class="tree-butterfly" style="{{ $style($point) }} --hue: {{ [0, 190, 300, 40][$i % 4] }}deg; --dur: {{ 9 + $i * 2 }}s; --delay: -{{ $i * 2.3 }}s;">
+            <span class="tree-butterfly" data-decor-piece="butterfly-{{ $i }}" style="{{ $style($point, 'butterfly-' . $i) }} --hue: {{ [0, 190, 300, 40][$i % 4] }}deg; --dur: {{ 9 + $i * 2 }}s; --delay: -{{ $i * 2.3 }}s;">
                 @include('decor.parts.butterfly')
             </span>
         @endforeach

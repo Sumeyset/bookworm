@@ -60,6 +60,7 @@ class User extends Authenticatable
             'is_public' => 'boolean',
             'streak_reminder' => 'boolean',
             'is_private' => 'boolean',
+            'decor_positions' => 'array',
             'hide_activity' => 'boolean',
             'is_admin' => 'boolean',
             'suspended_at' => 'datetime',

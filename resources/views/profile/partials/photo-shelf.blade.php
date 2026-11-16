@@ -92,7 +92,7 @@
             @endforeach
 
             @if ($decorations && $scene['decor'])
-                @include('profile.partials.tree-decor', ['decorations' => $decorations, 'spots' => $scene['decor'], 'windowSnow' => (bool) $scene['glass']])
+                @include('profile.partials.tree-decor', ['decorations' => $decorations, 'spots' => $scene['decor'], 'windowSnow' => (bool) $scene['glass'], 'positions' => ($profile->decor_positions ?? [])[$sceneKey] ?? []])
             @endif
 
             <span class="book-tree__sign" aria-hidden="true">{{ $treeBookCount }} {{ Str::plural('book', $treeBookCount) }}</span>

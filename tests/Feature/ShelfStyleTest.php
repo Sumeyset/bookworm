@@ -113,3 +113,18 @@ test('spine colours are read from the cover', function () {
     [$r, $g, $b] = sscanf($color, '#%02X%02X%02X');
     expect($b)->toBeGreaterThan($r + 60)->and($ink)->toBe('#FFF4DF'); // blue spine, light text
 });
+
+test('decorations can be moved and their spots are kept per shelf style', function () {
+    $me = User::factory()->create(['shelf_style' => 'window']);
+    $me->decorations()->create(['item' => 'owl', 'enabled' => true]);
+
+    $this->actingAs($me)->postJson(route('decor.positions'), ['style' => 'window', 'positions' => ['owl' => [12.5, 40], 'bad key!' => [1, 1]]])
+        ->assertOk()->assertJson(['saved' => 1]);
+    expect($me->fresh()->decor_positions)->toBe(['window' => ['owl' => [12.5, 40.0]]]);
+
+    $this->actingAs($me)->get(route('users.show', $me->username))
+        ->assertSee('data-decor-piece="owl"', false)->assertSee('left: 12.5%; top: 40%;', false)->assertSee('Arrange decorations');
+
+    $this->actingAs($me)->deleteJson(route('decor.positions.reset'), ['style' => 'window'])->assertOk();
+    expect($me->fresh()->decor_positions)->toBeNull();
+});
