@@ -500,3 +500,18 @@ a.shelf-hub__action:hover, button.shelf-hub__action:hover { background: #fbf3e8;
 .dark .shop-gift summary { color: #f0a8b4; }
 .badge-chip--year { border-color: rgb(139 42 61 / 30%); background: linear-gradient(135deg, #fff1e6, #fbe3ea); color: #6d1a2b; }
 .dark .badge-chip--year { background: rgb(240 168 180 / 10%); color: #f0a8b4; }
+
+/* ---- Tree shop: illustrated scenes instead of emoji ---- */
+.shop-item__art { height: 8.5rem; overflow: hidden; padding: 0; }
+.shop-item__art .decor-scene {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 6px 8px rgb(80 50 20 / 22%));
+    transition: transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.shop-item:hover .shop-item__art .decor-scene { transform: scale(1.05) translateY(-2px); }
+.decor-scene--evening { filter: none !important; }
+.decor-scene__twinkle { animation: decor-twinkle 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes decor-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+.shop-item:hover .tree-owl__eyes { animation: tree-blink 1.2s ease-in-out 1; }
+@media (prefers-reduced-motion: reduce) { .decor-scene__twinkle { animation: none; } }

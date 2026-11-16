@@ -21,7 +21,7 @@
                         $short = max(0, $price - $balance);
                     @endphp
                     <article class="shop-item {{ $has ? 'is-owned' : '' }} {{ $on ? 'is-on' : '' }}">
-                        <div class="shop-item__art" aria-hidden="true"><span>{{ $emoji }}</span></div>
+                        <div class="shop-item__art" aria-hidden="true">@include('decor.scene', ['item' => $key])</div>
                         <div class="flex items-start justify-between gap-2">
                             <h2 class="font-serif text-lg font-semibold text-ink dark:text-[#f4e9e2]">{{ $name }}</h2>
                             @if ($window)
