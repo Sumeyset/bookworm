@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/books', [BookController::class, 'index'])->middleware('throttle:search')->name('books.index');
     Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
     Route::post('/books/{book}/shelf', [LibraryController::class, 'update'])->name('books.shelf.update');
+    Route::post('/books/{book}/series', [\App\Http\Controllers\SeriesController::class, 'update'])->middleware('throttle:30,1')->name('books.series');
     Route::post('/books/{book}/log', [\App\Http\Controllers\ReadingLogController::class, 'store'])->name('books.log');
     Route::post('/shelves/{slot}/title', [LibraryController::class, 'updateShelfTitle'])->name('shelves.title.update');
     Route::patch('/shelf/{book}', [ShelfEntryController::class, 'update'])->name('shelf.entry.update');

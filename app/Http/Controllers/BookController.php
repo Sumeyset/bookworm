@@ -89,6 +89,8 @@ class BookController extends Controller
                 ->paginate(12, ['*'], 'quotes_page'),
             'reviews' => $book->reviews()->with('user')->latest()->paginate(10, ['*'], 'reviews_page'),
             'feel' => \App\Support\BookInsights::feel($book),
+            'series' => $book->seriesBooks(),
+            'seriesStatus' => $request->user()->shelfItems()->whereIn('book_id', $book->seriesBooks()->pluck('id'))->pluck('status', 'book_id'),
             'alsoLoved' => \App\Support\BookInsights::alsoLoved($book),
         ]);
     }

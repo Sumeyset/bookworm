@@ -51,6 +51,14 @@ class Book extends Model
             : null;
     }
 
+    /** The other books in this book's series, in order. */
+    public function seriesBooks()
+    {
+        return $this->series_name
+            ? static::where('series_name', $this->series_name)->orderByRaw('series_number IS NULL')->orderBy('series_number')->orderBy('title')->get()
+            : collect();
+    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);

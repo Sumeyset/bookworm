@@ -34,3 +34,19 @@ test('readers who loved this also loved', function () {
     expect($also->pluck('title')->all())->toBe(['Book B', 'Book C'])->and($also->first()->fans)->toBe(3);
     $this->actingAs(User::factory()->create())->get(route('books.show', $book))->assertSee('Readers who loved this also loved')->assertSee('3 readers loved both');
 });
+
+test('series: readers mark the series, the page lists it, finishing suggests the next', function () {
+    $me = User::factory()->create();
+    $one = Book::create(['ol_id' => 'OL-S1', 'title' => 'The First']);
+    $two = Book::create(['ol_id' => 'OL-S2', 'title' => 'The Second']);
+
+    $this->actingAs($me)->post(route('books.series', $one), ['series_name' => 'The Saga', 'series_number' => 1]);
+    $this->actingAs($me)->post(route('books.series', $two), ['series_name' => 'the saga', 'series_number' => 2]);
+    expect($two->fresh()->series_name)->toBe('The Saga');
+
+    $this->actingAs($me)->get(route('books.show', $one))->assertSee('The Saga')->assertSee('The Second')->assertSee('You’ve read 0 of 2');
+
+    $item = $me->shelfItems()->create(['book_id' => $one->id, 'status' => 'reading']);
+    $item->update(['status' => 'read', 'read_at' => now()]);
+    expect($me->notifications()->where('data->kind', 'series')->first()->data['message'])->toContain('The Second');
+});

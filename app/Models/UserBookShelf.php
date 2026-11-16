@@ -78,6 +78,7 @@ class UserBookShelf extends Model
 
             if ($finished) {
                 static::notifyGoalMilestone($item);
+                static::suggestNextInSeries($item);
             }
 
             // Acorns for reading: finishing a book (also when it's added as already read),
@@ -127,6 +128,20 @@ class UserBookShelf extends Model
         }
 
         return [self::MAX_SHELVES - 1, self::MAX_BOOKS_PER_SHELF];
+    }
+
+    /** Finished a book in a series: point to the next one (if it isn't on the shelf yet). */
+    private static function suggestNextInSeries(UserBookShelf $item): void
+    {
+        $book = $item->book;
+        if (! $book?->series_name || $book->series_number === null || \App\Support\FriendActivity::$quiet) {
+            return;
+        }
+        $next = Book::where('series_name', $book->series_name)->where('series_number', '>', $book->series_number)->orderBy('series_number')->first();
+        if (! $next || static::where('user_id', $item->user_id)->where('book_id', $next->id)->exists()) {
+            return;
+        }
+        \App\Notifications\BookwormNotification::send($item->user, 'series', '📚 Next in ' . $book->series_name . ': “' . $next->title . '” (book ' . rtrim(rtrim((string) $next->series_number, '0'), '.') . ').', route('books.show', $next));
     }
 
     /** Cheer the reader on at 50%, 80% and 100% of their yearly goal. */

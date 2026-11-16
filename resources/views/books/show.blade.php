@@ -236,6 +236,41 @@
             </section>
                 </div>
                 <aside class="space-y-8 lg:sticky lg:top-28 lg:self-start">
+            <section class="bw-card p-5" aria-labelledby="series-heading" x-data="{ edit: false }">
+                <div class="flex items-start justify-between gap-2">
+                    <h2 id="series-heading" class="font-serif text-xl font-semibold text-ink dark:text-[#f4e9e2]">{{ $book->series_name ?: 'Part of a series?' }}</h2>
+                    <button type="button" class="text-xs font-semibold text-burgundy underline underline-offset-2 dark:text-[#F0A8B4]" @click="edit = !edit">{{ $book->series_name ? 'Edit' : 'Add series' }}</button>
+                </div>
+                @if ($series->count() > 1)
+                    @php($readInSeries = $series->filter(fn ($b) => ($seriesStatus[$b->id] ?? null) === 'read')->count())
+                    <p class="mt-1 text-sm text-tan">You’ve read {{ $readInSeries }} of {{ $series->count() }} on Bookworm.</p>
+                    <ol class="mt-3 space-y-2">
+                        @foreach ($series as $part)
+                            @php($state = $seriesStatus[$part->id] ?? null)
+                            <li>
+                                <a href="{{ route('books.show', $part) }}" class="flex items-center gap-3 rounded-xl p-1.5 {{ $part->is($book) ? 'bg-parchment/70 dark:bg-white/5' : 'hover:bg-parchment/50 dark:hover:bg-white/5' }}">
+                                    <span class="w-6 text-center font-display text-xl font-bold text-gold">{{ $part->series_number !== null ? rtrim(rtrim((string) $part->series_number, '0'), '.') : '·' }}</span>
+                                    <x-book-cover :book="$part" class="w-8 shrink-0" />
+                                    <span class="min-w-0 flex-1 truncate text-sm font-semibold text-ink dark:text-[#F4E9E2]">{{ $part->title }}</span>
+                                    <span class="shrink-0 text-xs">{{ ['read' => '✅', 'reading' => '📖', 'want_to_read' => '🔖'][$state] ?? '' }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ol>
+                @elseif ($book->series_name)
+                    <p class="mt-1 text-sm text-tan">Book {{ $book->series_number !== null ? rtrim(rtrim((string) $book->series_number, '0'), '.') : '?' }}. Other books in this series show up here once readers add them.</p>
+                @else
+                    <p class="mt-1 text-sm text-tan">Tell Bookworm which series this belongs to, and readers can follow it in order.</p>
+                @endif
+                <form method="POST" action="{{ route('books.series', $book) }}" class="mt-3 space-y-2" x-show="edit" x-cloak>
+                    @csrf
+                    <input name="series_name" value="{{ $book->series_name }}" maxlength="120" placeholder="Series name" class="bw-input w-full py-2" aria-label="Series name">
+                    <div class="flex gap-2">
+                        <input name="series_number" type="number" step="0.5" min="0" value="{{ $book->series_number !== null ? rtrim(rtrim((string) $book->series_number, '0'), '.') : '' }}" placeholder="Book #" class="bw-input w-24 py-2" aria-label="Book number">
+                        <button class="btn-primary min-h-0 flex-1 py-2">Save</button>
+                    </div>
+                </form>
+            </section>
             @if ($feel['voters'] > 0)
                 <section class="bw-card p-5" aria-labelledby="feel-heading">
                     <h2 id="feel-heading" class="font-serif text-xl font-semibold text-ink dark:text-[#f4e9e2]">Readers say it’s…</h2>
