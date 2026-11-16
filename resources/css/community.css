@@ -591,3 +591,11 @@ a.shelf-hub__action:hover, button.shelf-hub__action:hover { background: #fbf3e8;
 .room__msg { margin: .2rem 0; }
 .room__msg time { font-size: .7rem; opacity: .55; }
 .room__msg.is-mine b { color: #8b2a3d; }
+
+/* ---- Author pages ---- */
+.author-hero { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem; border-radius: 2rem; background: radial-gradient(60% 120% at 100% 0%, rgb(242 195 139 / 28%), transparent 60%), linear-gradient(135deg, #2a0d15, #4a1220 50%, #8b2a3d); padding: 2rem; color: #fff8ef; }
+.author-hero__mark { display: flex; width: 5rem; height: 5rem; flex: none; align-items: center; justify-content: center; border-radius: 1.5rem; background: rgb(255 255 255 / 12%); font-family: Lora, Georgia, serif; font-size: 2.6rem; font-weight: 700; color: #f2c38b; }
+.author-quote { display: block; border-radius: 1.5rem; background: linear-gradient(140deg, #4a1220, #8b2a3d); padding: 1.4rem; color: #fff8ef; transition: transform .15s ease; }
+.author-quote:hover { transform: translateY(-2px); }
+.author-quote blockquote { font-family: Lora, Georgia, serif; font-size: 1.1rem; font-style: italic; line-height: 1.5; }
+.author-quote p { color: #f1d9c4; }

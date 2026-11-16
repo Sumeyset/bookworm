@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/quotes/{quote}', [QuoteController::class, 'destroy'])->name('quotes.destroy');
     Route::post('/books/rating', [BookRatingController::class, 'store'])->name('books.rate');
     Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
+    Route::get('/authors/{name}', [\App\Http\Controllers\AuthorController::class, 'show'])->where('name', '.+')->name('authors.show');
     Route::post('/books/{book}/pdfs', [BookPdfController::class, 'store'])->name('books.pdfs.store');
     Route::get('/books/{book}/pdfs/{bookPdf}', [BookPdfController::class, 'download'])->name('books.pdfs.download');
     Route::get('/books/{book}/pdfs/{bookPdf}/read', [BookPdfController::class, 'reader'])->name('books.pdfs.reader');

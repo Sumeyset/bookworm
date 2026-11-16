@@ -23,7 +23,7 @@
                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-tan dark:text-[#c7a491]">Book details</p>
                     <h1 class="font-display mt-2 text-4xl leading-none sm:text-6xl text-ink dark:text-[#f4e9e2] font-bold">{{ $book->title }}</h1>
                     <p class="mt-3 text-lg text-walnut dark:text-[#d4c2b9]">
-                        {{ $book->author_name ?? 'Unknown author' }}
+                        @if ($book->author_name)<a href="{{ route('authors.show', rawurlencode($book->author_name)) }}" class="hover:text-burgundy hover:underline dark:hover:text-[#F0A8B4]">{{ $book->author_name }}</a>@else Unknown author @endif
                         @if ($book->first_publish_year)
                             <span aria-hidden="true">&middot;</span> {{ $book->first_publish_year }}
                         @endif
