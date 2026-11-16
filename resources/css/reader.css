@@ -1216,3 +1216,34 @@
     width: 1.25rem;
     height: 1.25rem;
 }
+
+/* "Where was I?" welcome-back card */
+.reader-welcome {
+    position: sticky;
+    top: .75rem;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    max-width: 44rem;
+    margin: .75rem auto 0;
+    border: 1px solid rgb(184 137 59 / 35%);
+    border-radius: 1.25rem;
+    background: #fffaf2;
+    padding: .7rem .8rem .7rem .7rem;
+    font-size: .92rem;
+    line-height: 1.4;
+    color: #3a2a2d;
+    box-shadow: 0 18px 40px -20px rgb(70 35 20 / 55%);
+    animation: reader-welcome-in .4s cubic-bezier(.2,.8,.2,1);
+}
+.reader-welcome[hidden] { display: none; }
+.reader-welcome__go { flex: none; border-radius: 999px; background: #6d1a2b; padding: .5rem 1rem; font-weight: 700; color: #fff8ef; }
+.reader-welcome__close { flex: none; width: 2rem; height: 2rem; border-radius: 999px; color: #9b7b62; }
+.reader-welcome__close:hover { background: rgb(0 0 0 / 6%); }
+[data-theme="night"] .reader-welcome, .dark .reader-welcome { border-color: #4b3035; background: #2a1d20; color: #f4e9e2; }
+@keyframes reader-welcome-in { from { opacity: 0; transform: translateY(-8px); } }
+@media (max-width: 640px) {
+    .reader-welcome { flex-wrap: wrap; }
+    .reader-welcome__go { margin-left: auto; }
+}

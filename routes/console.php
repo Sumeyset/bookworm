@@ -17,3 +17,6 @@ Schedule::command('covers:warm --limit=500')->dailyAt('04:20');
 // (each reader gets theirs at the hour they picked, in their own time zone).
 Schedule::call(fn () => \App\Support\Streak::applyFreezes())->name('streaks:freezes')->dailyAt('00:05');
 Schedule::call(fn () => \App\Support\Streak::sendReminders())->name('streaks:reminders')->hourlyAt(2);
+
+// Barnaby's pick of the week, Monday morning, for readers who read in the last two weeks.
+Schedule::call(fn () => \App\Support\Barnaby\WeeklyPicks::send())->name('barnaby:weekly')->weeklyOn(1, '10:17');

@@ -69,7 +69,12 @@ class BookPdfController extends Controller
         $this->authorizePdf($request, $book, $bookPdf);
         abort_unless(Storage::disk('local')->exists($bookPdf->path), 404);
 
+        // "Where was I?": back after a few days away, Barnaby offers a recap.
+        $lastRead = \App\Models\ReadingSession::where('user_id', $request->user()->id)->where('book_id', $book->id)->max('read_on');
+        $daysAway = $lastRead ? (int) \Illuminate\Support\Carbon::parse($lastRead)->diffInDays(today()) : 0;
+
         return view('books.pdfs.reader', [
+            'daysAway' => $daysAway,
             'book' => $book,
             'bookPdf' => $bookPdf,
             'fileUrl' => route('books.pdfs.file', [$book, $bookPdf], false),

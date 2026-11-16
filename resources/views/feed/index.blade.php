@@ -58,6 +58,17 @@
         </div>
 
         <aside class="space-y-5 lg:sticky lg:top-28 lg:self-start">
+            <div class="bw-card p-5" data-weekly-pick="{{ route('barnaby.weekly') }}" hidden>
+                <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-tan"><x-barnaby-avatar class="h-6 w-6" /> Barnaby’s pick this week</p>
+                <a data-weekly-link class="mt-3 flex gap-3">
+                    <img data-weekly-cover alt="" class="w-16 shrink-0 rounded-md object-cover shadow-md" style="aspect-ratio: 2 / 3" hidden>
+                    <span class="min-w-0">
+                        <span data-weekly-title class="block font-serif text-lg font-semibold leading-tight text-ink dark:text-[#F4E9E2]"></span>
+                        <span data-weekly-author class="block text-xs text-tan"></span>
+                        <span data-weekly-why class="mt-2 block text-sm text-walnut dark:text-[#d4c2b9]"></span>
+                    </span>
+                </a>
+            </div>
             <div class="bw-card p-5">
                 <p class="eyebrow">Your circle</p>
                 <h2 class="mt-1 font-serif text-2xl font-semibold text-ink dark:text-[#F4E9E2]">Readers you follow</h2>

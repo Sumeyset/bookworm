@@ -159,6 +159,55 @@ TXT;
         ));
     }
 
+    /** "Who is this?": a character, place or thing, only as far as the reader has read. */
+    public function who(Book $book, string $name, int $page): string
+    {
+        $name = Str::limit(trim($name), 80, '');
+
+        return Cache::remember('barnaby:who:' . md5($book->id . '|' . Str::lower($name) . '|' . $page), now()->addWeek(), fn () => $this->client->reply(
+            self::PERSONA,
+            [['role' => 'user', 'text' => "I'm reading **{$book->title}**" . ($book->author_name ? " by {$book->author_name}" : '') . " and I'm on page {$page}.
+"
+                . "Who or what is \"{$name}\"? Remind me in 2–4 short sentences: who they are, how they connect to the main characters, and anything I should remember about them.
+"
+                . "STRICT: only what a reader knows by page {$page} — no later reveals, deaths, twists or identities. "
+                . "If you aren't sure who this is in this book, say so honestly instead of guessing."]],
+            0.3,
+            400,
+        ));
+    }
+
+    /**
+     * Barnaby's pick of the week: one book chosen for this reader.
+     * The same pick all week (cached), so it costs one AI call per reader per week.
+     *
+     * @return array<string, mixed>|null a book card (see findBooks), or null when there's nothing to go on
+     */
+    public function weeklyPick(User $user): ?array
+    {
+        $shelf = $this->shelfSummary($user);
+        if ($shelf === '') {
+            return null;
+        }
+
+        return Cache::remember('barnaby:weekly:' . $user->id . ':' . now()->format('o-W'), now()->endOfWeek(), function () use ($user, $shelf) {
+            $raw = $this->client->reply(
+                self::PERSONA,
+                [['role' => 'user', 'text' => "Here is {$this->firstName($user)}'s shelf (title — author [status, rating]):\n{$shelf}\n\n"
+                    . 'Pick ONE real, published book for them to read next that is not on their shelf. Lean on what they rated highly and finished. '
+                    . "Write one warm sentence (under 30 words) on why, then the hidden block:\n```books\n"
+                    . '[{"title": "...", "author": "...", "why": "..."}]' . "\n```"]],
+                0.9,
+                400,
+            );
+            [, $picks] = $this->splitBooks($raw);
+            $onShelf = $user->shelfItems()->with('book:id,title')->get()->pluck('book.title')->filter()->map(fn ($t) => Str::lower($t));
+            $pick = collect($picks)->reject(fn ($p) => $onShelf->contains(Str::lower($p['title'])))->first();
+
+            return $pick ? ($this->findBooks([$pick], $user)[0] ?? null) : null;
+        });
+    }
+
     /* ---------------- helpers ---------------- */
 
     private function firstName(User $user): string

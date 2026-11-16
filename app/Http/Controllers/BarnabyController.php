@@ -76,6 +76,30 @@ class BarnabyController extends Controller
         return $this->answer($request, fn () => ['reply' => $this->barnaby->discussion($buddyRead->load('book'), max(0, $page)), 'page' => $page]);
     }
 
+    public function who(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:80'],
+            'book_id' => ['required', 'integer', 'exists:books,id'],
+            'page' => ['required', 'integer', 'min:1', 'max:100000'],
+        ]);
+
+        return $this->answer($request, fn () => ['reply' => $this->barnaby->who(Book::findOrFail($validated['book_id']), $validated['name'], (int) $validated['page'])]);
+    }
+
+    /** Barnaby's pick of the week (the same all week; doesn't use up the reader's questions). */
+    public function weekly(Request $request): JsonResponse
+    {
+        if (! BarnabyClient::configured()) {
+            return response()->json(['book' => null]);
+        }
+        try {
+            return response()->json(['book' => $this->barnaby->weeklyPick($request->user())]);
+        } catch (BarnabyUnavailable) {
+            return response()->json(['book' => null]);
+        }
+    }
+
     /** Questions for one section of a book club's schedule (only up to that section's last page). */
     public function clubQuestions(Request $request, \App\Models\BookClub $club, \App\Models\BookClubSection $section): JsonResponse
     {

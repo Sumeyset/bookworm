@@ -16,6 +16,8 @@
               data-book-id="{{ $book->id }}"
               data-barnaby-explain-url="{{ route('barnaby.explain') }}"
               data-barnaby-recap-url="{{ route('barnaby.recap', $book) }}"
+              data-barnaby-who-url="{{ route('barnaby.who') }}"
+              data-days-away="{{ $daysAway }}"
               data-book-author="{{ $book->author_name }}"
               data-post-url="{{ route('posts.store') }}"
               data-delete-highlight-url="{{ route('books.pdfs.highlights.index', [$book, $bookPdf], false) }}/__HIGHLIGHT__">
@@ -202,6 +204,14 @@
             </section>
 
             {{-- Saved highlights --}}
+            {{-- "Where was I?" — shown when coming back to the book after a few days --}}
+            <div class="reader-welcome" data-welcome-back hidden role="status">
+                <x-barnaby-avatar class="h-10 w-10 shrink-0" />
+                <p class="min-w-0 flex-1"><b data-welcome-title>Welcome back!</b> <span data-welcome-text></span></p>
+                <button type="button" class="reader-welcome__go" data-welcome-recap>Catch me up</button>
+                <button type="button" class="reader-welcome__close" data-welcome-close aria-label="No thanks">✕</button>
+            </div>
+
             {{-- Barnaby: help with a passage, or the story so far --}}
             <aside id="reader-barnaby" class="reader-panel reader-panel--barnaby" data-panel="barnaby" hidden aria-labelledby="reader-barnaby-heading">
                 <div class="reader-panel__head">
@@ -230,7 +240,7 @@
             <div class="reader-pop" data-selection-toolbar role="toolbar" aria-label="Selected text" hidden>
                 <button type="button" data-action="highlight"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M9 11l-5 5v4h4l5-5M14 6l4 4M12 8l6-6 4 4-6 6z"/></svg><span>Highlight</span></button>
                 <button type="button" data-action="quote"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/></svg><span data-quote-label>Quote</span></button>
-                <button type="button" data-action="barnaby"><x-barnaby-avatar width="20" height="20" /><span>Ask Barnaby</span></button>
+                <button type="button" data-action="barnaby"><x-barnaby-avatar width="20" height="20" /><span data-barnaby-label>Ask Barnaby</span></button>
                 <button type="button" data-action="copy"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg><span>Copy</span></button>
                 <button type="button" data-action="share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span>Share</span></button>
                 <button type="button" data-action="remove" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg><span>Remove</span></button>

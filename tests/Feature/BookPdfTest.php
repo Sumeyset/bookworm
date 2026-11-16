@@ -239,3 +239,15 @@ test('the PDF card can upload with progress (JSON) and lands back on the book', 
         ->assertUnprocessable()
         ->assertJsonValidationErrors('pdfs.0');
 });
+
+test('the reader knows how long you were away, for the "Where was I?" recap', function () {
+    $user = User::factory()->create();
+    $book = Book::create(['ol_id' => 'OL-AWAY', 'title' => 'Away Book']);
+    $path = 'book-pdfs/' . $user->id . '/' . $book->id . '/away.pdf';
+    Storage::disk('local')->put($path, "%PDF-1.4\n%%EOF");
+    $pdf = BookPdf::create(['user_id' => $user->id, 'book_id' => $book->id, 'path' => $path, 'original_name' => 'away.pdf']);
+    \App\Models\ReadingSession::create(['user_id' => $user->id, 'book_id' => $book->id, 'read_on' => today()->subDays(9), 'pages_read' => 20]);
+
+    $this->actingAs($user)->get(route('books.pdfs.reader', [$book, $pdf]))
+        ->assertOk()->assertSee('data-days-away="9"', false)->assertSee('data-welcome-back', false);
+});

@@ -990,6 +990,12 @@ function initializeReader(reader) {
         toolbar.style.top = `${top}px`;
     }
 
+    // One to four words that look like a name or a thing ("Mr. Darcy", "the Shire").
+    function isShortName(text) {
+        const clean = (text || '').trim();
+        return clean.length > 1 && clean.length <= 40 && clean.split(/\s+/).length <= 4 && !/[.!?;:]$/.test(clean.replace(/^(Mr|Mrs|Ms|Dr|St)\.$/i, ''));
+    }
+
     function showToolbar(target, rect) {
         toolbarTarget = target;
         const isHighlight = target.kind === 'highlight';
@@ -1000,6 +1006,9 @@ function initializeReader(reader) {
         quoteButton.disabled = Boolean(quoted);
         toolbar.querySelector('[data-quote-label]').textContent = quoted ? 'Quoted' : 'Quote';
         toolbar.setAttribute('aria-label', isHighlight ? 'Saved highlight' : 'Selected text');
+        // A name or a word or two: Barnaby can say who (or what) it is.
+        const picked = (isHighlight ? target.highlight.text : target.payload.text || '').trim();
+        toolbar.querySelector('[data-barnaby-label]').textContent = isShortName(picked) ? 'Who is this?' : 'Ask Barnaby';
         placeToolbar(rect);
         if (isHighlight) {
             drawBookHighlights(target.highlight.id);
@@ -1082,6 +1091,12 @@ function initializeReader(reader) {
             const page = target.kind === 'selection' ? target.payload.page_number : target.highlight.page_number;
             hideToolbar();
             window.getSelection()?.removeAllRanges();
+            if (isShortName(text) && reader.dataset.barnabyWhoUrl) {
+                // Only as far as the reader has got: the furthest of this page and their bookmark.
+                const upTo = Math.max(page || 1, currentPdfPage());
+                barnabyAsk(`Who is ${text.trim()}?`, null, reader.dataset.barnabyWhoUrl, { name: text.trim(), book_id: bookId, page: upTo });
+                return;
+            }
             barnabyAsk('About this passage', text, reader.dataset.barnabyExplainUrl, { text, book_id: bookId, page });
             return;
         }
@@ -1281,6 +1296,23 @@ function initializeReader(reader) {
         const page = currentPdfPage();
         barnabyAsk(`Story so far · up to page ${page}`, null, reader.dataset.barnabyRecapUrl, { page });
     });
+
+    /* "Where was I?": coming back after a few days, offer a recap up to the bookmark. */
+    const welcome = $('[data-welcome-back]');
+    const daysAway = Number(reader.dataset.daysAway) || 0;
+    if (welcome && daysAway >= 4 && Number(reader.dataset.initialPage) > 3) {
+        const page = Number(reader.dataset.initialPage);
+        const away = daysAway >= 14 ? `${Math.round(daysAway / 7)} weeks` : `${daysAway} days`;
+        welcome.querySelector('[data-welcome-text]').textContent = `It’s been ${away} since you read this. Want a quick, spoiler-free recap of everything up to page ${page}?`;
+        welcome.hidden = false;
+        const dismiss = () => { welcome.hidden = true; };
+        welcome.querySelector('[data-welcome-close]').addEventListener('click', dismiss);
+        welcome.querySelector('[data-welcome-recap]').addEventListener('click', () => {
+            dismiss();
+            barnabyAsk(`Where was I? · up to page ${page}`, null, reader.dataset.barnabyRecapUrl, { page });
+        });
+        window.setTimeout(dismiss, 30000);
+    }
 
     /* ---------------- share a quote to the feed ---------------- */
 

@@ -75,6 +75,8 @@ Route::middleware('auth')->group(function () {
 
     // Barnaby the worm (AI reading assistant)
     Route::post('/barnaby/chat', [BarnabyController::class, 'chat'])->name('barnaby.chat');
+    Route::post('/barnaby/who', [BarnabyController::class, 'who'])->name('barnaby.who');
+    Route::get('/barnaby/weekly', [BarnabyController::class, 'weekly'])->middleware('throttle:20,1')->name('barnaby.weekly');
     Route::post('/barnaby/explain', [BarnabyController::class, 'explain'])->name('barnaby.explain');
     Route::post('/barnaby/recap/{book}', [BarnabyController::class, 'recap'])->name('barnaby.recap');
     Route::post('/barnaby/buddy-reads/{buddyRead}/questions', [BarnabyController::class, 'discussion'])->name('barnaby.discussion');

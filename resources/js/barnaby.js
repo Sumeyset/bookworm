@@ -353,8 +353,32 @@ function initQuestionButtons() {
     });
 }
 
+/* ---------------- Barnaby's pick of the week (feed sidebar) ---------------- */
+
+async function initWeeklyPick(card) {
+    try {
+        const response = await fetch(card.dataset.weeklyPick, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+        const { book } = await response.json();
+        if (!book) return;
+        card.querySelector('[data-weekly-link]').href = book.url;
+        card.querySelector('[data-weekly-title]').textContent = book.title;
+        card.querySelector('[data-weekly-author]').textContent = [book.author, book.year].filter(Boolean).join(' · ');
+        card.querySelector('[data-weekly-why]').textContent = book.why || '';
+        if (book.cover) {
+            const cover = card.querySelector('[data-weekly-cover]');
+            cover.src = book.cover;
+            cover.hidden = false;
+        }
+        card.hidden = false;
+    } catch {
+        // no pick this time
+    }
+}
+
 export function initBarnaby() {
     initQuestionButtons();
+    const weekly = document.querySelector('[data-weekly-pick]');
+    if (weekly) initWeeklyPick(weekly);
     const root = document.querySelector('[data-barnaby]');
     if (root) initChat(root);
     const discussion = document.querySelector('[data-barnaby-discussion]');

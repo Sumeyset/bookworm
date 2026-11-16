@@ -125,3 +125,33 @@ test('buddy-read questions stay behind the slowest reader, for members only', fu
 
     $this->actingAs(User::factory()->create())->postJson(route('barnaby.discussion', $read))->assertNotFound();
 });
+
+test('who is this: Barnaby answers only up to the reader page', function () {
+    $me = User::factory()->create();
+    $book = Book::create(['ol_id' => 'OL-WHO', 'title' => 'Pride and Prejudice', 'author_name' => 'Jane Austen']);
+    Http::fake(['generativelanguage.googleapis.com/*' => Http::response(geminiSays('Mr. Darcy is a wealthy, proud gentleman Elizabeth meets at the ball.'))]);
+
+    $this->actingAs($me)->postJson(route('barnaby.who'), ['name' => 'Mr. Darcy', 'book_id' => $book->id, 'page' => 42])
+        ->assertOk()->assertJsonPath('reply', 'Mr. Darcy is a wealthy, proud gentleman Elizabeth meets at the ball.');
+
+    Http::assertSent(fn (Request $request) => str_contains(json_encode($request->data()), 'only what a reader knows by page 42'));
+});
+
+test('the weekly pick is one book, the same all week, and notifies active readers', function () {
+    $me = User::factory()->create();
+    $read = Book::create(['ol_id' => 'OL-READ', 'title' => 'Rebecca']);
+    $me->shelfItems()->create(['book_id' => $read->id, 'status' => 'read', 'current_page' => 10]);
+    \App\Models\ReadingSession::create(['user_id' => $me->id, 'book_id' => $read->id, 'read_on' => today(), 'pages_read' => 10]);
+
+    Http::fake([
+        'generativelanguage.googleapis.com/*' => Http::response(geminiSays("You loved Rebecca's gothic house.\n```books\n[{\"title\":\"The Thirteenth Tale\",\"author\":\"Diane Setterfield\",\"why\":\"Another house full of secrets.\"}]\n```")),
+        'openlibrary.org/*' => Http::response(['docs' => [['key' => '/works/OL13W', 'title' => 'The Thirteenth Tale', 'author_name' => ['Diane Setterfield']]]]),
+    ]);
+
+    $this->actingAs($me)->getJson(route('barnaby.weekly'))->assertOk()->assertJsonPath('book.title', 'The Thirteenth Tale');
+    $this->actingAs($me)->getJson(route('barnaby.weekly'))->assertOk();
+    Http::assertSentCount(2); // one AI call + one Open Library lookup, then cached
+
+    expect(\App\Support\Barnaby\WeeklyPicks::send())->toBe(1)
+        ->and($me->notifications()->where('data->kind', 'barnaby')->first()->data['message'])->toContain('The Thirteenth Tale');
+});
