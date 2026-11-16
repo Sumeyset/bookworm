@@ -926,80 +926,6 @@
 }
 
 /* =====================================================================
-   Tree shop
-   ===================================================================== */
-
-.shop-item {
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    border: 1px solid #e6d9d0;
-    border-radius: 1.4rem;
-    background: #fffdf9;
-    transition: border-color .15s ease, transform .15s ease;
-}
-
-.dark .shop-item { border-color: #4b3035; background: #22131a; }
-.shop-item:hover { transform: translateY(-2px); }
-.shop-item.is-on { border-color: #6d9a62; box-shadow: 0 0 0 1px #6d9a62; }
-
-.shop-item__art {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 7rem;
-    margin-bottom: .8rem;
-    border-radius: 1rem;
-    background: radial-gradient(circle at 50% 60%, #fff8e8, #f1e2c6 70%, #e8d3ad);
-}
-
-.dark .shop-item__art { background: radial-gradient(circle at 50% 60%, #3b2a20, #2a1c16); }
-
-.shop-item__art span {
-    font-size: 3.4rem;
-    filter: drop-shadow(0 6px 8px rgb(80 50 20 / 30%));
-    transition: transform .2s ease;
-}
-
-.shop-item:hover .shop-item__art span { transform: scale(1.1) rotate(-6deg); }
-
-.shop-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: .6rem;
-    font-size: .9rem;
-    font-weight: 600;
-    color: #4f7a46;
-}
-
-.shop-toggle[aria-checked="false"] { color: #8a6a55; }
-
-.shop-toggle__track {
-    position: relative;
-    width: 2.6rem;
-    height: 1.5rem;
-    border-radius: 999px;
-    background: #d9c6b6;
-    transition: background-color .15s ease;
-}
-
-.shop-toggle[aria-checked="true"] .shop-toggle__track { background: #6d9a62; }
-
-.shop-toggle__dot {
-    position: absolute;
-    top: .2rem;
-    left: .2rem;
-    width: 1.1rem;
-    height: 1.1rem;
-    border-radius: 999px;
-    background: #fff;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
-    transition: transform .15s ease;
-}
-
-.shop-toggle[aria-checked="true"] .shop-toggle__dot { transform: translateX(1.1rem); }
-
-/* =====================================================================
    Shop creatures and extras on the tree
    ===================================================================== */
 
@@ -1253,9 +1179,6 @@
 /* the creatures cast their shadow on the photo too, and keep clear of the frame edge */
 .photo-shelf .tree-decor { overflow: hidden; }
 
-.shop-gift summary { cursor: pointer; font-size: .85rem; font-weight: 600; color: #8b2a3d; list-style: none; }
-.shop-gift summary::-webkit-details-marker { display: none; }
-.dark .shop-gift summary { color: #f0a8b4; }
 
 /* Decorations a little bigger in the wide photos, so they read as clearly as on the tree */
 .photo-shelf .tree-decor,

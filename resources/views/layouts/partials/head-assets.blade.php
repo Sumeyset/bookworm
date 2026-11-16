@@ -1,6 +1,4 @@
-{{-- Shared <head> assets. Only the font weights the design actually uses are requested. --}}
-<link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-<link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700|lora:500,600,700,500i&display=swap" rel="stylesheet">
+{{-- Shared <head> assets. Fonts are served by Bookworm itself (no third-party font host to wait for). --}}
 <script>
     (() => {
         try {

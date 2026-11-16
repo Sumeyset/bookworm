@@ -42,13 +42,7 @@ class ProfileController extends Controller
         $oldProfilePhotoPath = $user->profile_photo_path;
 
         if ($profilePhoto) {
-            $path = $profilePhoto->store('profile-photos', 'public');
-
-            if ($path === false) {
-                throw new RuntimeException('Failed to store the uploaded profile photo.');
-            }
-
-            $user->profile_photo_path = $path;
+            $user->profile_photo_path = \App\Support\Avatar::store($profilePhoto);
         }
 
         $user->save();

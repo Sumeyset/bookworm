@@ -17,6 +17,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/posts.css',
                 'resources/css/barnaby.css',
+                'resources/css/shelves.css',
                 'resources/js/app.js',
                 'resources/js/tree-shelf.js',
                 'resources/js/pdf-reader.js',

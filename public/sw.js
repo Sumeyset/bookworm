@@ -6,7 +6,7 @@
  *    They are private: logging out clears them (see resources/js/app.js).
  *  - Push notifications.
  */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const STATIC = `bw-static-${VERSION}`;
 const PAGES = 'bw-pages';
 const PDFS = 'bw-pdfs';

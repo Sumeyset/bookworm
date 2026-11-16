@@ -29,7 +29,8 @@
 @else
     <span {{ $attributes->class(['bw-logo inline-flex items-center gap-3 select-none']) }}>
         <picture class="bw-logo__mark {{ $sizeClasses }} shrink-0">
-            <source srcset="{{ asset('images/brand/bookworm-mark.webp') }}" type="image/webp">
+            <source srcset="{{ asset('images/brand/bookworm-mark-48.webp') }} 48w, {{ asset('images/brand/bookworm-mark-96.webp') }} 96w, {{ asset('images/brand/bookworm-mark-144.webp') }} 144w, {{ asset('images/brand/bookworm-mark.webp') }} 249w"
+                    sizes="{{ match ($size) { 'sm' => '32px', 'lg' => '56px', 'xl' => '96px', 'fill' => '120px', default => '44px' } }}" type="image/webp">
             <img src="{{ asset('images/brand/bookworm-mark.png') }}" alt="" width="249" height="249" class="h-full w-full rounded-full object-contain {{ $isLight ? 'shadow-[0_6px_18px_-6px_rgba(0,0,0,0.6)] ring-1 ring-white/20' : 'shadow-[0_8px_18px_-10px_rgba(74,18,32,0.7)]' }}" decoding="async">
         </picture>
 

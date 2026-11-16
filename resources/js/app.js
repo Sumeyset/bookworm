@@ -1,8 +1,5 @@
 import Alpine from 'alpinejs';
 import { attachReaderSuggest, fetchReaders, markMatch, readerAvatar, readerMeta } from './reader-search.js';
-import { initMessages } from './messages.js';
-import { initBarnaby } from './barnaby.js';
-import { preparePhoto } from './photo-prep.js';
 
 window.Alpine = Alpine;
 
@@ -509,6 +506,7 @@ Alpine.data('composer', ({ cards = [], books = [], old = null, maxPhotos = 10 } 
         try {
             for (const file of files.slice(0, Math.max(0, room))) {
                 try {
+                    const { preparePhoto } = await import('./photo-prep.js');
                     const prepared = await preparePhoto(file);
                     this.photos.push({
                         id: ++photoIds,
@@ -790,10 +788,16 @@ Alpine.data('pdfUploader', ({ maxFiles = 5, maxMb = 20 } = {}) => ({
 document.querySelectorAll('[data-reader-suggest]').forEach(attachReaderSuggest);
 
 // Direct messages: chat, "New message", and "Send to" on posts.
-initMessages();
+
 
 // Barnaby the worm, the reading assistant.
-initBarnaby();
+// Messages (badge, chat, share sheet) and Barnaby load once the page is up,
+// so they never hold up the first paint.
+const whenIdle = (work) => ('requestIdleCallback' in window ? window.requestIdleCallback(work, { timeout: 600 }) : window.setTimeout(work, 120));
+whenIdle(() => {
+    import('./messages.js').then(({ initMessages }) => initMessages());
+    import('./barnaby.js').then(({ initBarnaby }) => initBarnaby());
+});
 
 // Stay in place after actions. Replying, deleting, following and other buttons
 // send a form and the page reloads; bring the reader back to where they were

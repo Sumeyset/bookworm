@@ -9,7 +9,7 @@
 @endphp
 
 @if ($src)
-    <img src="{{ $src }}" alt="{{ $name }}'s profile photo" {{ $attributes->class([$sizeClasses, $ring, 'shrink-0 rounded-full object-cover']) }}>
+    <img src="{{ $src }}" loading="lazy" decoding="async" alt="{{ $name }}'s profile photo" {{ $attributes->class([$sizeClasses, $ring, 'shrink-0 rounded-full object-cover']) }}>
 @else
     <span aria-hidden="true" {{ $attributes->class([$sizeClasses, $ring, 'flex shrink-0 items-center justify-center rounded-full bg-parchment font-serif font-semibold text-burgundy dark:bg-[#493536] dark:text-[#F4E9E2]']) }}>
         {{ strtoupper(substr($name, 0, 1)) }}

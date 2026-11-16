@@ -16,6 +16,14 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
         @include('layouts.partials.head-assets')
+        {{-- Instant pages: browsers that support it fetch a page when you hover or press a link. --}}
+        <script type="speculationrules">
+            {"prefetch": [{"where": {"and": [
+                {"href_matches": "/*"},
+                {"not": {"href_matches": ["/logout", "/notifications/*", "/messages/to/*", "/import/*", "/books/*/pdfs/*/file", "/messages/attachments/*", "/*\\?*"]}},
+                {"not": {"selector_matches": "[data-no-prefetch], [download], [target=_blank]"}}
+            ]}, "eagerness": "moderate"}]}
+        </script>
         @stack('scripts')
     </head>
     <body id="top" class="bg-ivory font-sans text-ink antialiased selection:bg-burgundy/20 dark:bg-wineblack dark:text-[#f4e9e2]">

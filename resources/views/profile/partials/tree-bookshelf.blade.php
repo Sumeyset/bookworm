@@ -18,7 +18,7 @@
 @endphp
 
 @push('scripts')
-    @vite('resources/js/tree-shelf.js')
+    @vite(['resources/css/shelves.css', 'resources/js/tree-shelf.js'])
 @endpush
 
 <div class="space-y-5">
