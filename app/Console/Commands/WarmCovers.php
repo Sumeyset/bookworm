@@ -14,14 +14,29 @@ class WarmCovers extends Command
 
     public function handle(): int
     {
+        $limit = (int) $this->option('limit');
         $done = 0;
         $failed = 0;
+        $colours = 0;
 
-        Book::query()->whereNotNull('cover_url')->orderBy('id')->limit((int) $this->option('limit'))->each(function (Book $book) use (&$done, &$failed) {
-            CoverCache::ensure($book) ? $done++ : $failed++;
+        // Every book with a cover; only missing covers count towards --limit,
+        // so big libraries are finished over a few runs.
+        Book::query()->whereNotNull('cover_url')->orderBy('id')->chunkById(500, function ($books) use ($limit, &$done, &$failed, &$colours) {
+            foreach ($books as $book) {
+                $cached = \Illuminate\Support\Facades\Storage::disk('local')->exists(CoverCache::relativePath($book));
+                if (! $cached) {
+                    if ($done + $failed >= $limit) {
+                        return false;
+                    }
+                    CoverCache::ensure($book) ? $done++ : $failed++;
+                }
+                if (! $book->spine_color && \App\Support\SpineColor::for($book)) {
+                    $colours++;
+                }
+            }
         });
 
-        $this->info("Covers stored: {$done}. Could not fetch: {$failed}.");
+        $this->info("Covers downloaded: {$done}. Could not fetch: {$failed}. Spine colours worked out: {$colours}.");
 
         return self::SUCCESS;
     }

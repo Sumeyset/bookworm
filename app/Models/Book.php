@@ -16,6 +16,21 @@ class Book extends Model
                 $book->spine_text = null;
             }
         });
+
+        // Keep a copy of a new cover on our own server straight away (after the
+        // page is sent), so nobody waits for Open Library when it's first shown.
+        static::saved(function (Book $book): void {
+            if (! $book->cover_url || ! ($book->wasRecentlyCreated || $book->wasChanged('cover_url')) || app()->runningUnitTests()) {
+                return;
+            }
+            $id = $book->id;
+            dispatch(function () use ($id) {
+                $fresh = Book::find($id);
+                if ($fresh && \App\Support\CoverCache::ensure($fresh)) {
+                    \App\Support\SpineColor::for($fresh);
+                }
+            })->afterResponse();
+        });
     }
 
     protected $fillable = [
