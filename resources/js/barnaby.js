@@ -318,7 +318,43 @@ function initDiscussion(button) {
     });
 }
 
+/* ---------------- any "discussion questions" button: [data-barnaby-questions] ---------------- */
+
+// <button data-barnaby-questions="url" data-box="#id" data-input="#textarea">: questions appear in the box;
+// tapping one puts it in the textarea, ready to send.
+function initQuestionButtons() {
+    document.querySelectorAll('[data-barnaby-questions]').forEach((button) => {
+        const box = document.querySelector(button.dataset.box);
+        if (!box) return;
+        const text = box.querySelector('[data-questions-text]');
+        const note = box.querySelector('[data-questions-note]');
+        button.addEventListener('click', async () => {
+            button.disabled = true;
+            box.hidden = false;
+            text.replaceChildren(typingIndicator('Barnaby is thinking of good questions…'));
+            if (note) note.textContent = '';
+            const result = await askBarnaby(button.dataset.barnabyQuestions);
+            text.innerHTML = renderBarnaby(result.reply || '');
+            button.disabled = false;
+            if (result.failed) return;
+            const input = button.dataset.input ? document.querySelector(button.dataset.input) : null;
+            if (note) note.textContent = `Spoiler-safe: nothing past page ${result.page}.${input ? ' Tap a question to ask the club.' : ''}`;
+            if (!input) return;
+            text.querySelectorAll('li').forEach((item) => {
+                item.style.cursor = 'pointer';
+                item.title = 'Ask the club';
+                item.addEventListener('click', () => {
+                    input.value = item.textContent.trim();
+                    input.dispatchEvent(new Event('input'));
+                    input.focus();
+                });
+            });
+        });
+    });
+}
+
 export function initBarnaby() {
+    initQuestionButtons();
     const root = document.querySelector('[data-barnaby]');
     if (root) initChat(root);
     const discussion = document.querySelector('[data-barnaby-discussion]');

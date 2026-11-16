@@ -19,6 +19,7 @@
                             ['Search books', route('books.index')],
                             ['Reading feed', route('feed.index')],
                             ['Quote wall', route('quotes.index')],
+                            ['Book clubs', route('clubs.index')],
                             ['Buddy reads', route('buddy.index')],
                             ['Find readers', route('users.index')],
                         ],

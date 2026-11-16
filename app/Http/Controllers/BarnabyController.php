@@ -76,6 +76,18 @@ class BarnabyController extends Controller
         return $this->answer($request, fn () => ['reply' => $this->barnaby->discussion($buddyRead->load('book'), max(0, $page)), 'page' => $page]);
     }
 
+    /** Questions for one section of a book club's schedule (only up to that section's last page). */
+    public function clubQuestions(Request $request, \App\Models\BookClub $club, \App\Models\BookClubSection $section): JsonResponse
+    {
+        abort_unless($club->hasMember($request->user()) && $section->round->book_club_id === $club->id, 404);
+        $book = $section->round->book;
+
+        return $this->answer($request, fn () => [
+            'reply' => $this->barnaby->questions($book, $section->to_page, 'a book club', $section->title . " (pages {$section->from_page}–{$section->to_page})"),
+            'page' => $section->to_page,
+        ]);
+    }
+
     private function answer(Request $request, Closure $work): JsonResponse
     {
         if (! BarnabyClient::configured()) {

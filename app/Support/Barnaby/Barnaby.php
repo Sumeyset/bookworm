@@ -141,11 +141,16 @@ TXT;
 
     public function discussion(BuddyRead $read, int $page): string
     {
-        $book = $read->book;
+        return $this->questions($read->book, $page, 'a buddy-read group');
+    }
 
-        return Cache::remember('barnaby:discuss:' . md5($book->id . '|' . $page), now()->addDay(), fn () => $this->client->reply(
+    /** Five spoiler-safe discussion questions for a group that has read up to $page. */
+    public function questions(Book $book, int $page, string $group = 'a reading group', ?string $section = null): string
+    {
+        return Cache::remember('barnaby:discuss:' . md5($book->id . '|' . $page . '|' . $section), now()->addDay(), fn () => $this->client->reply(
             self::PERSONA,
-            [['role' => 'user', 'text' => "We're a buddy-read group reading **{$book->title}**" . ($book->author_name ? " by {$book->author_name}" : '')
+            [['role' => 'user', 'text' => "We're {$group} reading **{$book->title}**" . ($book->author_name ? " by {$book->author_name}" : '')
+                . ($section ? ". We're discussing {$section}" : '')
                 . ". Everyone has reached at least page {$page}. Give us 5 discussion questions to talk about, numbered 1–5, each one or two sentences. "
                 . "STRICT: nothing that happens after page {$page}. Mix feelings, characters, themes and predictions. "
                 . "If you don't know the book well, write good general questions that fit any reader at this point."]],

@@ -223,3 +223,84 @@
 .year-banner__text { display: block; font-size: .9rem; color: #f1d9c4; }
 .year-banner__play { flex: none; border-radius: 999px; background: #f2c38b; padding: .55rem 1.1rem; font-weight: 700; color: #4a1220; }
 .year-story__tap:focus { outline: none; }
+
+/* ---- Book clubs ---- */
+.club-emoji {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+    background: #fbf0dd;
+    font-size: 1.6rem;
+}
+.dark .club-emoji { background: rgb(255 255 255 / 8%); }
+.club-emoji--big { width: 5rem; height: 5rem; border-radius: 1.5rem; background: rgb(255 255 255 / 12%); font-size: 2.8rem; }
+
+.club-emoji-pick {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border: 1.5px solid rgb(184 137 59 / 25%);
+    border-radius: .9rem;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: transform .1s ease, border-color .1s ease;
+}
+.club-emoji-pick.is-picked { border-color: #8b2a3d; background: rgb(139 42 61 / 8%); transform: scale(1.08); }
+
+.club-card {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    min-height: 11rem;
+    border: 1px solid rgb(184 137 59 / 25%);
+    border-radius: 1.5rem;
+    background: rgb(255 253 249 / 85%);
+    padding: 1.1rem;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.club-card:hover { transform: translateY(-2px); box-shadow: 0 18px 36px -24px rgb(70 35 20 / 55%); }
+.dark .club-card { border-color: #4B3035; background: rgb(255 255 255 / 4%); }
+
+.club-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 2rem;
+    background: radial-gradient(70% 120% at 100% 0%, rgb(242 195 139 / 30%), transparent 60%), linear-gradient(135deg, #2a0d15, #4a1220 45%, #8b2a3d);
+    padding: 2rem;
+    color: #fff8ef;
+    box-shadow: 0 30px 60px -36px rgb(70 18 32 / 80%);
+}
+
+.club-track { position: relative; height: .7rem; margin: 0 .75rem; border-radius: 999px; background: #f3e6d4; }
+.dark .club-track { background: rgb(255 255 255 / 10%); }
+.club-track__mark { position: absolute; top: -.25rem; width: 2px; height: 1.2rem; background: rgb(122 79 51 / 35%); transform: translateX(-1px); }
+.club-track__reader { position: absolute; top: 50%; transform: translate(-50%, -50%); transition: left .4s ease; }
+
+.club-section { overflow: hidden; border: 1px solid rgb(184 137 59 / 25%); border-radius: 1.25rem; background: rgb(255 253 249 / 85%); }
+.dark .club-section { border-color: #4B3035; background: rgb(255 255 255 / 4%); }
+.club-section--now { border-color: rgb(139 42 61 / 40%); box-shadow: 0 0 0 3px rgb(139 42 61 / 8%); }
+.club-section__head { display: flex; width: 100%; align-items: center; gap: .9rem; padding: .9rem 1.1rem; }
+.club-section__num {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 999px;
+    background: #f3e6d4;
+    font-family: Lora, Georgia, serif;
+    font-weight: 700;
+    color: #6d1a2b;
+}
+.club-section--now .club-section__num { background: #8b2a3d; color: #fff8ef; }
+.club-section--past .club-section__num { background: rgb(109 154 98 / 20%); color: #3d6b35; }
+.club-section__body { border-top: 1px dashed rgb(184 137 59 / 30%); padding: 1rem 1.1rem 1.2rem; }
+.club-section__lock { border-radius: 1rem; background: rgb(243 230 212 / 60%); padding: 1rem; text-align: center; }
+.dark .club-section__lock { background: rgb(255 255 255 / 5%); }

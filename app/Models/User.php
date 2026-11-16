@@ -167,6 +167,11 @@ class User extends Authenticatable
         return $this->hasMany(UserDecoration::class);
     }
 
+    public function bookClubs(): BelongsToMany
+    {
+        return $this->belongsToMany(BookClub::class, 'book_club_members')->withPivot(['role', 'joined_at'])->withTimestamps();
+    }
+
     public function badges(): HasMany
     {
         return $this->hasMany(UserBadge::class);

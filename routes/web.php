@@ -30,6 +30,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\BuddyReadController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\BookClubController;
 
 Route::get('/', WelcomeController::class)->name('home');
 Route::get('/quotes/{quote:share_token}', [QuoteController::class, 'showPublic'])->name('quotes.public');
@@ -122,6 +123,21 @@ Route::middleware('auth')->group(function () {
 
     // Monthly reading challenges and badges
     Route::get('/challenges', [ChallengeController::class, 'index'])->name('challenges.index');
+
+    // Book clubs
+    Route::get('/clubs', [BookClubController::class, 'index'])->name('clubs.index');
+    Route::post('/clubs', [BookClubController::class, 'store'])->middleware('throttle:posting')->name('clubs.store');
+    Route::get('/clubs/{club}', [BookClubController::class, 'show'])->name('clubs.show');
+    Route::patch('/clubs/{club}', [BookClubController::class, 'update'])->name('clubs.update');
+    Route::post('/clubs/{club}/join', [BookClubController::class, 'join'])->name('clubs.join');
+    Route::delete('/clubs/{club}/leave', [BookClubController::class, 'leave'])->name('clubs.leave');
+    Route::post('/clubs/{club}/invite', [BookClubController::class, 'invite'])->middleware('throttle:posting')->name('clubs.invite');
+    Route::post('/clubs/{club}/rounds', [BookClubController::class, 'startRound'])->name('clubs.rounds.store');
+    Route::post('/clubs/{club}/rounds/finish', [BookClubController::class, 'finishRound'])->name('clubs.rounds.finish');
+    Route::post('/clubs/{club}/sections/{section}/posts', [BookClubController::class, 'post'])->middleware('throttle:posting')->name('clubs.posts.store');
+    Route::delete('/clubs/{club}/posts/{post}', [BookClubController::class, 'destroyPost'])->name('clubs.posts.destroy');
+    Route::delete('/clubs/{club}/members/{member}', [BookClubController::class, 'removeMember'])->name('clubs.members.remove');
+    Route::post('/barnaby/clubs/{club}/sections/{section}/questions', [BarnabyController::class, 'clubQuestions'])->name('barnaby.club');
 
     // Buddy reads
     Route::get('/buddy-reads', [BuddyReadController::class, 'index'])->name('buddy.index');
