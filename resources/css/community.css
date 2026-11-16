@@ -599,3 +599,7 @@ a.shelf-hub__action:hover, button.shelf-hub__action:hover { background: #fbf3e8;
 .author-quote:hover { transform: translateY(-2px); }
 .author-quote blockquote { font-family: Lora, Georgia, serif; font-size: 1.1rem; font-style: italic; line-height: 1.5; }
 .author-quote p { color: #f1d9c4; }
+
+/* ---- Pro ---- */
+.pro-hero { border-radius: 2rem; background: radial-gradient(60% 120% at 50% 0%, rgb(242 195 139 / 35%), transparent 60%), linear-gradient(135deg, #2a0d15, #4a1220 50%, #8b2a3d); padding: 3rem 1.5rem; text-align: center; color: #fff8ef; }
+.pro-badge { display: inline-flex; align-items: center; gap: .2rem; border-radius: 999px; background: linear-gradient(135deg, #f5d58a, #c99a45); padding: .1rem .55rem; font-size: .72rem; font-weight: 800; letter-spacing: .06em; color: #4a1220; vertical-align: middle; }

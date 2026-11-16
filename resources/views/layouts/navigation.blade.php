@@ -142,6 +142,7 @@
                                 [now()->year . ' in books', route('year.show', Auth::user()->username)],
                                 ['🌰 ' . number_format(Auth::user()->acorns) . ' acorns · Tree shop', route('shop.index')],
                                 ['🎯 Reading challenges', route('challenges.index')],
+                                [Auth::user()->isPro() ? '✦ Your Pro' : '✦ Bookworm Pro', route('pro.show')],
                                 ['📚 Book clubs', route('clubs.index')],
                                 ['🕯️ Reading rooms', route('rooms.index')],
                                 ['Buddy reads', route('buddy.index')],

@@ -62,13 +62,19 @@ class Streak
         return ! $days->contains(today()->toDateString()) && $days->contains(today()->subDay()->toDateString());
     }
 
+    public static function maxFor(User $user): int
+    {
+        return $user->isPro() ? Pro::FREEZES : self::MAX_FREEZES;
+    }
+
     /** Buy a freeze. Returns an error message, or null when bought. */
     public static function buyFreeze(User $user): ?string
     {
         return DB::transaction(function () use ($user) {
             $row = DB::table('users')->where('id', $user->id)->lockForUpdate()->first(['acorns', 'streak_freezes']);
-            if ($row->streak_freezes >= self::MAX_FREEZES) {
-                return 'You can hold ' . self::MAX_FREEZES . ' streak freezes at a time.';
+            $max = self::maxFor($user);
+            if ($row->streak_freezes >= $max) {
+                return 'You can hold ' . $max . ' streak freezes at a time.';
             }
             if ($row->acorns < self::FREEZE_PRICE) {
                 return 'You need ' . (self::FREEZE_PRICE - $row->acorns) . ' more acorns for a streak freeze.';

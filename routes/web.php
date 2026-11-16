@@ -37,6 +37,7 @@ use App\Http\Controllers\ReportController;
 
 Route::get('/', WelcomeController::class)->name('home');
 Route::view('/offline', 'offline')->name('offline');
+Route::post('/stripe/webhook', [\App\Http\Controllers\ProController::class, 'webhook'])->middleware('throttle:120,1')->name('stripe.webhook');
 Route::get('/quotes/{quote:share_token}', [QuoteController::class, 'showPublic'])->name('quotes.public');
 Route::get('/covers/{book}', [CoverController::class, 'show'])->name('covers.show');
 // Public share pages (only for readers who turned sharing on)
@@ -142,6 +143,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
     Route::post('/shelf-notes/{item}', [\App\Http\Controllers\ShelfNoteController::class, 'store'])->middleware('throttle:20,1')->name('shelf-notes.store');
     Route::delete('/shelf-notes/{note}', [\App\Http\Controllers\ShelfNoteController::class, 'destroy'])->name('shelf-notes.destroy');
+    Route::get('/pro', [\App\Http\Controllers\ProController::class, 'show'])->name('pro.show');
+    Route::post('/pro/checkout', [\App\Http\Controllers\ProController::class, 'checkout'])->middleware('throttle:10,1')->name('pro.checkout');
+    Route::post('/pro/portal', [\App\Http\Controllers\ProController::class, 'portal'])->name('pro.portal');
     Route::post('/decor-positions', [\App\Http\Controllers\DecorPositionController::class, 'store'])->middleware('throttle:60,1')->name('decor.positions');
     Route::delete('/decor-positions', [\App\Http\Controllers\DecorPositionController::class, 'destroy'])->name('decor.positions.reset');
     Route::post('/shop/streak-freeze', [ShopController::class, 'freeze'])->name('shop.freeze');

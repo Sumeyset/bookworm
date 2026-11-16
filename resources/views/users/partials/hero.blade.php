@@ -7,7 +7,7 @@
                 <div class="min-w-0 flex-1">
                     <p class="eyebrow">{{ $isOwnProfile ? 'Your reading life' : 'Bookworm reader' }}</p>
                     <h1 id="reader-profile-heading" class="font-display mt-1 break-words text-4xl leading-tight text-ink dark:text-[#f4e9e2] sm:text-5xl font-bold">{{ $profile->name }}</h1>
-                    <p class="mt-1 text-sm text-tan dark:text-[#c1aaa0]">{{ '@' . $profile->username }}{{ $profile->is_private ? ' · 🔒 private' : '' }} · reading since {{ $profile->created_at->format('F Y') }}</p>
+                    <p class="mt-1 text-sm text-tan dark:text-[#c1aaa0]">{{ '@' . $profile->username }}{{ $profile->is_private ? ' · 🔒 private' : '' }}@if ($profile->isPro()) <span class="pro-badge">✦ PRO</span>@endif · reading since {{ $profile->created_at->format('F Y') }}</p>
                 </div>
                 <div class="shrink-0">
                     @if ($isOwnProfile)

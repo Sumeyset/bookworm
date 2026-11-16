@@ -84,15 +84,15 @@
                     <span class="text-3xl" aria-hidden="true">🧊</span>
                     <div class="min-w-0">
                         <h2 class="font-serif text-xl font-semibold text-ink dark:text-[#f4e9e2]">Streak freeze</h2>
-                        <p class="mt-1 text-sm text-walnut dark:text-[#d4c2b9]">Covers one day you miss, all by itself, so your streak keeps going. Hold up to {{ \App\Support\Streak::MAX_FREEZES }}.</p>
+                        <p class="mt-1 text-sm text-walnut dark:text-[#d4c2b9]">Covers one day you miss, all by itself, so your streak keeps going. Hold up to {{ \App\Support\Streak::maxFor(auth()->user()) }}.</p>
                     </div>
                 </div>
                 @php $freezes = (int) auth()->user()->streak_freezes; @endphp
-                <p class="mt-3 text-sm font-semibold text-tan">You have {{ $freezes }} of {{ \App\Support\Streak::MAX_FREEZES }}</p>
+                <p class="mt-3 text-sm font-semibold text-tan">You have {{ $freezes }} of {{ \App\Support\Streak::maxFor(auth()->user()) }}</p>
                 <form method="POST" action="{{ route('shop.freeze') }}" class="mt-3">
                     @csrf
-                    <button class="btn-primary w-full min-h-0 py-2" @disabled($freezes >= \App\Support\Streak::MAX_FREEZES || $balance < \App\Support\Streak::FREEZE_PRICE)>
-                        {{ $freezes >= \App\Support\Streak::MAX_FREEZES ? 'You’re all set' : 'Buy for 🌰 ' . \App\Support\Streak::FREEZE_PRICE }}
+                    <button class="btn-primary w-full min-h-0 py-2" @disabled($freezes >= \App\Support\Streak::maxFor(auth()->user()) || $balance < \App\Support\Streak::FREEZE_PRICE)>
+                        {{ $freezes >= \App\Support\Streak::maxFor(auth()->user()) ? 'You’re all set' : 'Buy for 🌰 ' . \App\Support\Streak::FREEZE_PRICE }}
                     </button>
                 </form>
                 <a href="{{ route('profile.edit') }}" class="mt-2 block text-center text-xs font-semibold text-tan underline underline-offset-2">Streak reminders</a>

@@ -44,7 +44,7 @@ TXT;
         if (RateLimiter::tooManyAttempts($minute, config('barnaby.per_minute'))) {
             return [false, 'Barnaby needs a moment to turn the page — try again in a few seconds.'];
         }
-        if (RateLimiter::tooManyAttempts($day, config('barnaby.per_day'))) {
+        if (RateLimiter::tooManyAttempts($day, $this->perDay($user))) {
             return [false, 'Barnaby has read himself sleepy today 😴 He’ll be back tomorrow.'];
         }
         RateLimiter::hit($minute, 60);
@@ -55,7 +55,13 @@ TXT;
 
     public function remainingToday(User $user): int
     {
-        return RateLimiter::remaining('barnaby:day:' . $user->id . ':' . now()->toDateString(), config('barnaby.per_day'));
+        return RateLimiter::remaining('barnaby:day:' . $user->id . ':' . now()->toDateString(), $this->perDay($user));
+    }
+
+    /** Pro members get more questions a day. */
+    private function perDay(User $user): int
+    {
+        return $user->isPro() ? max(\App\Support\Pro::BARNABY_PER_DAY, (int) config('barnaby.per_day')) : (int) config('barnaby.per_day');
     }
 
     /* ---------------- chat & recommendations ---------------- */

@@ -61,6 +61,7 @@ class User extends Authenticatable
             'streak_reminder' => 'boolean',
             'is_private' => 'boolean',
             'decor_positions' => 'array',
+            'pro_until' => 'datetime',
             'hide_activity' => 'boolean',
             'is_admin' => 'boolean',
             'suspended_at' => 'datetime',
@@ -225,6 +226,11 @@ class User extends Authenticatable
             'follower_id',
             'followed_id',
         )->withTimestamps();
+    }
+
+    public function isPro(): bool
+    {
+        return \App\Support\Pro::active($this);
     }
 
     /* ---------------- privacy and safety ---------------- */

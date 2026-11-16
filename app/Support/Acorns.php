@@ -73,6 +73,10 @@ class Acorns
         if (self::$quiet || $amount <= 0) {
             return 0;
         }
+        // Pro members earn a quarter more for reading (gifts are as given).
+        if ($user->isPro() && $reason !== 'gift') {
+            $amount = (int) ceil($amount * Pro::ACORN_BONUS);
+        }
 
         $given = DB::transaction(function () use ($user, $amount, $reason, $key, $note) {
             if ($key !== null && AcornEvent::where('user_id', $user->id)->where('key', $key)->exists()) {
