@@ -27,7 +27,7 @@
      data-capacity="{{ $capacity }}"
      data-shelves='@json($shelfOptions)'
      @if ($scene['glass']) data-window-scene data-time="{{ $part }}" data-season="{{ $season }}" data-view-base="{{ asset('images/shelves/window') }}" @if ($fixedTime) data-fixed-time="{{ $fixedTime }}" @endif @if ($fixedSeason) data-fixed-season="{{ $fixedSeason }}" @endif @endif
-     style="--scene-w: {{ $scene['width'] }}; --scene-ar: {{ $scene['width'] }} / {{ $scene['height'] }};@if ($scene['glass']) --glass-l: {{ $scene['glass']['left'] }}%; --glass-t: {{ $scene['glass']['top'] }}%; --glass-r: {{ $scene['glass']['left'] + $scene['glass']['width'] }}%; --glass-b: {{ $scene['glass']['top'] + $scene['glass']['height'] }}%;@endif --min-w: {{ $scene['min_width'] }}px; --spine-px: {{ $scene['spine'] ?? 20 }}; --book-px: {{ $scene['book'] ?? 74 }};">
+     style="--scene-w: {{ $scene['width'] }}; --scene-ar: {{ $scene['width'] }} / {{ $scene['height'] }};@if ($scene['glass']) --glass-l: {{ $scene['glass']['left'] }}%; --glass-t: {{ $scene['glass']['top'] }}%; --glass-r: {{ $scene['glass']['left'] + $scene['glass']['width'] }}%; --glass-b: {{ $scene['glass']['top'] + $scene['glass']['height'] }}%;@endif --min-w: {{ $scene['min_width'] }}px; --decor-scale: {{ $scene['decor_scale'] ?? 1 }}; --spine-px: {{ $scene['spine'] ?? 20 }}; --book-px: {{ $scene['book'] ?? 74 }};">
     <div class="book-tree__frame photo-shelf__frame" data-scroll-frame>
         <div class="book-tree__scene photo-shelf__scene">
             @if ($scene['glass'])

@@ -80,10 +80,11 @@ class ShelfScene
             'width' => 1800,
             'height' => 1200,
             'view' => 'covers',
+            'decor_scale' => 1.2,
             'decor' => [
                 'star' => [900, 30],
                 'ornaments' => [[330, 292], [900, 296], [1470, 292], [615, 576], [1185, 576], [330, 850], [1470, 850], [900, 852]],
-                'gifts' => [[1760, 1082], [40, 1082], [615, 1082]],
+                'gifts' => [[1745, 1082], [58, 1082], [615, 1082]],
                 'pumpkins' => [[40, 1082], [1765, 1082]],
                 'leaves' => [[200, 1110, -30], [380, 1120, 40], [560, 1112, 10], [760, 1125, -60], [960, 1110, 25], [1140, 1122, -15], [1320, 1112, 70], [1500, 1124, 80], [1680, 1114, -45]],
                 'lanterns' => [[615, 300], [1185, 300], [615, 860], [1185, 860]],
@@ -121,61 +122,55 @@ class ShelfScene
             ],
         ],
 
-        // Built-in shelves around a window seat. The view outside changes
-        // with the time of day and the season.
+        // A window seat between two tall bookcases, with cubbies under the seat.
+        // The view outside changes with the time of day and the season.
         'window' => [
             'image' => 'images/shelves/window-nook.webp',
-            'width' => 2048,
-            'height' => 792,        // cropped under the window sill: no cupboards or floor
+            'width' => 2000,
+            'height' => 1116,
             'view' => 'spines',
             'spine' => 34,
             'min_width' => 900,
-            'decor' => [
-                'star' => [1028, 205],
-                'ornaments' => [[760, 222], [880, 226], [1000, 226], [1120, 226], [1240, 222], [330, 112], [1720, 112]],
-                'gifts' => [[760, 742], [828, 742], [1300, 742]],
-                'pumpkins' => [[1290, 742], [770, 742]],
-                'leaves' => [[700, 744, -30], [880, 746, 40], [940, 744, 10], [1060, 746, -60], [1150, 744, 25], [1210, 746, -15], [990, 746, 70], [1360, 744, 80], [650, 746, -45]],
-                'lanterns' => [[720, 290], [1336, 290], [330, 120], [1720, 120]],
-                'nest' => [1200, 744],
-                'owl' => [890, 744],
-                'swing' => [1028, 250],
-                'squirrel' => [556, 460],
-                'butterflies' => [[900, 330], [1200, 420], [700, 600], [1500, 300]],
-            ],
+            'decor_scale' => 1.5,
             // the glass, so the view can sit behind it
-            'window' => ['x1' => 676, 'y1' => 272, 'x2' => 1382, 'y2' => 736],
-            'slots' => [
-                ['x1' => 150, 'x2' => 326, 'y' => 222, 'h' => 120, 'align' => 'start'],
-                ['x1' => 336, 'x2' => 512, 'y' => 222, 'h' => 112, 'align' => 'end'],
-                ['x1' => 1546, 'x2' => 1722, 'y' => 222, 'h' => 112, 'align' => 'start'],
-                ['x1' => 1732, 'x2' => 1908, 'y' => 222, 'h' => 112, 'align' => 'end'],
-                ['x1' => 150, 'x2' => 326, 'y' => 352, 'h' => 120, 'align' => 'start'],
-                ['x1' => 336, 'x2' => 512, 'y' => 352, 'h' => 112, 'align' => 'end'],
-                ['x1' => 1546, 'x2' => 1722, 'y' => 352, 'h' => 112, 'align' => 'start'],
-                ['x1' => 1732, 'x2' => 1908, 'y' => 352, 'h' => 112, 'align' => 'end'],
-                ['x1' => 150, 'x2' => 326, 'y' => 484, 'h' => 120, 'align' => 'start'],
-                ['x1' => 336, 'x2' => 512, 'y' => 484, 'h' => 112, 'align' => 'end'],
-                ['x1' => 1546, 'x2' => 1722, 'y' => 484, 'h' => 112, 'align' => 'start'],
-                ['x1' => 1732, 'x2' => 1908, 'y' => 484, 'h' => 112, 'align' => 'end'],
-                ['x1' => 150, 'x2' => 326, 'y' => 614, 'h' => 120, 'align' => 'start'],
-                ['x1' => 336, 'x2' => 512, 'y' => 614, 'h' => 112, 'align' => 'end'],
-                ['x1' => 1546, 'x2' => 1722, 'y' => 614, 'h' => 112, 'align' => 'start'],
-                ['x1' => 1732, 'x2' => 1908, 'y' => 614, 'h' => 112, 'align' => 'end'],
-                ['x1' => 150, 'x2' => 326, 'y' => 728, 'h' => 104, 'align' => 'start'],
-                ['x1' => 336, 'x2' => 512, 'y' => 728, 'h' => 104, 'align' => 'end'],
-                ['x1' => 1546, 'x2' => 1722, 'y' => 728, 'h' => 104, 'align' => 'start'],
-                ['x1' => 1732, 'x2' => 1908, 'y' => 728, 'h' => 104, 'align' => 'end'],
+            'window' => ['x1' => 670, 'y1' => 132, 'x2' => 1332, 'y2' => 848],
+            'decor' => [
+                'star' => [1000, 78],
+                'ornaments' => [[730, 112], [850, 116], [1150, 116], [1270, 112], [620, 300], [1380, 300]],
+                'gifts' => [[650, 930], [712, 930], [1352, 930]],
+                'pumpkins' => [[1345, 930], [660, 930]],
+                'leaves' => [[600, 934, -30], [760, 938, 40], [840, 934, 10], [960, 938, -60], [1060, 934, 25], [1140, 938, -15], [1220, 934, 70], [1300, 938, 80], [1420, 934, -45]],
+                'lanterns' => [[606, 150], [1394, 150], [300, 70], [1710, 70]],
+                'nest' => [1180, 930],
+                'owl' => [880, 930],
+                'swing' => [1000, 112],
+                'squirrel' => [560, 600],
+                'butterflies' => [[1100, 320], [860, 640], [1640, 330], [360, 560]],
             ],
-            // More books: the cabinets grow taller, a row at a time, with more
-            // wall above the window (images/shelves/window-band.webp).
+            'slots' => [
+                // the two bookcases, shelf by shelf (left, right), top to bottom
+                ['x1' => 86, 'x2' => 500, 'y' => 205, 'h' => 135, 'align' => 'start', 'cap' => 6],
+                ['x1' => 1500, 'x2' => 1916, 'y' => 205, 'h' => 135, 'align' => 'end', 'cap' => 6],
+                ['x1' => 86, 'x2' => 500, 'y' => 452, 'h' => 220, 'align' => 'start', 'cap' => 6],
+                ['x1' => 1500, 'x2' => 1916, 'y' => 452, 'h' => 220, 'align' => 'end', 'cap' => 6],
+                ['x1' => 86, 'x2' => 500, 'y' => 693, 'h' => 210, 'align' => 'start', 'cap' => 6],
+                ['x1' => 1500, 'x2' => 1916, 'y' => 693, 'h' => 210, 'align' => 'end', 'cap' => 6],
+                ['x1' => 86, 'x2' => 500, 'y' => 900, 'h' => 178, 'align' => 'start', 'cap' => 6],
+                ['x1' => 1500, 'x2' => 1916, 'y' => 900, 'h' => 178, 'align' => 'end', 'cap' => 6],
+                ['x1' => 86, 'x2' => 500, 'y' => 1098, 'h' => 158, 'align' => 'start', 'cap' => 6],
+                ['x1' => 1500, 'x2' => 1916, 'y' => 1098, 'h' => 158, 'align' => 'end', 'cap' => 6],
+                ['x1' => 540, 'x2' => 982, 'y' => 1098, 'h' => 116, 'align' => 'center', 'cap' => 5],
+                ['x1' => 1018, 'x2' => 1460, 'y' => 1098, 'h' => 116, 'align' => 'center', 'cap' => 5],
+            ],
+            // More books: one more shelf row in each bookcase and another pair of
+            // cubbies under the seat, added at the bottom (images/shelves/window-band.webp).
             'grow' => [
-                'at' => 180, 'image' => 'images/shelves/window-band.webp', 'y1' => 0, 'y2' => 130,
+                'at' => 1116, 'image' => 'images/shelves/window-band.webp', 'y1' => 0, 'y2' => 203,
                 'slots' => [
-                    ['x1' => 150, 'x2' => 326, 'dy' => 42, 'h' => 120, 'align' => 'start'],
-                    ['x1' => 336, 'x2' => 512, 'dy' => 42, 'h' => 112, 'align' => 'end'],
-                    ['x1' => 1546, 'x2' => 1722, 'dy' => 42, 'h' => 112, 'align' => 'start'],
-                    ['x1' => 1732, 'x2' => 1908, 'dy' => 42, 'h' => 112, 'align' => 'end'],
+                    ['x1' => 86, 'x2' => 500, 'dy' => 185, 'h' => 150, 'align' => 'start', 'cap' => 6],
+                    ['x1' => 1500, 'x2' => 1916, 'dy' => 185, 'h' => 150, 'align' => 'end', 'cap' => 6],
+                    ['x1' => 540, 'x2' => 982, 'dy' => 185, 'h' => 148, 'align' => 'center', 'cap' => 5],
+                    ['x1' => 1018, 'x2' => 1460, 'dy' => 185, 'h' => 148, 'align' => 'center', 'cap' => 5],
                 ],
             ],
         ],
@@ -274,7 +269,9 @@ class ShelfScene
             for ($k = 0; $k < $bands; $k++) {
                 $pieces[] = ['image' => $grow['image'] ?? $scene['image'], 'from' => $grow['y1'], 'top' => $grow['at'] + $k * $bh, 'h' => $bh];
             }
-            $pieces[] = ['image' => $scene['image'], 'from' => $grow['at'], 'top' => $grow['at'] + $bands * $bh, 'h' => $scene['height'] - $grow['at']];
+            if ($scene['height'] > $grow['at']) {
+                $pieces[] = ['image' => $scene['image'], 'from' => $grow['at'], 'top' => $grow['at'] + $bands * $bh, 'h' => $scene['height'] - $grow['at']];
+            }
             $pieces = array_map(fn ($p) => [
                 'image' => $p['image'],
                 'top' => $pct($p['top'], $h),

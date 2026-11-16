@@ -44,7 +44,7 @@ test('wall shelves and the window nook grow as books are added', function () {
     expect(ShelfScene::bandsFor('wall', 12))->toBe(0)
         ->and(ShelfScene::bandsFor('wall', 13))->toBe(1)
         ->and(ShelfScene::slotCount('wall', 2))->toBe(18)
-        ->and(ShelfScene::bandsFor('window', 25))->toBe(2)
+        ->and(ShelfScene::bandsFor('window', 13))->toBe(1)->and(ShelfScene::bandsFor('window', 21))->toBe(3)
         ->and(ShelfScene::bandsFor('christmas', 60))->toBe(0);
 
     $me = User::factory()->create(['shelf_style' => 'wall']);
@@ -90,7 +90,7 @@ test('the christmas tree shelves hold as many books as fit', function () {
 });
 
 test('every shop decoration shows on the photo shelves', function () {
-    foreach (['wall', 'window', 'christmas'] as $style) {
+    foreach (['tree', 'wall', 'window', 'christmas'] as $style) {
         $me = User::factory()->create(['shelf_style' => $style]);
         foreach (array_keys(\App\Support\Acorns::ITEMS) as $item) {
             $me->decorations()->create(['item' => $item, 'enabled' => true]);

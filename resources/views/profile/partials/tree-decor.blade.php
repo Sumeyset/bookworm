@@ -37,7 +37,33 @@
     $spread = fn (int $i, int $salt) => (($i * 37 + $salt * 53) % 97) / 97;
 @endphp
 
+@php
+    $maple = 'M12 1.5l1.6 4 3-1.6-.9 3.8 3.9-.6-2.2 3.2 3.1 1.6-3.7 1.3.9 2.1-3.3-.6.2 4.1-2.6-1.9-2.6 1.9.2-4.1-3.3.6.9-2.1L2.5 11.5l3.1-1.6-2.2-3.2 3.9.6-.9-3.8 3 1.6z';
+@endphp
+
 @if ($decorations)
+{{-- Shared paints for the decorations --}}
+<svg width="0" height="0" class="absolute" aria-hidden="true" focusable="false">
+    <defs>
+        <radialGradient id="dec-glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFE7A3" stop-opacity=".95"/><stop offset=".45" stop-color="#FFD36B" stop-opacity=".35"/><stop offset="1" stop-color="#FFD36B" stop-opacity="0"/></radialGradient>
+        <linearGradient id="dec-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF1B8"/><stop offset=".45" stop-color="#F4C64E"/><stop offset="1" stop-color="#B9852A"/></linearGradient>
+        <linearGradient id="dec-gold-dark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2C24A"/><stop offset="1" stop-color="#9C6A1C"/></linearGradient>
+        @foreach (['red' => ['#FF8A8F', '#C8303F', '#6E0F1C'], 'gold' => ['#FFF0B0', '#D9A53A', '#7A5212'], 'green' => ['#8FE0B4', '#2F7D57', '#0F3A27'], 'blue' => ['#A9CBFF', '#3F6FB5', '#14305E']] as $name => [$light, $mid, $dark])
+            <radialGradient id="dec-ball-{{ $name }}" cx=".36" cy=".32" r=".75"><stop offset="0" stop-color="{{ $light }}"/><stop offset=".45" stop-color="{{ $mid }}"/><stop offset="1" stop-color="{{ $dark }}"/></radialGradient>
+        @endforeach
+        @foreach (['wine' => ['#B8435A', '#7A2133'], 'forest' => ['#4E9A73', '#235740'], 'cream' => ['#FFF0CF', '#E2BF7E']] as $name => [$top, $bottom])
+            <linearGradient id="dec-box-{{ $name }}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{{ $top }}"/><stop offset="1" stop-color="{{ $bottom }}"/></linearGradient>
+        @endforeach
+        <linearGradient id="dec-lantern-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6D2"/><stop offset=".55" stop-color="#FFC861"/><stop offset="1" stop-color="#E58A2B"/></linearGradient>
+        <linearGradient id="dec-bronze" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3B2414"/><stop offset=".5" stop-color="#8A5A2E"/><stop offset="1" stop-color="#3B2414"/></linearGradient>
+        <radialGradient id="dec-pumpkin" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#FFB45C"/><stop offset=".6" stop-color="#E9792A"/><stop offset="1" stop-color="#A9480F"/></radialGradient>
+        <radialGradient id="dec-owl-body" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#A47A54"/><stop offset="1" stop-color="#5A3B24"/></radialGradient>
+        <linearGradient id="dec-wing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB347"/><stop offset=".6" stop-color="#F07F1C"/><stop offset="1" stop-color="#C4520C"/></linearGradient>
+        <linearGradient id="dec-tail" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D9864A"/><stop offset="1" stop-color="#8E4A1D"/></linearGradient>
+        <linearGradient id="dec-wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C58E5A"/><stop offset="1" stop-color="#7C4F2C"/></linearGradient>
+    </defs>
+</svg>
+
 <div class="tree-decor" aria-hidden="true">
     @if ($windowTheme)
         <span class="tree-decor__window tree-decor__window--{{ $windowTheme }}" style="{{ $spots['window'] }}">
@@ -48,108 +74,173 @@
     @endif
 
     @if ($on('snow'))
-        <svg class="tree-decor__star" style="{{ $style($spots['star']) }}" viewBox="0 0 48 48">
-            <defs><radialGradient id="tree-star-glow"><stop offset="0" stop-color="#FFE7A3" stop-opacity=".9"/><stop offset="1" stop-color="#FFE7A3" stop-opacity="0"/></radialGradient></defs>
-            <circle cx="24" cy="24" r="24" fill="url(#tree-star-glow)"/>
-            <path d="M24 7l4.7 10.6 11.5 1.1-8.7 7.7 2.5 11.3L24 31.8l-10 5.9 2.5-11.3-8.7-7.7 11.5-1.1z" fill="#F4C64E" stroke="#C9922A" stroke-width="1.2" stroke-linejoin="round"/>
-        </svg>
-        @foreach ($spots['ornaments'] as $i => $point)
-            <span class="tree-ornament tree-ornament--{{ ['red', 'gold', 'green', 'blue'][$i % 4] }}" style="{{ $style($point) }} --sway: {{ 2.6 + ($i % 4) * 0.4 }}s; --delay: -{{ $i * 0.7 }}s;"></span>
-        @endforeach
-        <svg class="tree-decor__gift" style="{{ $style($spots['gifts'][0]) }}" viewBox="0 0 60 50">
-            <rect x="4" y="16" width="52" height="34" rx="2" fill="#8B2A3D"/><rect x="2" y="10" width="56" height="10" rx="2" fill="#A3324A"/>
-            <rect x="26" y="10" width="8" height="40" fill="#F2C38B"/><path d="M30 10c-6-9-16-6-12 0M30 10c6-9 16-6 12 0" fill="none" stroke="#F2C38B" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-        <svg class="tree-decor__gift tree-decor__gift--small" style="{{ $style($spots['gifts'][1]) }}" viewBox="0 0 60 50">
-            <rect x="6" y="18" width="48" height="32" rx="2" fill="#2F6B4F"/><rect x="4" y="12" width="52" height="9" rx="2" fill="#3C8562"/>
-            <rect x="26" y="12" width="8" height="38" fill="#FFF8EF"/><path d="M30 12c-5-8-14-5-10 0M30 12c5-8 14-5 10 0" fill="none" stroke="#FFF8EF" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-        <svg class="tree-decor__gift" style="{{ $style($spots['gifts'][2]) }}" viewBox="0 0 60 50">
-            <rect x="4" y="16" width="52" height="34" rx="2" fill="#E9C27D"/><rect x="2" y="10" width="56" height="10" rx="2" fill="#F2D49A"/>
-            <rect x="26" y="10" width="8" height="40" fill="#8B2A3D"/><path d="M30 10c-6-9-16-6-12 0M30 10c6-9 16-6 12 0" fill="none" stroke="#8B2A3D" stroke-width="3" stroke-linecap="round"/>
-        </svg>
         <span class="tree-decor__floor tree-decor__floor--snow"></span>
+        {{-- a glowing star --}}
+        <svg class="tree-decor__star" style="{{ $style($spots['star']) }}" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="31" fill="url(#dec-glow)"/>
+            <path d="M32 9l6.5 14.4 15.7 1.6-11.8 10.5 3.4 15.4L32 43.1l-13.8 7.8 3.4-15.4L9.8 25l15.7-1.6z" fill="url(#dec-gold)" stroke="#9C6A1C" stroke-width="1.2" stroke-linejoin="round"/>
+            <path d="M32 9l6.5 14.4L32 32zM54.2 25L42.4 35.5 32 32zM45.8 50.9L32 43.1V32zM18.2 50.9l3.4-15.4L32 32zM9.8 25l15.7-1.6L32 32z" fill="#FFF6D2" opacity=".35"/>
+            <g fill="#FFF8E0"><circle cx="50" cy="12" r="1.4"/><circle cx="13" cy="15" r="1"/><circle cx="55" cy="40" r="1"/></g>
+        </svg>
+
+        {{-- glass baubles --}}
+        @foreach ($spots['ornaments'] as $i => $point)
+            @php $tone = ['red', 'gold', 'green', 'blue'][$i % 4]; @endphp
+            <svg class="tree-ornament" style="{{ $style($point) }} --sway: {{ 2.6 + ($i % 4) * 0.4 }}s; --delay: -{{ $i * 0.7 }}s;" viewBox="0 0 40 64">
+                <path d="M20 0v14" stroke="#B89A6A" stroke-width="1"/>
+                <circle cx="20" cy="15" r="2.6" fill="none" stroke="url(#dec-gold)" stroke-width="1.4"/>
+                <rect x="14.5" y="17" width="11" height="7" rx="1.6" fill="url(#dec-gold)"/>
+                <path d="M15 20h10" stroke="#9C6A1C" stroke-width=".7"/>
+                <circle cx="20" cy="41" r="17" fill="url(#dec-ball-{{ $tone }})"/>
+                @if ($i % 2)
+                    <path d="M3.6 37c10 4 22.8 4 32.8 0M3.4 44c10 4 23.2 4 33.2 0" stroke="#FFE7A3" stroke-width="1.4" fill="none" opacity=".85"/>
+                @else
+                    <g fill="#FFF6E0" opacity=".9"><circle cx="13" cy="44" r="1.4"/><circle cx="20" cy="47" r="1.4"/><circle cx="27" cy="44" r="1.4"/><path d="M20 33l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3z"/></g>
+                @endif
+                <ellipse cx="13" cy="33" rx="4.5" ry="3" fill="#fff" opacity=".55" transform="rotate(-30 13 33)"/>
+            </svg>
+        @endforeach
+
+        {{-- presents --}}
+        @foreach ([['wine', '#F2C38B', ''], ['forest', '#FFF8EF', 'tree-decor__gift--small'], ['cream', '#A3324A', '']] as $g => [$box, $ribbon, $size])
+            <svg class="tree-decor__gift {{ $size }}" style="{{ $style($spots['gifts'][$g]) }}" viewBox="0 0 64 60">
+                <ellipse cx="32" cy="58" rx="28" ry="2.5" fill="#000" opacity=".18"/>
+                <rect x="6" y="24" width="52" height="34" rx="2.5" fill="url(#dec-box-{{ $box }})"/>
+                <rect x="6" y="24" width="52" height="34" rx="2.5" fill="none" stroke="#000" stroke-opacity=".12"/>
+                <rect x="3" y="17" width="58" height="10" rx="2.5" fill="url(#dec-box-{{ $box }})"/>
+                <rect x="3" y="25" width="58" height="2" fill="#000" opacity=".12"/>
+                <rect x="28" y="17" width="8" height="41" fill="{{ $ribbon }}"/>
+                <rect x="28" y="17" width="2.5" height="41" fill="#fff" opacity=".35"/>
+                <path d="M32 17c-4-11-17-11-15-3 1 4 9 4 15 3zM32 17c4-11 17-11 15-3-1 4-9 4-15 3z" fill="{{ $ribbon }}" stroke="#000" stroke-opacity=".15"/>
+                <path d="M32 17c-6 2-9 7-11 11M32 17c6 2 9 7 11 11" stroke="{{ $ribbon }}" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <circle cx="32" cy="17" r="3.2" fill="{{ $ribbon }}" stroke="#000" stroke-opacity=".15"/>
+            </svg>
+        @endforeach
     @endif
 
     @if ($on('autumn'))
         @foreach ($spots['leaves'] as $i => $leaf)
-            <svg class="tree-leaf tree-leaf--{{ $tones[$i % 3] }} tree-leaf--fallen" style="{{ $style($leaf['at']) }} --turn: {{ $leaf['turn'] }}deg;" viewBox="0 0 24 24"><path d="M12 2C6.5 6 4.5 12 6.5 17.5 8.5 21 12 22 12 22s3.5-1 5.5-4.5C19.5 12 17.5 6 12 2z" fill="currentColor"/><path d="M12 5v17M12 11l-3-2M12 15l3-2" stroke="rgb(0 0 0 / 22%)" stroke-width="1" fill="none"/></svg>
+            <svg class="tree-leaf tree-leaf--{{ $tones[$i % 3] }} tree-leaf--fallen" style="{{ $style($leaf['at']) }} --turn: {{ $leaf['turn'] }}deg;" viewBox="0 0 24 24"><path d="{{ $maple }}" fill="currentColor"/><path d="M12 21v-9M12 12l-4-4M12 12l4-4M12 14l-5 1M12 14l5 1" stroke="rgb(0 0 0 / 25%)" stroke-width=".8" fill="none"/></svg>
         @endforeach
         @unless ($on('snow'))
-            <svg class="tree-decor__pumpkin" style="{{ $style($spots['pumpkins'][0]) }}" viewBox="0 0 64 52">
-                <path d="M32 10c-2-6 2-9 6-8" fill="none" stroke="#5B6B2F" stroke-width="4" stroke-linecap="round"/>
-                <ellipse cx="20" cy="32" rx="14" ry="18" fill="#D9771F"/><ellipse cx="44" cy="32" rx="14" ry="18" fill="#D9771F"/>
-                <ellipse cx="32" cy="32" rx="14" ry="19" fill="#EE8E2E"/>
-                <path d="M32 14v36M22 15c-3 10-3 24 0 34M42 15c3 10 3 24 0 34" stroke="#B85F14" stroke-width="1.6" fill="none" opacity=".7"/>
-            </svg>
-            <svg class="tree-decor__pumpkin tree-decor__pumpkin--small" style="{{ $style($spots['pumpkins'][1]) }}" viewBox="0 0 64 52">
-                <path d="M32 10c-2-6 2-9 6-8" fill="none" stroke="#5B6B2F" stroke-width="4" stroke-linecap="round"/>
-                <ellipse cx="22" cy="33" rx="13" ry="16" fill="#E2A23A"/><ellipse cx="42" cy="33" rx="13" ry="16" fill="#E2A23A"/><ellipse cx="32" cy="33" rx="13" ry="17" fill="#F0B84C"/>
-            </svg>
+            @foreach ([0 => '', 1 => 'tree-decor__pumpkin--small'] as $p => $size)
+                <svg class="tree-decor__pumpkin {{ $size }}" style="{{ $style($spots['pumpkins'][$p]) }}" viewBox="0 0 72 60">
+                    <ellipse cx="36" cy="58" rx="30" ry="2.5" fill="#000" opacity=".18"/>
+                    <path d="M36 14c-1-6 1-10 6-11" fill="none" stroke="#5B6B2F" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M42 8c6-4 13-1 13 5-5 1-10 0-13-5z" fill="#6E8B3D"/>
+                    <path d="M44 10c4 1 6 3 9 3" stroke="#4E6A28" stroke-width="1" fill="none"/>
+                    <ellipse cx="18" cy="36" rx="14" ry="20" fill="url(#dec-pumpkin)"/>
+                    <ellipse cx="54" cy="36" rx="14" ry="20" fill="url(#dec-pumpkin)"/>
+                    <ellipse cx="27" cy="36" rx="13" ry="21" fill="url(#dec-pumpkin)"/>
+                    <ellipse cx="45" cy="36" rx="13" ry="21" fill="url(#dec-pumpkin)"/>
+                    <ellipse cx="36" cy="36" rx="12" ry="22" fill="url(#dec-pumpkin)"/>
+                    <path d="M27 16c-3 12-3 28 0 40M45 16c3 12 3 28 0 40M36 14v44" stroke="#A9480F" stroke-width="1.2" fill="none" opacity=".55"/>
+                    <ellipse cx="30" cy="26" rx="4" ry="7" fill="#fff" opacity=".18"/>
+                </svg>
+            @endforeach
         @endunless
     @endif
 
     @if ($on('lanterns'))
         @foreach ($spots['lanterns'] as $i => $point)
-            <span class="tree-lantern" style="{{ $style($point) }} --delay: -{{ $i * 1.3 }}s;"></span>
+            <svg class="tree-lantern" style="{{ $style($point) }} --delay: -{{ $i * 1.3 }}s;" viewBox="0 0 40 74">
+                <path d="M20 0v8" stroke="#6B4A2A" stroke-width="1.2"/>
+                <circle cx="20" cy="10" r="3" fill="none" stroke="url(#dec-bronze)" stroke-width="2"/>
+                <ellipse cx="20" cy="45" rx="19" ry="22" fill="url(#dec-glow)"/>
+                <path d="M9 20h22l-3-6H12z" fill="url(#dec-bronze)"/>
+                <rect x="8" y="20" width="24" height="3" rx="1" fill="#5A3A1E"/>
+                <path d="M10 23h20l-2 34H12z" fill="url(#dec-lantern-glass)" opacity=".95"/>
+                <path d="M15.5 23l-.7 34M24.5 23l.7 34" stroke="#5A3A1E" stroke-width="1.6"/>
+                <path d="M20 36c3 4 3 9 0 12-3-3-3-8 0-12z" fill="#FFF7D6"/>
+                <path d="M20 41c1.4 2 1.4 4.6 0 6-1.4-1.4-1.4-4 0-6z" fill="#FF9A3C"/>
+                <rect x="9" y="57" width="22" height="4" rx="1.5" fill="url(#dec-bronze)"/>
+                <path d="M13 61h14l-2 4H15z" fill="#4A2E18"/>
+                <path d="M11.5 25l1 30" stroke="#fff" stroke-width="1.4" opacity=".45"/>
+            </svg>
         @endforeach
     @endif
 
     @if ($on('nest'))
-        {{-- robin in its nest, on a branch --}}
-        <svg class="tree-creature tree-creature--nest" style="{{ $style($spots['nest']) }}" viewBox="0 0 90 70">
+        {{-- a robin in its nest, with eggs --}}
+        <svg class="tree-creature tree-creature--nest" style="{{ $style($spots['nest']) }}" viewBox="0 0 100 78">
+            <ellipse cx="50" cy="74" rx="40" ry="3.5" fill="#000" opacity=".2"/>
             <g class="tree-nest__bird">
-                <ellipse cx="46" cy="30" rx="17" ry="14" fill="#7A5236"/>
-                <path d="M58 26c8-2 14 1 18 4-6 1-12 2-17 1z" fill="#5E3E28"/>
-                <circle cx="36" cy="20" r="10" fill="#7A5236"/>
-                <path d="M30 26c4 9 14 11 20 8-4-5-12-8-20-8z" fill="#E2683C"/>
-                <circle cx="33" cy="18" r="2" fill="#1d1410"/><circle cx="33.6" cy="17.4" r=".6" fill="#fff"/>
-                <path d="M26 20l-7 2 7 2z" fill="#E8B23C"/>
+                <path d="M66 36c10-3 18-1 24 4-8 2-16 2-23 0z" fill="#4A3020"/>
+                <ellipse cx="54" cy="38" rx="19" ry="15" fill="#6B4A32"/>
+                <path d="M46 30c-6 6-5 15 2 19 4-6 4-13-2-19z" fill="#5A3B26"/>
+                <circle cx="40" cy="26" r="11" fill="#6B4A32"/>
+                <path d="M31 30c3 11 16 15 25 9-5-7-15-10-25-9z" fill="#E86A33"/>
+                <path d="M33 32c4 6 11 8 17 6" stroke="#FF9A5C" stroke-width="1.4" fill="none" opacity=".7"/>
+                <circle cx="37" cy="23" r="2.4" fill="#1D1410"/><circle cx="37.8" cy="22.2" r=".8" fill="#fff"/>
+                <path d="M30 25l-8 2.4 8 2z" fill="#E8B23C"/>
+                <path d="M58 30c5 1 9 4 11 8" stroke="#8C6446" stroke-width="1.6" fill="none"/>
             </g>
-            <path d="M8 42c8 18 66 18 74 0-6 6-62 6-74 0z" fill="#8A6038"/>
-            <path d="M10 40c10 10 60 10 70 0M12 46c10 9 56 9 66 0M18 52c12 6 42 6 54 0" stroke="#5B3A20" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <path d="M14 38l6 6M24 36l2 8M66 36l-3 8M76 38l-6 6M40 37l1 8M52 37l-1 8" stroke="#A47A4E" stroke-width="1.6" stroke-linecap="round"/>
+            <ellipse cx="32" cy="44" rx="5" ry="6" fill="#9FD3E6"/><ellipse cx="30.8" cy="42.2" rx="1.6" ry="2" fill="#fff" opacity=".6"/>
+            <path d="M8 46c6 22 78 22 84 0-8 7-76 7-84 0z" fill="#8A6038"/>
+            <path d="M8 46c8-3 76-3 84 0" stroke="#A47A4E" stroke-width="3" fill="none"/>
+            <path d="M10 48c12 10 68 10 80 0M14 54c12 8 60 8 72 0M20 60c12 6 48 6 60 0" stroke="#5B3A20" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M12 44l8 7M26 42l2 9M74 42l-3 9M88 44l-8 7M46 43l1 9M58 43l-1 9M5 47l7-2M95 47l-7-2" stroke="#B88A58" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
     @endif
 
     @if ($on('swing'))
-        {{-- rope swing hanging from a low branch --}}
+        {{-- a wooden swing on twisted ropes, with a few flowers --}}
         <svg class="tree-creature tree-creature--swing" style="{{ $style($spots['swing']) }}" viewBox="0 0 100 200">
             <g class="tree-swing">
-                <path d="M18 0v168M82 0v168" stroke="#C9A36A" stroke-width="2.6"/>
-                <path d="M18 0v168M82 0v168" stroke="#8A6A3A" stroke-width="2.6" stroke-dasharray="3 5" opacity=".6"/>
-                <rect x="6" y="164" width="88" height="12" rx="3" fill="#8A5A36"/>
-                <rect x="6" y="164" width="88" height="4" rx="2" fill="#A97A4E"/>
+                <path d="M18 0v168M82 0v168" stroke="#C9A36A" stroke-width="3.2"/>
+                <path d="M18 0v168M82 0v168" stroke="#8A6A3A" stroke-width="3.2" stroke-dasharray="2.5 3.5" opacity=".7"/>
+                <g fill="#F7B7C6"><circle cx="15" cy="60" r="3"/><circle cx="21" cy="64" r="3"/><circle cx="16" cy="66" r="3"/></g><circle cx="17.5" cy="63.5" r="1.6" fill="#F4C64E"/>
+                <g fill="#FFF0F4"><circle cx="79" cy="96" r="3"/><circle cx="85" cy="100" r="3"/><circle cx="80" cy="102" r="3"/></g><circle cx="81.5" cy="99.5" r="1.6" fill="#F4C64E"/>
+                <path d="M21 62c3-3 6-2 8 1M77 98c-3-3-6-2-8 1" stroke="#6E8B3D" stroke-width="1.6" fill="none"/>
+                <rect x="4" y="164" width="92" height="14" rx="3.5" fill="url(#dec-wood)"/>
+                <path d="M10 169h34M50 173h38" stroke="#5A3A1E" stroke-width="1" opacity=".5"/>
+                <rect x="4" y="164" width="92" height="3.5" rx="1.75" fill="#E2B27C" opacity=".8"/>
+                <circle cx="18" cy="166" r="3.4" fill="#8A6A3A"/><circle cx="82" cy="166" r="3.4" fill="#8A6A3A"/>
             </g>
         </svg>
     @endif
 
     @if ($on('squirrel'))
-        {{-- squirrel climbing the trunk --}}
-        <svg class="tree-creature tree-creature--squirrel" style="{{ $style($spots['squirrel']) }}" viewBox="0 0 80 110">
-            <path class="tree-squirrel__tail" d="M44 60c26 2 34-30 18-46-8-8-22-4-20 8 2 10 14 8 12 18-2 8-14 10-14 20z" fill="#B5652B"/>
-            <path d="M48 26c10-2 16 4 14 12" stroke="#D88A49" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
-            <ellipse cx="30" cy="66" rx="14" ry="22" fill="#A85A24"/>
-            <ellipse cx="25" cy="70" rx="7" ry="14" fill="#E9C9A0"/>
-            <circle cx="28" cy="40" r="11" fill="#A85A24"/>
-            <path d="M22 31l-3-9 7 5zM33 29l1-9 5 7z" fill="#A85A24"/>
-            <circle cx="24" cy="39" r="2.2" fill="#1d1410"/><circle cx="24.7" cy="38.3" r=".7" fill="#fff"/>
-            <circle cx="18.5" cy="43" r="1.6" fill="#3a2214"/>
-            <path d="M20 58l-8 6M22 80l-8 8M38 84l4 10" stroke="#8A4718" stroke-width="4" stroke-linecap="round"/>
+        {{-- a red squirrel holding an acorn --}}
+        <svg class="tree-creature tree-creature--squirrel" style="{{ $style($spots['squirrel']) }}" viewBox="0 0 90 110">
+            <path class="tree-squirrel__tail" d="M50 74c30 2 40-34 22-56C62 6 44 10 46 24c2 11 16 9 14 21-2 9-16 13-10 29z" fill="url(#dec-tail)"/>
+            <path class="tree-squirrel__tail" d="M58 22c10-1 16 7 14 17M62 32c6 1 8 6 7 11" stroke="#F0A86A" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".7"/>
+            <ellipse cx="34" cy="70" rx="16" ry="24" fill="#B4602A"/>
+            <ellipse cx="29" cy="74" rx="8" ry="15" fill="#F2D6B0"/>
+            <circle cx="32" cy="40" r="13" fill="#B4602A"/>
+            <path d="M24 30l-3-11 8 6zM37 28l3-11 4 9z" fill="#B4602A"/>
+            <path d="M24.5 27l-1.4-5 3.2 2.6zM38.5 25.5l1.6-5 1.6 4.2z" fill="#F2A46E"/>
+            <ellipse cx="24" cy="44" rx="7" ry="6" fill="#F2D6B0"/>
+            <circle cx="27" cy="38" r="2.6" fill="#1D1410"/><circle cx="27.8" cy="37.2" r=".9" fill="#fff"/>
+            <circle cx="18.5" cy="44" r="1.8" fill="#3A2214"/>
+            <path d="M19 47c2 1.5 4 1.5 6 0" stroke="#3A2214" stroke-width="1" fill="none"/>
+            <ellipse cx="22" cy="60" rx="6" ry="7" fill="#8E5A2B"/>
+            <path d="M16.5 56.5c2-4 9-4 11 0z" fill="#5A3A1E"/>
+            <path d="M22 52.5v-2.5" stroke="#5A3A1E" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M26 58c-3 3-7 3-9 0M28 64c-3 3-8 3-10 0" stroke="#9A4F20" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+            <path d="M24 90l-8 8M38 92l3 10" stroke="#9A4F20" stroke-width="4.5" stroke-linecap="round"/>
         </svg>
     @endif
 
     @if ($on('owl'))
-        {{-- owl perched on a branch; it blinks --}}
-        <svg class="tree-creature tree-creature--owl" style="{{ $style($spots['owl']) }}" viewBox="0 0 70 90">
-            <path d="M14 22l4-14 10 10M56 22l-4-14-10 10" fill="#6B4A32"/>
-            <ellipse cx="35" cy="50" rx="25" ry="32" fill="#7D573A"/>
-            <ellipse cx="35" cy="60" rx="16" ry="20" fill="#D9B98C"/>
-            <path d="M24 54q3 3 6 0M33 58q3 3 6 0M42 54q3 3 6 0M28 66q3 3 6 0M37 66q3 3 6 0" stroke="#A88257" stroke-width="1.4" fill="none"/>
-            <circle cx="24" cy="34" r="10" fill="#F3E3C3"/><circle cx="46" cy="34" r="10" fill="#F3E3C3"/>
-            <g class="tree-owl__eyes"><circle cx="24" cy="34" r="5" fill="#2A1A10"/><circle cx="46" cy="34" r="5" fill="#2A1A10"/><circle cx="25.6" cy="32.4" r="1.6" fill="#fff"/><circle cx="47.6" cy="32.4" r="1.6" fill="#fff"/></g>
-            <path d="M35 38l-4 6h8z" fill="#E1A23A"/>
-            <path d="M22 80l-4 6M28 81l0 7M42 81l0 7M48 80l4 6" stroke="#E1A23A" stroke-width="2.4" stroke-linecap="round"/>
+        {{-- a barn-brown owl; it blinks --}}
+        <svg class="tree-creature tree-creature--owl" style="{{ $style($spots['owl']) }}" viewBox="0 0 80 100">
+            <ellipse cx="40" cy="97" rx="26" ry="3" fill="#000" opacity=".2"/>
+            <path d="M16 26L19 6l13 12M64 26L61 6 48 18" fill="#5A3B24"/>
+            <ellipse cx="40" cy="56" rx="28" ry="36" fill="url(#dec-owl-body)"/>
+            <path d="M14 50c-6 14-3 30 8 38 1-14-2-28-8-38zM66 50c6 14 3 30-8 38-1-14 2-28 8-38z" fill="#4A2F1C"/>
+            <path d="M15 58c3 6 4 14 4 22M65 58c-3 6-4 14-4 22" stroke="#7A5638" stroke-width="1.4" fill="none"/>
+            <ellipse cx="40" cy="66" rx="17" ry="22" fill="#E8D1A8"/>
+            <path d="M30 58q3 3.4 6 0M39 62q3 3.4 6 0M44 56q3 3.4 6 0M33 68q3 3.4 6 0M42 72q3 3.4 6 0M34 78q3 3.4 6 0M43 82q3 3.4 6 0" stroke="#A88257" stroke-width="1.4" fill="none"/>
+            <path d="M14 36c4-12 22-16 26-6 4-10 22-6 26 6-6 10-20 12-26 4-6 8-20 6-26-4z" fill="#F4E4C4"/>
+            <g class="tree-owl__eyes">
+                <circle cx="28" cy="34" r="9" fill="#F3B23A"/><circle cx="52" cy="34" r="9" fill="#F3B23A"/>
+                <circle cx="28" cy="34" r="5.4" fill="#1D1410"/><circle cx="52" cy="34" r="5.4" fill="#1D1410"/>
+                <circle cx="30" cy="31.8" r="2" fill="#fff"/><circle cx="54" cy="31.8" r="2" fill="#fff"/>
+                <circle cx="26.4" cy="36.4" r=".9" fill="#fff" opacity=".7"/><circle cx="50.4" cy="36.4" r=".9" fill="#fff" opacity=".7"/>
+            </g>
+            <path d="M40 38l-4.5 6.5h9z" fill="#E1A23A"/><path d="M40 44.5l-2-3h4z" fill="#B87A1E"/>
+            <path d="M28 92l-4 5M33 93v5M47 93v5M52 92l4 5" stroke="#E1A23A" stroke-width="2.6" stroke-linecap="round"/>
         </svg>
     @endif
 </div>
@@ -163,7 +254,7 @@
     @if ($on('autumn'))
         @foreach (range(0, 9) as $i)
             <span class="tree-fall" style="left: {{ round(24 + $spread($i, 1) * 56, 2) }}%; --dur: {{ round(11 + $spread($i, 2) * 8, 1) }}s; --delay: -{{ round($spread($i, 3) * 18, 1) }}s; --drift: {{ round(-40 + $spread($i, 4) * 80) }}px;">
-                <svg class="tree-leaf tree-leaf--{{ ['orange', 'red', 'gold'][$i % 3] }}" viewBox="0 0 24 24"><path d="M12 2C6.5 6 4.5 12 6.5 17.5 8.5 21 12 22 12 22s3.5-1 5.5-4.5C19.5 12 17.5 6 12 2z" fill="currentColor"/><path d="M12 5v17" stroke="rgb(0 0 0 / 22%)" stroke-width="1"/></svg>
+                <svg class="tree-leaf tree-leaf--{{ $tones[$i % 3] }}" viewBox="0 0 24 24"><path d="{{ $maple }}" fill="currentColor"/><path d="M12 21v-9" stroke="rgb(0 0 0 / 25%)" stroke-width=".8"/></svg>
             </span>
         @endforeach
     @endif
@@ -174,8 +265,19 @@
     @endif
     @if ($on('butterflies'))
         @foreach ($spots['butterflies'] as $i => $point)
-            <span class="tree-butterfly" style="{{ $style($point) }} --hue: {{ [0, 200, 40, 290][$i % 4] }}deg; --dur: {{ 9 + $i * 2 }}s; --delay: -{{ $i * 2.3 }}s;">
-                <svg viewBox="0 0 40 30"><g class="tree-butterfly__wings"><path d="M20 15C14 2 2 2 3 10s9 9 17 5z" fill="#F28C38"/><path d="M20 15C14 22 5 27 7 21s7-7 13-6z" fill="#E36A2E"/><path d="M20 15C26 2 38 2 37 10s-9 9-17 5z" fill="#F28C38"/><path d="M20 15C26 22 35 27 33 21s-7-7-13-6z" fill="#E36A2E"/><circle cx="9" cy="9" r="1.6" fill="#fff"/><circle cx="31" cy="9" r="1.6" fill="#fff"/></g><path d="M20 8v15" stroke="#2A1A10" stroke-width="2" stroke-linecap="round"/></svg>
+            <span class="tree-butterfly" style="{{ $style($point) }} --hue: {{ [0, 190, 300, 40][$i % 4] }}deg; --dur: {{ 9 + $i * 2 }}s; --delay: -{{ $i * 2.3 }}s;">
+                <svg viewBox="0 0 48 36">
+                    <g class="tree-butterfly__wings">
+                        <path d="M24 17C18 2 4 0 3 9s9 11 21 8z" fill="url(#dec-wing)" stroke="#2A1A10" stroke-width="1.2"/>
+                        <path d="M24 19C17 22 8 31 11 33s11-5 13-14z" fill="url(#dec-wing)" stroke="#2A1A10" stroke-width="1.2"/>
+                        <path d="M24 17c6-15 20-17 21-8s-9 11-21 8z" fill="url(#dec-wing)" stroke="#2A1A10" stroke-width="1.2"/>
+                        <path d="M24 19c7 3 16 12 13 14s-11-5-13-14z" fill="url(#dec-wing)" stroke="#2A1A10" stroke-width="1.2"/>
+                        <path d="M23 15C17 7 10 5 6 8M23 17C15 14 9 13 5 11M25 15c6-8 13-10 17-7M25 17c8-3 14-4 18-6M23 20c-4 4-8 8-10 11M25 20c4 4 8 8 10 11" stroke="#2A1A10" stroke-width=".9" fill="none" opacity=".75"/>
+                        <g fill="#fff"><circle cx="5" cy="8" r="1"/><circle cx="8" cy="5" r=".8"/><circle cx="43" cy="8" r="1"/><circle cx="40" cy="5" r=".8"/><circle cx="12" cy="31" r=".8"/><circle cx="36" cy="31" r=".8"/></g>
+                    </g>
+                    <ellipse cx="24" cy="19" rx="1.8" ry="8" fill="#2A1A10"/>
+                    <path d="M23 11c-2-4-4-6-6-7M25 11c2-4 4-6 6-7" stroke="#2A1A10" stroke-width=".9" fill="none"/>
+                </svg>
             </span>
         @endforeach
     @endif

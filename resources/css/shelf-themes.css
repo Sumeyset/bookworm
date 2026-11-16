@@ -1085,7 +1085,7 @@
     position: absolute;
     inset: 0;
     z-index: 4;
-    background: radial-gradient(40% 60% at 50% 96%, rgb(140 160 255 / 14%), transparent 70%);
+    background: radial-gradient(40% 55% at 50% 80%, rgb(140 160 255 / 14%), transparent 70%);
     pointer-events: none;
 }
 
@@ -1256,3 +1256,75 @@
 .shop-gift summary { cursor: pointer; font-size: .85rem; font-weight: 600; color: #8b2a3d; list-style: none; }
 .shop-gift summary::-webkit-details-marker { display: none; }
 .dark .shop-gift summary { color: #f0a8b4; }
+
+/* Decorations a little bigger in the wide photos, so they read as clearly as on the tree */
+.photo-shelf .tree-decor,
+.photo-shelf .tree-fx {
+    --u: calc(100cqw / var(--scene-w) * var(--decor-scale, 1));
+}
+@container (max-width: 760px) {
+    .photo-shelf .tree-decor,
+    .photo-shelf .tree-fx {
+        --u: calc(var(--min-w) / var(--scene-w) * var(--decor-scale, 1));
+    }
+}
+
+/* =====================================================================
+   Redesigned decorations (SVG drawings in tree-decor.blade.php)
+   ===================================================================== */
+
+.tree-decor__star { width: calc(var(--u) * 104); height: calc(var(--u) * 104); }
+
+svg.tree-ornament {
+    width: calc(var(--u) * 30);
+    height: calc(var(--u) * 48);
+    margin-left: calc(var(--u) * -15);
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    overflow: visible;
+    transform-origin: 50% 0;
+    filter: drop-shadow(0 calc(var(--u) * 4) calc(var(--u) * 4) rgb(40 20 10 / 35%));
+}
+
+svg.tree-lantern {
+    width: calc(var(--u) * 32);
+    height: calc(var(--u) * 59);
+    margin-left: calc(var(--u) * -16);
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    overflow: visible;
+    transform-origin: 50% 0;
+    filter: drop-shadow(0 0 calc(var(--u) * 12) rgb(255 190 100 / 70%));
+}
+
+.tree-decor__gift { width: calc(var(--u) * 84); }
+.tree-decor__gift--small { width: calc(var(--u) * 62); }
+.tree-decor__pumpkin { width: calc(var(--u) * 92); }
+.tree-decor__pumpkin--small { width: calc(var(--u) * 64); }
+
+.tree-creature--owl { width: calc(var(--u) * 70); transform: translate(-50%, -97%); }
+.tree-creature--nest { width: calc(var(--u) * 100); transform: translate(-50%, -94%); }
+.tree-creature--squirrel { width: calc(var(--u) * 66); }
+.tree-butterfly { width: calc(var(--u) * 46); }
+.tree-nest__bird { transform-origin: 54px 44px; }
+.tree-owl__eyes { transform-origin: 40px 34px; }
+.tree-squirrel__tail { transform-origin: 50px 74px; }
+.tree-butterfly__wings { transform-origin: 24px 18px; }
+
+/* On the photo shelves the decorations sit in front of the books, in their
+   own open spots, so every one you buy is easy to see. */
+.photo-shelf .tree-decor { z-index: 3; }
+.photo-shelf .tree-decor__floor { display: none; }
+
+/* A soft light rim so creatures stand out on brown wood and bark */
+.tree-creature {
+    filter: drop-shadow(0 0 calc(var(--u) * 1.5) rgb(255 244 228 / 85%)) drop-shadow(0 calc(var(--u) * 4) calc(var(--u) * 4) rgb(40 20 10 / 35%));
+}
+.tree-creature--squirrel { width: calc(var(--u) * 78); }
+.tree-butterfly { width: calc(var(--u) * 58); }
+
+/* Autumn: golden, not pink (also when the Christmas set is on) */
+.decor-autumn .book-tree__segment img { filter: sepia(.24) saturate(1.25) hue-rotate(-8deg) brightness(1.02); }
+.decor-autumn.decor-snow .book-tree__segment img { filter: sepia(.14) saturate(1.05) hue-rotate(-4deg); }
