@@ -498,3 +498,5 @@ a.shelf-hub__action:hover, button.shelf-hub__action:hover { background: #fbf3e8;
 .shop-gift summary { cursor: pointer; font-size: .85rem; font-weight: 600; color: #8b2a3d; list-style: none; }
 .shop-gift summary::-webkit-details-marker { display: none; }
 .dark .shop-gift summary { color: #f0a8b4; }
+.badge-chip--year { border-color: rgb(139 42 61 / 30%); background: linear-gradient(135deg, #fff1e6, #fbe3ea); color: #6d1a2b; }
+.dark .badge-chip--year { background: rgb(240 168 180 / 10%); color: #f0a8b4; }

@@ -101,3 +101,15 @@ test('every shop decoration shows on the photo shelves', function () {
         }
     }
 });
+
+test('spine colours are read from the cover', function () {
+    $path = tempnam(sys_get_temp_dir(), 'cover') . '.png';
+    $image = imagecreatetruecolor(60, 90);
+    imagefill($image, 0, 0, imagecolorallocate($image, 20, 60, 140)); // a deep blue cover
+    imagefilledrectangle($image, 10, 10, 50, 30, imagecolorallocate($image, 250, 250, 250)); // white title box
+    imagepng($image, $path);
+
+    [$color, $ink] = \App\Support\SpineColor::fromImage($path);
+    [$r, $g, $b] = sscanf($color, '#%02X%02X%02X');
+    expect($b)->toBeGreaterThan($r + 60)->and($ink)->toBe('#FFF4DF'); // blue spine, light text
+});

@@ -26,7 +26,10 @@
                     <h2 id="bookshelf-heading" class="font-display mt-1 text-4xl text-ink dark:text-[#f4e9e2] font-bold">{{ $isOwnProfile ? 'My bookshelf' : 'Bookshelf by ' . $profile->name }}</h2>
                 </div>
                 @if ($isOwnProfile)
-                    <a href="{{ route('books.index') }}" class="btn-primary">+ Add a book</a>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="{{ route('import.show') }}" class="btn-ghost">⬆️ Import books</a>
+                        <a href="{{ route('books.index') }}" class="btn-primary">+ Add a book</a>
+                    </div>
                 @endif
             </div>
             @include('profile.partials.tree-bookshelf')

@@ -47,6 +47,7 @@
                             @endforeach
                             @if ($isOwnProfile)
                                 <a href="{{ route('challenges.index') }}" class="badge-chip">🎯 {{ $profileBadges->isEmpty() ? 'Earn your first badge' : 'Challenges' }}</a>
+                                <a href="{{ route('year.show', $profile->username) }}" class="badge-chip badge-chip--year">✨ {{ now()->year }} in books</a>
                             @endif
                         </div>
                     @endif

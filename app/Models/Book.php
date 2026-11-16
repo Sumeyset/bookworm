@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Book extends Model
 {
+    protected static function booted(): void
+    {
+        // A new cover means new spine colours (worked out again from the cover).
+        static::saving(function (Book $book): void {
+            if ($book->isDirty('cover_url')) {
+                $book->spine_color = null;
+                $book->spine_text = null;
+            }
+        });
+    }
+
     protected $fillable = [
         'ol_id',
         'isbn',

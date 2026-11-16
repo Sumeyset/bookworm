@@ -73,10 +73,6 @@
                     <span class="shelf-hub__icon shelf-hub__icon--acorn" aria-hidden="true">🌰</span>
                     <span class="min-w-0"><span class="shelf-hub__label">Tree shop</span><span class="shelf-hub__sub">{{ number_format($profile->acorns) }} acorns to spend</span></span>
                 </a>
-                <a href="{{ route('year.show', $profile->username) }}" class="shelf-hub__action">
-                    <span class="shelf-hub__icon shelf-hub__icon--year" aria-hidden="true">✨</span>
-                    <span class="min-w-0"><span class="shelf-hub__label">{{ now()->year }} in books</span><span class="shelf-hub__sub">Your year so far</span></span>
-                </a>
                 <div class="shelf-hub__action shelf-hub__action--share">
                     <span class="shelf-hub__icon {{ $profile->is_public ? 'shelf-hub__icon--on' : '' }}" aria-hidden="true">{{ $profile->is_public ? '🌍' : '🔒' }}</span>
                     <span class="min-w-0 flex-1">
@@ -99,10 +95,6 @@
                         </button>
                     </form>
                 </div>
-                <a href="{{ route('import.show') }}" class="shelf-hub__action">
-                    <span class="shelf-hub__icon shelf-hub__icon--import" aria-hidden="true">⬆️</span>
-                    <span class="min-w-0"><span class="shelf-hub__label">Import books</span><span class="shelf-hub__sub">Goodreads, StoryGraph…</span></span>
-                </a>
             </div>
         @endif
     </section>

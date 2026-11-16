@@ -11,11 +11,17 @@
     $spineSize = 86 + crc32('h' . $book->id) % 15; // height in %, so a row of spines isn't perfectly even
     $spineThick = 26 + crc32('w' . $book->id) % 12;
     $variant = crc32('v' . $book->id) % 4; // cloth, leather, paperback, linen
+    // Books with a cover: the spine takes the cover's colours and a slice of its picture.
+    $coverSpine = (bool) $book->cover_url;
+    if ($coverSpine && ($fromCover = \App\Support\SpineColor::for($book))) {
+        [$spineColor, $spineInk] = $fromCover;
+        $spineLight = $spineInk !== '#FFF4DF';
+    }
 @endphp
 
 <button type="button"
-        class="tree-book tree-book--{{ $statusKey }} tree-book--v{{ $variant }}"
-        style="--spine: {{ $spineColor }}; --spine-size: {{ $spineSize }}%;"
+        class="tree-book tree-book--{{ $statusKey }} tree-book--v{{ $variant }} {{ $coverSpine ? 'tree-book--cover-spine' : '' }}"
+        style="--spine: {{ $spineColor }}; --spine-size: {{ $spineSize }}%;@if ($coverSpine) --spine-img: url('{{ $book->cover_src }}');@endif"
         data-book-id="{{ $book->id }}"
         data-book="{{ json_encode($payload) }}"
         aria-label="{{ $label }}"
