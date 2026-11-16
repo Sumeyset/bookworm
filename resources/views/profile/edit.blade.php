@@ -11,7 +11,7 @@
     <div class="page-section space-y-6">
         @foreach ([
             ['update-profile-information-form', 'Profile', 'How other readers see you: photo, name and a short bio.', 'M10 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0'],
-            ['reading-reminders-form', 'Reading reminders', 'A nudge before your reading streak ends, and your streak freezes.', 'M10 2c3 3 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3 0-5 1-8Z'],
+            ['reading-reminders-form', 'Reminders & notifications', 'A nudge before your reading streak ends, streak freezes, and notifications on your phone.', 'M10 2c3 3 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3 0-5 1-8Z'],
             ['update-password-form', 'Password', 'Use a long, unique password to keep your shelf safe.', 'M6 9V6a4 4 0 1 1 8 0v3M5 9h10v8H5z'],
             ['delete-user-form', 'Delete account', 'Permanently remove your account, shelf, notes and PDFs.', 'M4 6h12M8 6V4h4v2m-6 0 1 11h6l1-11'],
         ] as [$partial, $heading, $copy, $icon])

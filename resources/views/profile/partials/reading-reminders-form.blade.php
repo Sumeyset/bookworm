@@ -45,3 +45,67 @@
         } catch {}
     });
 </script>
+
+@if (\App\Support\Push::configured())
+    <div class="mt-8 border-t border-warmborder pt-6 dark:border-[#4B3035]" data-push-settings
+         data-key="{{ config('webpush.public_key') }}" data-subscribe-url="{{ route('push.subscribe') }}" data-unsubscribe-url="{{ route('push.unsubscribe') }}">
+        <p class="font-semibold text-ink dark:text-[#F4E9E2]">Notifications on this device</p>
+        <p class="mt-1 text-sm text-walnut dark:text-[#d4c2b9]">Messages, club news, badges and reminders, even when Bookworm is closed. On iPhone, add Bookworm to your Home Screen first (Share → Add to Home Screen).</p>
+        <div class="mt-3 flex flex-wrap items-center gap-3">
+            <button type="button" class="btn-primary" data-push-toggle disabled>Checking…</button>
+            <span class="text-sm text-tan" data-push-note></span>
+        </div>
+    </div>
+    <script>
+        (() => {
+            const box = document.querySelector('[data-push-settings]');
+            const button = box.querySelector('[data-push-toggle]');
+            const note = box.querySelector('[data-push-note]');
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+            const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+            const keyBytes = (base64) => {
+                const padded = (base64 + '='.repeat((4 - base64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+                return Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
+            };
+            const send = (url, method, body) => fetch(url, { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': csrf }, body: JSON.stringify(body) });
+
+            async function refresh() {
+                if (!supported) {
+                    button.textContent = 'Not available here';
+                    note.textContent = 'This browser can’t show notifications.';
+                    return;
+                }
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+                button.disabled = Notification.permission === 'denied';
+                button.textContent = subscription ? 'Turn off on this device' : 'Turn on notifications';
+                button.dataset.on = subscription ? '1' : '';
+                note.textContent = Notification.permission === 'denied' ? 'Notifications are blocked in your browser settings.' : (subscription ? '✓ On for this device' : '');
+            }
+
+            button.addEventListener('click', async () => {
+                button.disabled = true;
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    const existing = await registration.pushManager.getSubscription();
+                    if (existing) {
+                        await send(box.dataset.unsubscribeUrl, 'DELETE', { endpoint: existing.endpoint });
+                        await existing.unsubscribe();
+                    } else {
+                        if (await Notification.requestPermission() !== 'granted') return;
+                        const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(box.dataset.key) });
+                        const json = subscription.toJSON();
+                        const encoding = (PushManager.supportedContentEncodings || ['aes128gcm'])[0];
+                        await send(box.dataset.subscribeUrl, 'POST', { ...json, contentEncoding: encoding });
+                    }
+                } catch (error) {
+                    note.textContent = 'Something went wrong — please try again.';
+                } finally {
+                    refresh();
+                }
+            });
+
+            refresh();
+        })();
+    </script>
+@endif

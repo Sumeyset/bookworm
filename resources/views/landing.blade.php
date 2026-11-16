@@ -9,6 +9,9 @@
     <title>Bookworm — Your reading life, beautifully shelved</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+        <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="Bookworm">
     @include('layouts.partials.head-assets')
 </head>
 <body id="top" class="bg-ivory font-sans text-ink antialiased dark:bg-wineblack dark:text-[#F4E9E2]">

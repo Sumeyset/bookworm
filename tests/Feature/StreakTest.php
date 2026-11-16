@@ -63,3 +63,26 @@ test('reminder settings save with the time zone', function () {
     expect($me->fresh())->streak_reminder->toBeTrue()->reminder_hour->toBe(21)->timezone->toBe('Asia/Baku');
     $this->actingAs($me)->get(route('profile.edit'))->assertOk()->assertSee('Remind me before my streak ends');
 });
+
+test('push: devices subscribe, notifications and messages are pushed, and it is off without keys', function () {
+    $me = User::factory()->create();
+    $this->actingAs($me)->postJson(route('push.subscribe'), [
+        'endpoint' => 'https://push.example.test/abc', 'keys' => ['p256dh' => 'key', 'auth' => 'auth'],
+    ])->assertOk();
+    expect($me->fresh()->hasMany(\App\Models\PushSubscription::class)->count())->toBe(1);
+
+    // Without VAPID keys nothing is sent and nothing breaks.
+    config(['webpush.public_key' => null, 'webpush.private_key' => null]);
+    \App\Notifications\BookwormNotification::send($me, 'badge', 'Hello', '/');
+    expect($me->notifications()->count())->toBe(1);
+
+    $this->actingAs($me)->deleteJson(route('push.unsubscribe'), ['endpoint' => 'https://push.example.test/abc'])->assertOk();
+    expect(\App\Models\PushSubscription::count())->toBe(0);
+});
+
+test('the app manifest, service worker and offline page are served', function () {
+    $this->get('/offline')->assertOk()->assertSee('You’re offline');
+    expect(file_exists(public_path('sw.js')))->toBeTrue()
+        ->and(json_decode(file_get_contents(public_path('manifest.webmanifest')), true)['short_name'])->toBe('Bookworm');
+    $this->actingAs(User::factory()->create())->get(route('feed.index'))->assertSee('manifest.webmanifest', false);
+});

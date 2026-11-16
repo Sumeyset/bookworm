@@ -827,4 +827,30 @@ document.addEventListener('submit', (event) => {
     window.setTimeout(restore, 250);
 })();
 
+/* ---------------- installable app: service worker ---------------- */
+
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+            // no offline support in this browser; everything still works online
+        });
+    });
+}
+
+// Logging out: forget the books kept for offline reading on this device.
+document.addEventListener('submit', (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || !/\/logout$/.test(new URL(form.action, window.location.href).pathname)) return;
+    try {
+        navigator.serviceWorker?.controller?.postMessage('clear-private');
+        if ('caches' in window) {
+            caches.delete('bw-pdfs');
+            caches.delete('bw-pages');
+        }
+        localStorage.removeItem('bookworm-offline-books');
+    } catch {
+        // nothing kept
+    }
+});
+
 Alpine.start();

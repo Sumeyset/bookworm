@@ -31,8 +31,10 @@ use App\Http\Controllers\BuddyReadController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\BookClubController;
+use App\Http\Controllers\PushSubscriptionController;
 
 Route::get('/', WelcomeController::class)->name('home');
+Route::view('/offline', 'offline')->name('offline');
 Route::get('/quotes/{quote:share_token}', [QuoteController::class, 'showPublic'])->name('quotes.public');
 Route::get('/covers/{book}', [CoverController::class, 'show'])->name('covers.show');
 // Public share pages (only for readers who turned sharing on)
@@ -43,6 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/push/subscriptions', [PushSubscriptionController::class, 'store'])->middleware('throttle:20,1')->name('push.subscribe');
+    Route::delete('/push/subscriptions', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
     Route::patch('/settings/reminders', [SettingsController::class, 'reminders'])->name('settings.reminders');
     Route::get('/books', [BookController::class, 'index'])->middleware('throttle:search')->name('books.index');
     Route::get('/library', [LibraryController::class, 'index'])->name('library.index');

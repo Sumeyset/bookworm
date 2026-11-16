@@ -990,6 +990,18 @@ function initializeReader(reader) {
         toolbar.style.top = `${top}px`;
     }
 
+    // The offline page lists the books opened on this device (the service worker keeps their files).
+    function rememberForOffline() {
+        try {
+            const key = 'bookworm-offline-books';
+            const books = JSON.parse(localStorage.getItem(key) || '[]').filter((book) => book.url !== window.location.pathname);
+            books.unshift({ url: window.location.pathname, title: reader.dataset.bookTitle });
+            localStorage.setItem(key, JSON.stringify(books.slice(0, 12)));
+        } catch {
+            // storage blocked
+        }
+    }
+
     // One to four words that look like a name or a thing ("Mr. Darcy", "the Shire").
     function isShortName(text) {
         const clean = (text || '').trim();
@@ -1578,11 +1590,13 @@ function initializeReader(reader) {
     async function loadReader() {
         applySettings();
         const [loadedDocument, savedHighlights] = await Promise.all([
-            pdfjsLib.getDocument({ url: reader.dataset.fileUrl, withCredentials: true }).promise,
+            // One whole download (no byte ranges), so the app can keep the book for offline reading.
+            pdfjsLib.getDocument({ url: reader.dataset.fileUrl, withCredentials: true, disableRange: true, disableStream: true }).promise,
             requestJson(reader.dataset.highlightsUrl),
         ]);
 
         documentProxy = loadedDocument;
+        rememberForOffline();
         highlights = savedHighlights.map((highlight) => ({ ...highlight, quoted: Boolean(highlight.quoted) }));
         pdfPage = Math.min(documentProxy.numPages, Math.max(1, Number(reader.dataset.initialPage) || 1));
         lastSavedPage = pdfPage;

@@ -8,6 +8,11 @@
         <title>{{ $title ?? 'Bookworm — a home for readers' }}</title>
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+        <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="Bookworm">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         @include('layouts.partials.head-assets')
     </head>
     <body class="min-h-screen bg-ivory font-sans text-ink antialiased dark:bg-wineblack dark:text-[#F4E9E2]">

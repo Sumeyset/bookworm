@@ -47,5 +47,6 @@ class BookwormNotification extends Notification
         }
 
         $to->notify(new self($kind, $message, $url, $actor));
+        \App\Support\Push::toUser($to, 'Bookworm', $message, $url, $kind);
     }
 }

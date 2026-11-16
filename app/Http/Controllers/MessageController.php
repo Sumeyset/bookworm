@@ -260,7 +260,22 @@ class MessageController extends Controller
             'accepted_at' => $conversation->membership($sender)?->accepted_at ?? now(),
         ]);
 
-        return $message->load(['user', 'attachments', 'post.photos', 'post.book', 'post.user']);
+        $message->load(['user', 'attachments', 'post.photos', 'post.book', 'post.user']);
+
+        // A push to the others' phones (only in chats they accepted, not message requests).
+        $preview = $body ?? match ($message->attachments->first()?->type) {
+            'photo' => '📷 Photo',
+            'voice' => '🎤 Voice message',
+            'file' => '📎 ' . $message->attachments->first()->original_name,
+            default => $postId ? '📚 Shared a post' : 'New message',
+        };
+        $conversation->users->each(function (User $member) use ($sender, $preview, $conversation) {
+            if ($member->isNot($sender) && $member->pivot?->accepted_at) {
+                \App\Support\Push::toUser($member, $sender->name, $preview, route('messages.show', $conversation), 'dm-' . $conversation->id);
+            }
+        });
+
+        return $message;
     }
 
     /** Store the photos, voice message and files of a new message; returns attachment rows. */
