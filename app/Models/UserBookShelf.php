@@ -30,7 +30,12 @@ class UserBookShelf extends Model
         'total_pages',
         'started_at',
         'read_at',
+        'format',
+        'audio_position',
+        'audio_length',
     ];
+
+    public const FORMATS = ['paper' => '📖 Paper book', 'ebook' => '📱 E-book', 'audio' => '🎧 Audiobook'];
 
     protected function casts(): array
     {
@@ -66,8 +71,9 @@ class UserBookShelf extends Model
             // Moving the bookmark forward or finishing a book counts as a reading day.
             $pagesForward = max(0, (int) $item->current_page - (int) $item->getOriginal('current_page'));
             $finished = $item->wasChanged('status') && $item->status === 'read';
-            if (($item->wasChanged('current_page') && $pagesForward > 0) || $finished) {
-                \App\Models\ReadingSession::log($item->user_id, $item->book_id, $item->wasChanged('current_page') ? $pagesForward : 0);
+            $minutesForward = $item->wasChanged('audio_position') ? max(0, (int) $item->audio_position - (int) $item->getOriginal('audio_position')) : 0;
+            if (($item->wasChanged('current_page') && $pagesForward > 0) || $minutesForward > 0 || $finished) {
+                \App\Models\ReadingSession::log($item->user_id, $item->book_id, $item->wasChanged('current_page') ? $pagesForward : 0, $minutesForward);
             }
 
             if ($finished) {
@@ -80,7 +86,7 @@ class UserBookShelf extends Model
                 if ($finished || ($item->wasRecentlyCreated && $item->status === 'read')) {
                     \App\Support\Acorns::finishedBook($item);
                 }
-                if (($item->wasChanged('current_page') && $pagesForward > 0) || $finished) {
+                if (($item->wasChanged('current_page') && $pagesForward > 0) || $minutesForward > 0 || $finished) {
                     \App\Support\Acorns::readingActivity($item->user);
                 }
             }
@@ -165,6 +171,9 @@ class UserBookShelf extends Model
 
     public function progressPercent(): ?int
     {
+        if ($this->format === 'audio' && $this->audio_length) {
+            return $this->status === 'read' ? 100 : min(100, (int) round(($this->audio_position ?? 0) / $this->audio_length * 100));
+        }
         if (! $this->total_pages) {
             return null;
         }

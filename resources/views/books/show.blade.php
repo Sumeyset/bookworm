@@ -37,8 +37,8 @@
                             <span class="text-sm text-[#8a7065] dark:text-[#c1aaa0]">No reviews yet</span>
                         @endif
                     </div>
-                    @if ($myShelfItem?->status === 'reading' && $myShelfItem->total_pages)
-                        @php($bookProgress = min(100, (int) round(($myShelfItem->current_page ?? 0) / $myShelfItem->total_pages * 100)))
+                    @if ($myShelfItem?->status === 'reading' && $myShelfItem->progressPercent() !== null)
+                        @php($bookProgress = $myShelfItem->progressPercent())
                         <p class="mt-4 text-sm text-tan dark:text-[#c7a491]">You’re {{ $bookProgress }}% through this one.</p>
                         <div class="mt-2 h-1.5 max-w-sm overflow-hidden rounded-full bg-parchment dark:bg-[#493536]" aria-label="{{ $bookProgress }}% read"><span class="block h-full rounded-full bg-burgundy" style="width: {{ $bookProgress }}%"></span></div>
                     @endif
@@ -61,6 +61,38 @@
                             @endif
                         </p>
                     </form>
+                    @if ($myShelfItem && $myShelfItem->status !== 'want_to_read')
+                        @php($fmt = $myShelfItem->format ?? 'paper')
+                        @php($pos = (int) $myShelfItem->audio_position)
+                        @php($len = (int) $myShelfItem->audio_length)
+                        <form method="POST" action="{{ route('books.log', $book) }}" class="reading-log mt-4" x-data="{ format: '{{ $fmt }}' }">
+                            @csrf
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-tan dark:text-[#c7a491]">Log your reading</p>
+                                <div class="reading-log__formats" role="radiogroup" aria-label="How you're reading it">
+                                    @foreach (\App\Models\UserBookShelf::FORMATS as $key => $label)
+                                        <label :class="format === '{{ $key }}' && 'is-on'"><input type="radio" name="format" value="{{ $key }}" x-model="format" class="sr-only">{{ $label }}</label>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap items-end gap-2" x-show="format !== 'audio'">
+                                <label class="reading-log__field">Page<input type="number" name="current_page" min="0" value="{{ $myShelfItem->current_page }}" class="bw-input"></label>
+                                <span class="pb-2.5 text-sm text-tan">of</span>
+                                <label class="reading-log__field">Pages<input type="number" name="total_pages" min="1" value="{{ $myShelfItem->total_pages ?: $book->page_count }}" class="bw-input"></label>
+                                <button class="btn-primary min-h-0 py-2.5">Save</button>
+                            </div>
+                            <div class="mt-3 flex flex-wrap items-end gap-2" x-show="format === 'audio'" x-cloak>
+                                <span class="pb-2.5 text-sm text-tan">I’m at</span>
+                                <label class="reading-log__field reading-log__field--short">h<input type="number" name="position_h" min="0" value="{{ intdiv($pos, 60) }}" class="bw-input"></label>
+                                <label class="reading-log__field reading-log__field--short">min<input type="number" name="position_m" min="0" max="59" value="{{ $pos % 60 }}" class="bw-input"></label>
+                                <span class="pb-2.5 text-sm text-tan">of</span>
+                                <label class="reading-log__field reading-log__field--short">h<input type="number" name="length_h" min="0" value="{{ $len ? intdiv($len, 60) : '' }}" class="bw-input"></label>
+                                <label class="reading-log__field reading-log__field--short">min<input type="number" name="length_m" min="0" max="59" value="{{ $len ? $len % 60 : '' }}" class="bw-input"></label>
+                                <button class="btn-primary min-h-0 py-2.5">Save</button>
+                            </div>
+                            <p class="mt-2 text-xs text-tan" x-show="format === 'audio'" x-cloak>Listening counts for your reading days, streaks and acorns (a minute counts like a page).</p>
+                        </form>
+                    @endif
                     <div class="mt-4 flex flex-wrap gap-2">
                         <a href="{{ route('buddy.index', ['book' => $book->id]) }}" class="bw-chip">🤝 Start a buddy read</a>
                         <button type="button" class="bw-chip" data-ask-barnaby="Would I enjoy “{{ $book->title }}”{{ $book->author_name ? ' by ' . $book->author_name : '' }}? Tell me a little about it, spoiler-free, and how it fits my shelf.">

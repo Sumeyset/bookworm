@@ -117,7 +117,8 @@ class Acorns
             self::award($user, self::STREAK_BONUS, 'streak', 'streak:' . $today, "for a {$streak}-day reading streak");
         }
 
-        $pages = (int) ReadingSession::where('user_id', $user->id)->whereDate('read_on', $today)->sum('pages_read');
+        // A minute of listening counts like a page.
+        $pages = (int) ReadingSession::where('user_id', $user->id)->whereDate('read_on', $today)->selectRaw('COALESCE(SUM(pages_read), 0) + COALESCE(SUM(minutes), 0) as total')->value('total');
         $due = min(self::PAGES_DAILY_MAX, intdiv($pages, self::PAGES_PER_ACORN));
         $earned = (int) AcornEvent::where('user_id', $user->id)->where('reason', 'pages')->whereDate('created_at', $today)->sum('amount');
         if ($due > $earned) {

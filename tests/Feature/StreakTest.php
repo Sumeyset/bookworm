@@ -86,3 +86,21 @@ test('the app manifest, service worker and offline page are served', function ()
         ->and(json_decode(file_get_contents(public_path('manifest.webmanifest')), true)['short_name'])->toBe('Bookworm');
     $this->actingAs(User::factory()->create())->get(route('feed.index'))->assertSee('manifest.webmanifest', false);
 });
+
+test('audiobook listening is logged in minutes and counts as a reading day', function () {
+    $me = User::factory()->create();
+    $book = Book::create(['ol_id' => 'OL-AUDIO', 'title' => 'Audio Book']);
+    $me->shelfItems()->create(['book_id' => $book->id, 'status' => 'reading']);
+
+    $this->actingAs($me)->post(route('books.log', $book), ['format' => 'audio', 'position_h' => 1, 'position_m' => 30, 'length_h' => 10, 'length_m' => 0])->assertRedirect();
+    $item = $me->shelfItems()->first();
+    expect($item->format)->toBe('audio')->and($item->audio_position)->toBe(90)->and($item->audio_length)->toBe(600)
+        ->and($item->progressPercent())->toBe(15)
+        ->and((int) ReadingSession::where('user_id', $me->id)->sum('minutes'))->toBe(90)
+        ->and(Streak::current($me))->toBe(1);
+    $this->actingAs($me)->get(route('books.show', $book))->assertOk()->assertSee('Log your reading')->assertSee('Audiobook');
+
+    // Paper: a page, and the last page finishes the book.
+    $this->actingAs($me)->post(route('books.log', $book), ['format' => 'paper', 'current_page' => 320, 'total_pages' => 320]);
+    expect($me->shelfItems()->first()->status)->toBe('read');
+});

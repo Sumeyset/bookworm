@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReadingSession extends Model
 {
-    protected $fillable = ['user_id', 'book_id', 'read_on', 'pages_read'];
+    protected $fillable = ['user_id', 'book_id', 'read_on', 'pages_read', 'minutes'];
 
     protected function casts(): array
     {
@@ -20,7 +20,7 @@ class ReadingSession extends Model
     }
 
     /** Record reading for today. Pages only ever add up. */
-    public static function log(int $userId, ?int $bookId, int $pages = 0): void
+    public static function log(int $userId, ?int $bookId, int $pages = 0, int $minutes = 0): void
     {
         $session = static::query()
             ->where('user_id', $userId)
@@ -29,6 +29,7 @@ class ReadingSession extends Model
             ->first()
             ?? new static(['user_id' => $userId, 'book_id' => $bookId, 'read_on' => today()]);
         $session->pages_read = (int) $session->pages_read + max(0, $pages);
+        $session->minutes = (int) $session->minutes + max(0, $minutes);
         $session->save();
     }
 }
