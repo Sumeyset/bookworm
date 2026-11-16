@@ -13,27 +13,78 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Imports a Goodreads or StoryGraph CSV export into a reader's tree:
- * books, shelf status, ratings, reviews, page counts and finish dates.
+ * Imports a reading export into a reader's shelf: books, shelf status,
+ * ratings, reviews, page counts and finish dates.
+ *
+ * Understands Goodreads, StoryGraph and LibraryThing exports, and any other
+ * spreadsheet (CSV or tab-separated) with a title column. preview() shows
+ * what would happen without saving anything; run() does it.
  */
 class ReadingImport
 {
     public const MAX_ROWS = 5000;
 
+    public const SOURCES = [
+        'goodreads' => 'Goodreads',
+        'storygraph' => 'StoryGraph',
+        'librarything' => 'LibraryThing',
+        'csv' => 'your spreadsheet',
+    ];
+
+    /** Which export this is (throws a friendly error if it isn't one). */
+    public static function detectFile(string $path): string
+    {
+        [$handle, , $source] = self::open($path);
+        fclose($handle);
+
+        return $source;
+    }
+
+    /**
+     * What an import would do, without saving anything.
+     *
+     * @return array{source: string, total: int, new: int, duplicates: int, skipped: int, ratings: int, reviews: int, statuses: array<string, int>, sample: list<array{title: string, author: ?string, status: string, rating: ?float}>}
+     */
+    public static function preview(User $user, string $path): array
+    {
+        [$handle, $header, $source, $delimiter] = self::open($path);
+        $owned = $user->shelfItems()->with('book:id,isbn,ol_id,title,author_name')->get()->pluck('book')->filter();
+        $ownedIsbns = $owned->pluck('isbn')->filter()->flip();
+        $ownedKeys = $owned->map(fn ($b) => Str::lower($b->title . '|' . $b->author_name))->flip();
+
+        $preview = ['source' => $source, 'total' => 0, 'new' => 0, 'duplicates' => 0, 'skipped' => 0, 'ratings' => 0, 'reviews' => 0,
+            'statuses' => ['read' => 0, 'reading' => 0, 'want_to_read' => 0], 'sample' => []];
+        $seen = [];
+
+        foreach (self::rows($handle, $header, $source, $delimiter) as $data) {
+            $preview['total']++;
+            if (! $data) {
+                $preview['skipped']++;
+                continue;
+            }
+            $key = Str::lower($data['title'] . '|' . $data['author']);
+            if (($data['isbn'] && $ownedIsbns->has($data['isbn'])) || $ownedKeys->has($key) || isset($seen[$data['isbn'] ?: $key])) {
+                $preview['duplicates']++;
+                continue;
+            }
+            $seen[$data['isbn'] ?: $key] = true;
+            $preview['new']++;
+            $preview['statuses'][$data['status']]++;
+            $preview['ratings'] += $data['rating'] ? 1 : 0;
+            $preview['reviews'] += $data['review'] ? 1 : 0;
+            if (count($preview['sample']) < 8) {
+                $preview['sample'][] = ['title' => $data['title'], 'author' => $data['author'], 'status' => $data['status'], 'rating' => $data['rating']];
+            }
+        }
+        fclose($handle);
+
+        return $preview;
+    }
+
     /** @return array{source: string, imported: int, skipped: int, reviews: int} */
     public static function run(User $user, string $path): array
     {
-        $handle = fopen($path, 'r');
-        if (! $handle) {
-            throw new RuntimeException('That file could not be read.');
-        }
-
-        $header = fgetcsv($handle);
-        if (! $header) {
-            throw new RuntimeException('That file looks empty.');
-        }
-        $header = array_map(fn ($h) => trim(preg_replace('/^\xEF\xBB\xBF/', '', (string) $h)), $header);
-        $source = self::detect($header);
+        [$handle, $header, $source, $delimiter] = self::open($path);
 
         $stats = ['source' => $source, 'imported' => 0, 'skipped' => 0, 'reviews' => 0];
         $existing = $user->shelfItems()->pluck('book_id')->flip();
@@ -42,16 +93,10 @@ class ReadingImport
         FriendActivity::$quiet = true;
         Acorns::$quiet = true;
         try {
-            Review::withoutEvents(function () use ($handle, $header, $source, $user, &$stats, $existing) {
-                DB::transaction(function () use ($handle, $header, $source, $user, &$stats, $existing) {
-                    $rows = 0;
-                    while (($values = fgetcsv($handle)) !== false && $rows++ < self::MAX_ROWS) {
-                        if (count($values) < 2) {
-                            continue;
-                        }
-                        $row = array_combine($header, array_pad(array_slice($values, 0, count($header)), count($header), ''));
-                        $data = $source === 'goodreads' ? self::fromGoodreads($row) : self::fromStoryGraph($row);
-                        if (! $data || $data['title'] === '') {
+            Review::withoutEvents(function () use ($handle, $header, $source, $delimiter, $user, &$stats, $existing) {
+                DB::transaction(function () use ($handle, $header, $source, $delimiter, $user, &$stats, $existing) {
+                    foreach (self::rows($handle, $header, $source, $delimiter) as $data) {
+                        if (! $data) {
                             $stats['skipped']++;
                             continue;
                         }
@@ -93,6 +138,54 @@ class ReadingImport
         return $stats;
     }
 
+    /** @return array{0: resource, 1: list<string>, 2: string, 3: string} [handle, header, source, delimiter] */
+    private static function open(string $path): array
+    {
+        $handle = fopen($path, 'r');
+        if (! $handle) {
+            throw new RuntimeException('That file could not be read.');
+        }
+
+        // Comma or tab separated? Look at the first line.
+        $first = (string) fgets($handle);
+        rewind($handle);
+        $delimiter = substr_count($first, "\t") > substr_count($first, ',') ? "\t" : ',';
+
+        $header = fgetcsv($handle, null, $delimiter);
+        if (! $header || $header === [null]) {
+            fclose($handle);
+            throw new RuntimeException('That file looks empty.');
+        }
+        $header = array_map(fn ($h) => trim(preg_replace('/^\xEF\xBB\xBF/', '', (string) $h)), $header);
+
+        try {
+            $source = self::detect($header);
+        } catch (RuntimeException $e) {
+            fclose($handle);
+            throw $e;
+        }
+
+        return [$handle, $header, $source, $delimiter];
+    }
+
+    /** Each row as import data (null for a row that can't be used). */
+    private static function rows($handle, array $header, string $source, string $delimiter): \Generator
+    {
+        $rows = 0;
+        while (($values = fgetcsv($handle, null, $delimiter)) !== false && $rows++ < self::MAX_ROWS) {
+            if (count($values) < 2) {
+                continue;
+            }
+            $row = array_combine($header, array_pad(array_slice($values, 0, count($header)), count($header), ''));
+            $data = match ($source) {
+                'goodreads' => self::fromGoodreads($row),
+                'storygraph' => self::fromStoryGraph($row),
+                default => self::fromSpreadsheet($row),
+            };
+            yield ($data && $data['title'] !== '') ? $data : null;
+        }
+    }
+
     private static function detect(array $header): string
     {
         if (in_array('Exclusive Shelf', $header, true) && in_array('Title', $header, true)) {
@@ -101,8 +194,60 @@ class ReadingImport
         if (in_array('Read Status', $header, true) && in_array('Title', $header, true)) {
             return 'storygraph';
         }
+        if (in_array('Primary Author', $header, true) && in_array('Title', $header, true)) {
+            return 'librarything';
+        }
+        if (self::column(array_combine($header, $header), self::TITLE_COLUMNS) !== null) {
+            return 'csv';
+        }
 
-        throw new RuntimeException('This doesn’t look like a Goodreads or StoryGraph export. Please upload the CSV file they give you.');
+        throw new RuntimeException('We couldn’t find a “Title” column in this file. Upload a Goodreads, StoryGraph or LibraryThing export, or a spreadsheet with a Title column.');
+    }
+
+    private const TITLE_COLUMNS = ['title', 'book title', 'book', 'book name', 'name of book'];
+
+    /** First non-empty value among columns with these names (any case). */
+    private static function column(array $row, array $names): ?string
+    {
+        foreach ($row as $key => $value) {
+            if (in_array(Str::lower(trim((string) $key)), $names, true) && trim((string) $value) !== '') {
+                return trim((string) $value);
+            }
+        }
+
+        return null;
+    }
+
+    /** LibraryThing, and any other spreadsheet with a Title column. */
+    private static function fromSpreadsheet(array $row): ?array
+    {
+        $title = self::column($row, self::TITLE_COLUMNS) ?? '';
+        $author = self::column($row, ['author', 'authors', 'primary author', 'author l-f', 'writer', 'by']);
+        $readAt = self::date(self::column($row, ['date read', 'date finished', 'finished', 'last date read', 'read date', 'date completed']));
+        $statusText = Str::lower((string) self::column($row, ['status', 'shelf', 'exclusive shelf', 'read status', 'collections', 'bookshelves', 'state']));
+        $rating = (float) self::column($row, ['rating', 'my rating', 'star rating', 'stars', 'score']);
+        if ($rating > 5 && $rating <= 10) {
+            $rating /= 2; // out of 10
+        }
+
+        return [
+            'key' => null,
+            'title' => $title,
+            'author' => $author ? trim(explode(';', $author)[0]) : null,
+            'isbn' => self::cleanIsbn(self::column($row, ['isbn13', 'isbn', 'isbn/uid', 'isbns', 'isbn 13', 'isbn-13']) ?? ''),
+            'year' => self::year(self::column($row, ['year', 'original publication year', 'year published', 'publication year', 'date']) ?? ''),
+            'pages' => self::int(self::column($row, ['pages', 'page count', 'number of pages', 'page_count', 'length'])),
+            'status' => match (true) {
+                $statusText !== '' && (str_contains($statusText, 'to read') || str_contains($statusText, 'to-read') || str_contains($statusText, 'want') || str_contains($statusText, 'wish') || str_contains($statusText, 'tbr')) => 'want_to_read',
+                str_contains($statusText, 'current') || str_contains($statusText, 'reading now') || $statusText === 'reading' => 'reading',
+                str_contains($statusText, 'read') || str_contains($statusText, 'finished') || str_contains($statusText, 'done') || $readAt !== null => 'read',
+                default => 'want_to_read',
+            },
+            'rating' => self::rating($rating),
+            'review' => self::review(self::column($row, ['review', 'my review', 'notes', 'comment'])),
+            'read_at' => $readAt,
+            'added_at' => self::date(self::column($row, ['date added', 'added', 'entry date', 'acquired'])),
+        ];
     }
 
     private static function fromGoodreads(array $row): ?array

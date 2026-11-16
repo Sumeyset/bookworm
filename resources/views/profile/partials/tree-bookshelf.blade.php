@@ -62,7 +62,7 @@
             <button type="button" class="bw-chip" data-open-shelf-styles>🎨 Shelf style: {{ $shelfStyle['name'] }}</button>
             <a href="{{ route('shop.index') }}" class="bw-chip">🌰 {{ number_format($profile->acorns) }} acorns · Tree shop</a>
             <a href="{{ route('year.show', $profile->username) }}" class="bw-chip">✨ {{ now()->year }} in books</a>
-            <a href="{{ route('import.show') }}" class="bw-chip ml-auto">⬆️ Import from Goodreads</a>
+            <a href="{{ route('import.show') }}" class="bw-chip ml-auto">⬆️ Import books</a>
         </div>
     @endif
 

@@ -21,7 +21,15 @@ test('a Goodreads export is imported onto the tree with statuses, ratings and re
     ]);
     $file = UploadedFile::fake()->createWithContent('goodreads_library_export.csv', $csv);
 
-    $this->actingAs($user)->post(route('import.store'), ['file' => $file])
+    // Step 1: upload and preview — nothing saved yet.
+    $response = $this->actingAs($user)->post(route('import.store'), ['file' => $file]);
+    $token = basename(parse_url($response->headers->get('Location'), PHP_URL_PATH));
+    $response->assertRedirect(route('import.preview', $token));
+    $this->get(route('import.preview', $token))->assertOk()->assertSee('The Hobbit')->assertSee('Import 3 books');
+    expect($user->shelfItems()->count())->toBe(0);
+
+    // Step 2: confirm.
+    $this->post(route('import.confirm', $token))
         ->assertRedirect(route('users.show', $user->username))
         ->assertSessionHas('status', fn ($status) => str_contains($status, 'Imported 3 books from Goodreads'));
 
@@ -33,10 +41,32 @@ test('a Goodreads export is imported onto the tree with statuses, ratings and re
         ->and($items['Emma']->status)->toBe('want_to_read')
         ->and(Review::where('user_id', $user->id)->value('body'))->toBe('Second breakfast, please.');
 
-    // Importing again skips books that are already on the tree.
+    // Importing again: the preview says they're all there already.
     $again = UploadedFile::fake()->createWithContent('again.csv', $csv);
-    $this->post(route('import.store'), ['file' => $again]);
+    $token = basename(parse_url($this->post(route('import.store'), ['file' => $again])->headers->get('Location'), PHP_URL_PATH));
+    $this->get(route('import.preview', $token))->assertSee('already on your shelf');
+    $this->post(route('import.confirm', $token));
     expect($user->shelfItems()->count())->toBe(3);
+});
+
+test('LibraryThing (tab-separated) and plain spreadsheets import too', function () {
+    $user = User::factory()->create();
+    $tsv = "Title\tPrimary Author\tRating\tPage Count\tDate Read\tCollections\tISBN\n"
+        . "Piranesi\tSusanna Clarke\t5\t272\t2026-05-01\tYour library\t[9781526622426]\n"
+        . "Middlemarch\tGeorge Eliot\t\t880\t\tTo read\t\n";
+    $token = basename(parse_url($this->actingAs($user)->post(route('import.store'), ['file' => UploadedFile::fake()->createWithContent('librarything.tsv', $tsv)])->headers->get('Location'), PHP_URL_PATH));
+    $this->post(route('import.confirm', $token))->assertSessionHas('status', fn ($s) => str_contains($s, 'Imported 2 books from LibraryThing'));
+    $items = $user->shelfItems()->with('book')->get()->keyBy('book.title');
+    expect($items['Piranesi']->status)->toBe('read')->and($items['Middlemarch']->status)->toBe('want_to_read')
+        ->and($items['Piranesi']->book->isbn)->toBe('9781526622426');
+
+    $other = User::factory()->create();
+    $csv = "Book Title,Writer,Score,Status\nThe Hobbit,Tolkien,9,finished\nDune,Herbert,,currently reading\n";
+    $token = basename(parse_url($this->actingAs($other)->post(route('import.store'), ['file' => UploadedFile::fake()->createWithContent('mine.csv', $csv)])->headers->get('Location'), PHP_URL_PATH));
+    $this->post(route('import.confirm', $token));
+    $mine = $other->shelfItems()->with('book')->get()->keyBy('book.title');
+    expect($mine['The Hobbit']->status)->toBe('read')->and($mine['Dune']->status)->toBe('reading')
+        ->and((float) Review::where('user_id', $other->id)->value('rating'))->toBe(4.5); // 9 out of 10
 });
 
 test('a file that is not a reading export is rejected kindly', function () {

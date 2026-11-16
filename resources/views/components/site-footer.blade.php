@@ -26,7 +26,7 @@
                         'Your shelf' => [
                             ['My book tree', route('users.show', auth()->user()->username)],
                             [now()->year . ' in books', route('year.show', auth()->user()->username)],
-                            ['Import from Goodreads', route('import.show')],
+                            ['Import books', route('import.show')],
                             ['Profile settings', route('profile.edit')],
                         ],
                     ];

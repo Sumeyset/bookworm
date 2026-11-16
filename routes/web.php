@@ -129,6 +129,9 @@ Route::middleware('auth')->group(function () {
     // Import from Goodreads / StoryGraph
     Route::get('/import', [ImportController::class, 'show'])->name('import.show');
     Route::post('/import', [ImportController::class, 'store'])->middleware('throttle:import')->name('import.store');
+    Route::get('/import/{token}', [ImportController::class, 'preview'])->name('import.preview');
+    Route::post('/import/{token}', [ImportController::class, 'confirm'])->middleware('throttle:import')->name('import.confirm');
+    Route::delete('/import/{token}', [ImportController::class, 'cancel'])->name('import.cancel');
 
     // Sharing
     Route::post('/share/toggle', [ShareController::class, 'toggle'])->name('share.toggle');
