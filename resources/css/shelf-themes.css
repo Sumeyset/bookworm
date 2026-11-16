@@ -1252,3 +1252,7 @@
 
 /* the creatures cast their shadow on the photo too, and keep clear of the frame edge */
 .photo-shelf .tree-decor { overflow: hidden; }
+
+.shop-gift summary { cursor: pointer; font-size: .85rem; font-weight: 600; color: #8b2a3d; list-style: none; }
+.shop-gift summary::-webkit-details-marker { display: none; }
+.dark .shop-gift summary { color: #f0a8b4; }

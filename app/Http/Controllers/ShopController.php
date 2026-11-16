@@ -17,6 +17,8 @@ class ShopController extends Controller
         return view('shop.index', [
             'balance' => (int) $user->acorns,
             'owned' => $user->decorations()->pluck('enabled', 'item'),
+            'gifts' => $user->decorations()->whereNotNull('gifted_by')->with('giver')->get()->keyBy('item'),
+            'friends' => $user->following()->orderBy('name')->get(['users.id', 'users.name', 'users.username']),
             'history' => $user->acornEvents()->latest('id')->take(12)->get(),
             'streak' => Acorns::streak($user),
         ]);
@@ -41,6 +43,20 @@ class ShopController extends Controller
         $bought = Acorns::ITEMS[$item][1] . ' ' . Acorns::ITEMS[$item][0];
 
         return back()->with('status', $bought . ' added to your shelves!');
+    }
+
+    public function gift(Request $request, string $item): RedirectResponse
+    {
+        $validated = $request->validate([
+            'friend_id' => ['required', 'integer', \Illuminate\Validation\Rule::exists('user_follows', 'followed_id')->where('follower_id', $request->user()->id)],
+        ], ['friend_id.required' => 'Pick a friend to give it to.']);
+
+        $friend = \App\Models\User::findOrFail($validated['friend_id']);
+        $error = Acorns::gift($request->user(), $friend, $item);
+
+        return $error
+            ? back()->withErrors(['shop' => $error])
+            : back()->with('status', '🎁 Sent! ' . $friend->name . ' just got the ' . Acorns::ITEMS[$item][0] . '.');
     }
 
     public function toggle(Request $request, string $item): RedirectResponse

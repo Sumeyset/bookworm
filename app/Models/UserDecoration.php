@@ -7,11 +7,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserDecoration extends Model
 {
-    protected $fillable = ['user_id', 'item', 'enabled'];
+    protected $fillable = ['user_id', 'item', 'enabled', 'gifted_by'];
 
     protected function casts(): array
     {
         return ['enabled' => 'boolean'];
+    }
+
+    public function giver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'gifted_by');
     }
 
     public function user(): BelongsTo

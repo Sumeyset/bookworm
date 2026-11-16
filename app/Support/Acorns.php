@@ -195,6 +195,43 @@ class Acorns
         });
     }
 
+    /** Buy a decoration for another reader. Returns an error message, or null when sent. */
+    public static function gift(User $giver, User $friend, string $item): ?string
+    {
+        if (! array_key_exists($item, self::ITEMS)) {
+            return 'That decoration doesn’t exist.';
+        }
+        [$name, $emoji, $price] = self::ITEMS[$item];
+        if ($giver->is($friend)) {
+            return 'Gifts are for friends — buy it for yourself above!';
+        }
+        if ($friend->decorations()->where('item', $item)->exists()) {
+            return "{$friend->name} already has the {$name}.";
+        }
+        if (! self::onSale($item)) {
+            return "The {$name} aren’t in the shop right now — they come back in season.";
+        }
+
+        $error = DB::transaction(function () use ($giver, $friend, $item, $name, $price) {
+            $balance = (int) User::whereKey($giver->id)->lockForUpdate()->value('acorns');
+            if ($balance < $price) {
+                return 'You need ' . ($price - $balance) . ' more acorns to gift the ' . $name . '.';
+            }
+            User::whereKey($giver->id)->decrement('acorns', $price);
+            AcornEvent::create(['user_id' => $giver->id, 'amount' => -$price, 'reason' => 'gift', 'note' => 'gave ' . $friend->name . ' the ' . $name]);
+            $friend->decorations()->create(['item' => $item, 'enabled' => true, 'gifted_by' => $giver->id]);
+            $giver->acorns = $balance - $price;
+
+            return null;
+        });
+
+        if ($error === null) {
+            \App\Notifications\BookwormNotification::send($friend, 'gift', "{$giver->name} gave you the {$emoji} {$name} for your shelf! It’s already up.", route('users.show', $friend->username), $giver);
+        }
+
+        return $error;
+    }
+
     /** @return list<string> decoration keys switched on for this reader */
     public static function enabled(User $user): array
     {

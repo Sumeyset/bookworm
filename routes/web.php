@@ -119,6 +119,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
     Route::post('/shop/streak-freeze', [ShopController::class, 'freeze'])->name('shop.freeze');
     Route::post('/shop/{item}', [ShopController::class, 'buy'])->whereAlpha('item')->name('shop.buy');
+    Route::post('/shop/{item}/gift', [ShopController::class, 'gift'])->whereAlpha('item')->middleware('throttle:posting')->name('shop.gift');
     Route::post('/shop/{item}/toggle', [ShopController::class, 'toggle'])->whereAlpha('item')->name('shop.toggle');
 
     // Monthly reading challenges and badges

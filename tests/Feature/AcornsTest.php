@@ -102,3 +102,22 @@ test('acorns can be given by hand', function () {
 
     expect($jack->fresh()->acorns)->toBe(1000);
 });
+
+test('a decoration can be gifted to a reader you follow', function () {
+    $me = \App\Models\User::factory()->create(['acorns' => 500]);
+    $friend = \App\Models\User::factory()->create();
+    $stranger = \App\Models\User::factory()->create();
+    $me->following()->attach($friend->id);
+
+    $this->actingAs($me)->post(route('shop.gift', 'owl'), ['friend_id' => $friend->id])->assertSessionHasNoErrors();
+    expect($friend->decorations()->where('item', 'owl')->value('gifted_by'))->toBe($me->id)
+        ->and($me->fresh()->acorns)->toBe(100)
+        ->and($friend->notifications()->where('data->kind', 'gift')->count())->toBe(1);
+
+    // Not twice, and only to readers you follow.
+    $me->update(['acorns' => 1000]);
+    $this->actingAs($me)->post(route('shop.gift', 'owl'), ['friend_id' => $friend->id])->assertSessionHasErrors('shop');
+    $this->actingAs($me)->post(route('shop.gift', 'owl'), ['friend_id' => $stranger->id])->assertSessionHasErrors('friend_id');
+
+    $this->actingAs($friend)->get(route('shop.index'))->assertOk()->assertSee('A gift from ' . $me->name);
+});

@@ -48,6 +48,25 @@
                                 </button>
                             </form>
                         @endif
+                        @if ($has && $gifts->has($key))
+                            <p class="mt-2 text-xs font-semibold text-tan">🎁 A gift from {{ $gifts[$key]->giver?->name ?? 'a friend' }}</p>
+                        @endif
+                        @if ($sale && $friends->isNotEmpty())
+                            <details class="shop-gift mt-3">
+                                <summary>🎁 Gift to a friend</summary>
+                                <form method="POST" action="{{ route('shop.gift', $key) }}" class="mt-2 flex gap-2">
+                                    @csrf
+                                    <label for="gift-{{ $key }}" class="sr-only">Friend</label>
+                                    <select id="gift-{{ $key }}" name="friend_id" required class="bw-input min-w-0 flex-1 py-1.5 text-sm">
+                                        <option value="">Choose a friend…</option>
+                                        @foreach ($friends as $friend)
+                                            <option value="{{ $friend->id }}">{{ $friend->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button class="btn-ghost min-h-0 shrink-0 py-1.5 text-sm" @disabled($balance < $price)>🌰 {{ $price }}</button>
+                                </form>
+                            </details>
+                        @endif
                     </article>
                 @endforeach
             </div>
