@@ -703,3 +703,28 @@ document.querySelectorAll('[data-scroll-frame]').forEach((frame) => {
     tree.addEventListener('pointerup', end);
     tree.addEventListener('pointercancel', end);
 })();
+
+// Window nook: tap the window to open it (the bottom sashes slide up); remembered on this device.
+document.querySelectorAll('[data-window-toggle]').forEach((button) => {
+    const shelf = button.closest('.photo-shelf');
+    const key = 'bookworm-window-open';
+    const set = (open) => {
+        shelf.classList.toggle('is-window-open', open);
+        button.setAttribute('aria-pressed', String(open));
+        button.setAttribute('aria-label', open ? 'Close the window' : 'Open the window');
+    };
+    try {
+        if (localStorage.getItem(key) === '1') set(true);
+    } catch {
+        // storage blocked
+    }
+    button.addEventListener('click', () => {
+        const open = !shelf.classList.contains('is-window-open');
+        set(open);
+        try {
+            localStorage.setItem(key, open ? '1' : '0');
+        } catch {
+            // storage blocked
+        }
+    });
+});

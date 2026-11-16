@@ -133,7 +133,9 @@ class ShelfScene
             'min_width' => 900,
             'decor_scale' => 1.5,
             // the glass, so the view can sit behind it
-            'window' => ['x1' => 670, 'y1' => 132, 'x2' => 1332, 'y2' => 848],
+            'window' => ['x1' => 645, 'y1' => 130, 'x2' => 1356, 'y2' => 872],
+            // the bottom sashes (images/shelves/window-sash.webp): they slide up this far to open the window
+            'sash' => ['image' => 'images/shelves/window-sash.webp', 'x1' => 645, 'y1' => 530, 'x2' => 1356, 'y2' => 872, 'open_by' => 330],
             'decor' => [
                 'star' => [1000, 78],
                 'ornaments' => [[730, 112], [850, 116], [1150, 116], [1270, 112], [620, 300], [1380, 300]],
@@ -333,6 +335,20 @@ class ShelfScene
             'window' => null,   // the window nook has a real window
         ] : null;
 
-        return ['height' => $h, 'pieces' => $pieces, 'shelves' => $shelves, 'glass' => $window, 'decor' => $decor] + $scene;
+        $sash = null;
+        if (isset($scene['sash'])) {
+            $s = $scene['sash'];
+            $sash = [
+                'image' => $s['image'],
+                'left' => $pct($s['x1'], $w),
+                'top' => $pct($s['y1'], $h),
+                'width' => $pct($s['x2'] - $s['x1'], $w),
+                'height' => $pct($s['y2'] - $s['y1'], $h),
+                // how far it slides, as a share of its own height
+                'open' => round($s['open_by'] / ($s['y2'] - $s['y1']) * 100, 2),
+            ];
+        }
+
+        return ['height' => $h, 'pieces' => $pieces, 'shelves' => $shelves, 'glass' => $window, 'decor' => $decor, 'sash' => $sash] + $scene;
     }
 }

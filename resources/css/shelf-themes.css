@@ -1310,3 +1310,75 @@ svg.tree-lantern {
 .book-tree.is-arranging [data-decor-piece]:hover { outline-color: #f5d590; }
 .book-tree.is-arranging [data-decor-piece].is-moving { cursor: grabbing; outline-style: solid; outline-color: #f5d590; filter: drop-shadow(0 10px 14px rgb(0 0 0 / 40%)); }
 .book-tree.is-arranging .tree-book { opacity: .55; pointer-events: none; }
+
+/* ---- The window nook's window opens ---- */
+.photo-shelf__sash {
+    position: absolute;
+    z-index: 1;
+    max-width: none;
+    pointer-events: none;
+    user-select: none;
+    transform: translateY(0);
+    transition: transform 1.1s cubic-bezier(.45,.05,.2,1);
+    filter: drop-shadow(0 6px 6px rgb(0 0 0 / 18%));
+}
+.photo-shelf.is-window-open .photo-shelf__sash { transform: translateY(var(--open)); }
+
+.photo-shelf__window-toggle {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 6%;
+    background: transparent;
+    cursor: pointer;
+}
+.photo-shelf__window-hint {
+    border-radius: 999px;
+    background: rgb(42 26 29 / 72%);
+    padding: .35rem .8rem;
+    font-size: max(11px, calc(var(--u) * 16));
+    font-weight: 600;
+    color: #fff8ef;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .2s ease, transform .2s ease;
+    backdrop-filter: blur(3px);
+}
+.photo-shelf__window-toggle:hover .photo-shelf__window-hint,
+.photo-shelf__window-toggle:focus-visible .photo-shelf__window-hint { opacity: 1; transform: none; }
+.photo-shelf.is-window-open .photo-shelf__window-hint::after { content: " · tap to close"; }
+.photo-shelf__window-toggle:focus-visible { outline: 3px solid #f5d590; outline-offset: -3px; border-radius: 4px; }
+.book-tree.is-arranging .photo-shelf__window-toggle, .book-tree.is-dragging .photo-shelf__window-toggle { pointer-events: none; }
+
+/* a breeze comes in while it's open: petals, fireflies, leaves or snow, by season */
+.photo-shelf__breeze { position: absolute; z-index: 3; overflow: visible; pointer-events: none; opacity: 0; transition: opacity .8s ease .6s; }
+.photo-shelf.is-window-open .photo-shelf__breeze { opacity: 1; }
+.photo-shelf__breeze span {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: calc(var(--u) * 12);
+    height: calc(var(--u) * 9);
+    border-radius: 60% 40% 60% 40%;
+    background: #f7b7c6;
+    opacity: 0;
+    animation: window-breeze var(--d) ease-in-out var(--delay) infinite;
+    animation-play-state: paused;
+}
+.photo-shelf.is-window-open .photo-shelf__breeze span { animation-play-state: running; }
+.photo-shelf[data-season="summer"] .photo-shelf__breeze span { width: calc(var(--u) * 6); height: calc(var(--u) * 6); border-radius: 50%; background: #fff7a8; box-shadow: 0 0 calc(var(--u) * 10) calc(var(--u) * 3) rgb(255 240 140 / 70%); }
+.photo-shelf[data-season="autumn"] .photo-shelf__breeze span { background: #e07b2a; border-radius: 10% 70% 10% 70%; }
+.photo-shelf[data-season="autumn"] .photo-shelf__breeze span:nth-child(3n) { background: #b8402b; }
+.photo-shelf[data-season="winter"] .photo-shelf__breeze span { width: calc(var(--u) * 6); height: calc(var(--u) * 6); border-radius: 50%; background: #fff; box-shadow: 0 0 calc(var(--u) * 3) rgb(255 255 255 / 80%); }
+@keyframes window-breeze {
+    0% { transform: translate(0, 0) rotate(0); opacity: 0; }
+    15% { opacity: .95; }
+    80% { opacity: .9; }
+    100% { transform: translate(var(--drift), calc(var(--u) * 260)) rotate(220deg); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .photo-shelf__sash { transition: none; }
+    .photo-shelf__breeze { display: none; }
+}

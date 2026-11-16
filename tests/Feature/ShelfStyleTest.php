@@ -128,3 +128,10 @@ test('decorations can be moved and their spots are kept per shelf style', functi
     $this->actingAs($me)->deleteJson(route('decor.positions.reset'), ['style' => 'window'])->assertOk();
     expect($me->fresh()->decor_positions)->toBeNull();
 });
+
+test('the window nook window can be opened', function () {
+    $me = User::factory()->create(['shelf_style' => 'window']);
+    $this->actingAs($me)->get(route('users.show', $me->username))
+        ->assertSee('data-window-toggle', false)->assertSee('window-sash.webp', false);
+    expect(file_exists(public_path('images/shelves/window-sash.webp')))->toBeTrue();
+});

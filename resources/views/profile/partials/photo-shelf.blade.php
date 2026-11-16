@@ -56,6 +56,20 @@
             @else
                 <img class="photo-shelf__img" src="{{ \App\Support\StaticAsset::url($scene['image']) }}" alt="" width="{{ $scene['width'] }}" height="{{ $scene['height'] }}" decoding="async" fetchpriority="high" draggable="false">
             @endif
+            @if ($scene['sash'])
+                {{-- The bottom sashes: tap the window to slide them up --}}
+                <img class="photo-shelf__sash" src="{{ \App\Support\StaticAsset::url($scene['sash']['image']) }}" alt="" draggable="false"
+                     style="left: {{ $scene['sash']['left'] }}%; top: {{ $scene['sash']['top'] }}%; width: {{ $scene['sash']['width'] }}%; height: {{ $scene['sash']['height'] }}%; --open: -{{ $scene['sash']['open'] }}%;">
+                <div class="photo-shelf__breeze" aria-hidden="true" style="left: {{ $scene['glass']['left'] }}%; top: {{ $scene['glass']['top'] }}%; width: {{ $scene['glass']['width'] }}%; height: {{ $scene['glass']['height'] }}%;">
+                    @foreach (range(0, 9) as $i)
+                        <span style="--x: {{ 8 + ($i * 37 % 84) }}%; --y: {{ 50 + ($i * 23 % 45) }}%; --d: {{ 4 + ($i % 4) * 1.3 }}s; --delay: -{{ $i * 0.7 }}s; --drift: {{ ($i % 2 ? 1 : -1) * (40 + $i * 9) }}px;"></span>
+                    @endforeach
+                </div>
+                <button type="button" class="photo-shelf__window-toggle" data-window-toggle aria-pressed="false" aria-label="Open the window"
+                        style="left: {{ $scene['glass']['left'] }}%; top: {{ $scene['glass']['top'] }}%; width: {{ $scene['glass']['width'] }}%; height: {{ $scene['glass']['height'] }}%;">
+                    <span class="photo-shelf__window-hint">Tap to open the window</span>
+                </button>
+            @endif
             @if ($scene['glass'])
                 <span class="photo-shelf__light" aria-hidden="true"></span>
             @endif
