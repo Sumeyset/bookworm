@@ -728,3 +728,29 @@ document.querySelectorAll('[data-window-toggle]').forEach((button) => {
         }
     });
 });
+
+// Window nook curtains: tap them (or the tassel) to draw them; remembered on this device.
+document.querySelectorAll('.photo-curtains').forEach((curtains) => {
+    const shelf = curtains.closest('.photo-shelf');
+    const toggles = curtains.querySelectorAll('[data-curtains-toggle]');
+    const key = 'bookworm-curtains-closed';
+    const set = (closed) => {
+        shelf.classList.toggle('is-curtains-closed', closed);
+        toggles.forEach((t) => t.setAttribute('aria-label', closed ? 'Open the curtains' : 'Close the curtains'));
+    };
+    try {
+        set(localStorage.getItem(key) === '1');
+    } catch {
+        set(false);
+    }
+    toggles.forEach((toggle) => toggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const closed = !shelf.classList.contains('is-curtains-closed');
+        set(closed);
+        try {
+            localStorage.setItem(key, closed ? '1' : '0');
+        } catch {
+            // storage blocked
+        }
+    }));
+});

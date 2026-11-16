@@ -1382,3 +1382,136 @@ svg.tree-lantern {
     .photo-shelf__sash { transition: none; }
     .photo-shelf__breeze { display: none; }
 }
+
+/* ---- Curtains in the window nook ---- */
+.photo-curtains { position: absolute; z-index: 2; pointer-events: none; }
+.photo-curtains__rod {
+    position: absolute;
+    left: -1.5%;
+    right: -1.5%;
+    top: 0;
+    height: calc(var(--u) * 11);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #e8c27a, #a8742c 55%, #6e4718);
+    box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 5) rgb(0 0 0 / 35%);
+}
+.photo-curtains__rod i {
+    position: absolute;
+    top: 50%;
+    width: calc(var(--u) * 24);
+    height: calc(var(--u) * 24);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fbe3a6, #c48f3a 55%, #6e4718);
+    transform: translateY(-50%);
+}
+.photo-curtains__rod i:first-child { left: calc(var(--u) * -14); }
+.photo-curtains__rod i:last-child { right: calc(var(--u) * -14); }
+
+.photo-curtains__panel {
+    position: absolute;
+    top: calc(var(--u) * 5);
+    bottom: 0;
+    width: 50.6%;
+    padding: 0;
+    pointer-events: auto;
+    cursor: pointer;
+    background: none;
+    transition: transform 1.1s cubic-bezier(.45,.05,.2,1), clip-path 1.1s cubic-bezier(.45,.05,.2,1);
+}
+.photo-curtains__panel--left { left: 0; transform-origin: 0 0; }
+.photo-curtains__panel--right { right: 0; transform-origin: 100% 0; }
+
+/* the cloth: soft linen in a dusty rose, with deep folds and a hem */
+.photo-curtains__fabric {
+    position: absolute;
+    inset: 0;
+    transform-origin: 50% 0;
+    background:
+        linear-gradient(180deg, rgb(0 0 0 / 18%), transparent 4%, transparent 94%, rgb(0 0 0 / 14%) 96%, rgb(255 255 255 / 12%) 97%, rgb(0 0 0 / 20%)),
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0%) 0, rgb(0 0 0 / 16%) 5%, rgb(255 255 255 / 14%) 9%, rgb(0 0 0 / 0%) 12.5%),
+        linear-gradient(180deg, #e7c3bd, #d9aaa3);
+    box-shadow: inset 0 0 0 1px rgb(80 30 30 / 18%), 0 calc(var(--u) * 8) calc(var(--u) * 14) rgb(40 15 10 / 30%);
+}
+.photo-curtains__fabric::before {
+    /* curtain rings along the top */
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--u) * -9);
+    height: calc(var(--u) * 14);
+    background: radial-gradient(circle, transparent calc(var(--u) * 3.5), #b8893b calc(var(--u) * 4), #b8893b calc(var(--u) * 5.5), transparent calc(var(--u) * 6)) 0 0 / 12.5% 100% repeat-x;
+}
+
+/* tiebacks: only seen when the curtains are open */
+.photo-curtains__tie {
+    position: absolute;
+    top: 62.4%;
+    height: calc(var(--u) * 16);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #f2cf86, #b8893b);
+    box-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 3) rgb(0 0 0 / 30%);
+    opacity: 1;
+    transition: opacity .4s ease .7s;
+}
+
+/* open (the default): gathered to each side and pinched at the tieback */
+.photo-curtains__panel--left { transform: scaleX(.26); clip-path: polygon(0 0, 100% 0, 100% 28%, 92% 44%, 74% 56%, 60% 64%, 70% 74%, 88% 86%, 100% 100%, 0 100%); }
+.photo-curtains__panel--right { transform: scaleX(.26); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12% 86%, 30% 74%, 40% 64%, 26% 56%, 8% 44%, 0 28%); }
+
+/* closed: drawn across the window */
+.photo-shelf.is-curtains-closed .photo-curtains__panel { transform: none; clip-path: polygon(0 0, 100% 0, 100% 28%, 100% 44%, 100% 56%, 100% 64%, 100% 74%, 100% 86%, 100% 100%, 0 100%); }
+.photo-shelf.is-curtains-closed .photo-curtains__panel--right { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 86%, 0 74%, 0 64%, 0 56%, 0 44%, 0 28%); }
+.photo-shelf.is-curtains-closed .photo-curtains__tie { opacity: 0; transition-delay: 0s; }
+.photo-shelf.is-curtains-closed .photo-shelf__window-toggle { pointer-events: none; }
+
+/* a breeze through the open window moves them */
+.photo-shelf.is-window-open .photo-curtains__fabric { animation: curtain-breeze 4.5s ease-in-out infinite; }
+.photo-shelf.is-window-open .photo-curtains__panel--right .photo-curtains__fabric { animation-delay: -2.2s; }
+@keyframes curtain-breeze {
+    0%, 100% { transform: skewX(0deg) scaleX(1); }
+    35% { transform: skewX(2.4deg) scaleX(1.03); }
+    65% { transform: skewX(-1.2deg) scaleX(.99); }
+}
+
+/* the pull tassel on the right */
+.photo-curtains__tassel {
+    position: absolute;
+    right: -3.4%;
+    top: calc(var(--u) * 10);
+    width: calc(var(--u) * 26);
+    height: 46%;
+    padding: 0;
+    pointer-events: auto;
+    cursor: pointer;
+    background: linear-gradient(90deg, transparent 46%, #b8893b 46% 54%, transparent 54%) top / 100% calc(100% - var(--u) * 40) no-repeat;
+}
+.photo-curtains__tassel span {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: calc(var(--u) * 18);
+    height: calc(var(--u) * 42);
+    border-radius: 45% 45% 30% 30% / 25% 25% 75% 75%;
+    background: repeating-linear-gradient(90deg, #f2cf86 0 2px, #b8893b 2px 4px);
+    box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 4) rgb(0 0 0 / 30%);
+    transform: translateX(-50%);
+    transform-origin: 50% 0;
+    transition: transform .3s ease;
+}
+.photo-curtains__tassel:hover span { transform: translateX(-50%) translateY(calc(var(--u) * 6)); }
+.photo-curtains__panel:focus-visible, .photo-curtains__tassel:focus-visible { outline: 3px solid #f5d590; outline-offset: 2px; }
+
+/* closed curtains take the room's light evenly (the light no longer skips the glass) */
+.photo-shelf.is-curtains-closed .photo-shelf__light { clip-path: none; }
+.book-tree.is-arranging .photo-curtains *, .book-tree.is-dragging .photo-curtains * { pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+    .photo-curtains__panel { transition: none; }
+    .photo-shelf.is-window-open .photo-curtains__fabric { animation: none; }
+}
+
+.photo-curtains__panel--left .photo-curtains__tie { left: -4%; width: 66%; }
+.photo-curtains__panel--right .photo-curtains__tie { right: -4%; width: 66%; }
+/* a soft shade where the two curtains meet, and gentler folds when drawn */
+.photo-shelf.is-curtains-closed .photo-curtains__panel--left .photo-curtains__fabric { box-shadow: inset calc(var(--u) * -10) 0 calc(var(--u) * 12) rgb(80 30 30 / 18%), 0 calc(var(--u) * 8) calc(var(--u) * 14) rgb(40 15 10 / 30%); }
+.photo-shelf.is-curtains-closed .photo-curtains__panel--right .photo-curtains__fabric { box-shadow: inset calc(var(--u) * 10) 0 calc(var(--u) * 12) rgb(80 30 30 / 18%), 0 calc(var(--u) * 8) calc(var(--u) * 14) rgb(40 15 10 / 30%); }

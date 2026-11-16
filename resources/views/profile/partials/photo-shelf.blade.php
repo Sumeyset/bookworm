@@ -70,6 +70,19 @@
                     <span class="photo-shelf__window-hint">Tap to open the window</span>
                 </button>
             @endif
+            @if ($scene['curtains'])
+                {{-- Curtains: tap them (or the tassel) to draw them open or closed --}}
+                <div class="photo-curtains" style="left: {{ $scene['curtains']['left'] }}%; top: {{ $scene['curtains']['top'] }}%; width: {{ $scene['curtains']['width'] }}%; height: {{ $scene['curtains']['height'] }}%;">
+                    @foreach (['left', 'right'] as $side)
+                        <button type="button" class="photo-curtains__panel photo-curtains__panel--{{ $side }}" data-curtains-toggle aria-label="Draw the curtains">
+                            <span class="photo-curtains__fabric"></span>
+                            <span class="photo-curtains__tie" aria-hidden="true"></span>
+                        </button>
+                    @endforeach
+                    <span class="photo-curtains__rod" aria-hidden="true"><i></i><i></i></span>
+                    <button type="button" class="photo-curtains__tassel" data-curtains-toggle aria-label="Draw the curtains"><span></span></button>
+                </div>
+            @endif
             @if ($scene['glass'])
                 <span class="photo-shelf__light" aria-hidden="true"></span>
             @endif

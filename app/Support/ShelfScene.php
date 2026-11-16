@@ -135,6 +135,8 @@ class ShelfScene
             // the glass, so the view can sit behind it
             'window' => ['x1' => 645, 'y1' => 130, 'x2' => 1356, 'y2' => 872],
             // the bottom sashes (images/shelves/window-sash.webp): they slide up this far to open the window
+            // curtains on a rod across the top of the recess (drawn over the picture)
+            'curtains' => ['x1' => 552, 'y1' => 26, 'x2' => 1448, 'y2' => 884],
             'sash' => ['image' => 'images/shelves/window-sash.webp', 'x1' => 645, 'y1' => 530, 'x2' => 1356, 'y2' => 872, 'open_by' => 330],
             'decor' => [
                 'star' => [1000, 78],
@@ -349,6 +351,13 @@ class ShelfScene
             ];
         }
 
-        return ['height' => $h, 'pieces' => $pieces, 'shelves' => $shelves, 'glass' => $window, 'decor' => $decor, 'sash' => $sash] + $scene;
+        $curtains = isset($scene['curtains']) ? [
+            'left' => $pct($scene['curtains']['x1'], $w),
+            'top' => $pct($scene['curtains']['y1'], $h),
+            'width' => $pct($scene['curtains']['x2'] - $scene['curtains']['x1'], $w),
+            'height' => $pct($scene['curtains']['y2'] - $scene['curtains']['y1'], $h),
+        ] : null;
+
+        return ['height' => $h, 'pieces' => $pieces, 'shelves' => $shelves, 'glass' => $window, 'decor' => $decor, 'sash' => $sash, 'curtains' => $curtains] + $scene;
     }
 }
