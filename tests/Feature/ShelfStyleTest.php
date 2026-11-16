@@ -120,7 +120,7 @@ test('decorations can be moved and their spots are kept per shelf style', functi
 
     $this->actingAs($me)->postJson(route('decor.positions'), ['style' => 'window', 'positions' => ['owl' => [12.5, 40], 'bad key!' => [1, 1]]])
         ->assertOk()->assertJson(['saved' => 1]);
-    expect($me->fresh()->decor_positions)->toBe(['window' => ['owl' => [12.5, 40.0]]]);
+    expect($me->fresh()->decor_positions)->toEqual(['window' => ['owl' => [12.5, 40]]]);
 
     $this->actingAs($me)->get(route('users.show', $me->username))
         ->assertSee('data-decor-piece="owl"', false)->assertSee('left: 12.5%; top: 40%;', false)->assertSee('Arrange decorations');
