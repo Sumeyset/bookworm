@@ -29,6 +29,7 @@ use App\Http\Controllers\ShelfStyleController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\BuddyReadController;
 use App\Http\Controllers\ChallengeController;
+use App\Http\Controllers\SettingsController;
 
 Route::get('/', WelcomeController::class)->name('home');
 Route::get('/quotes/{quote:share_token}', [QuoteController::class, 'showPublic'])->name('quotes.public');
@@ -41,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/settings/reminders', [SettingsController::class, 'reminders'])->name('settings.reminders');
     Route::get('/books', [BookController::class, 'index'])->middleware('throttle:search')->name('books.index');
     Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
     Route::post('/books/{book}/shelf', [LibraryController::class, 'update'])->name('books.shelf.update');
@@ -114,6 +116,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/share/toggle', [ShareController::class, 'toggle'])->name('share.toggle');
     Route::post('/shelf-style', ShelfStyleController::class)->name('shelf.style');
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+    Route::post('/shop/streak-freeze', [ShopController::class, 'freeze'])->name('shop.freeze');
     Route::post('/shop/{item}', [ShopController::class, 'buy'])->whereAlpha('item')->name('shop.buy');
     Route::post('/shop/{item}/toggle', [ShopController::class, 'toggle'])->whereAlpha('item')->name('shop.toggle');
 

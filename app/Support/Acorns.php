@@ -149,29 +149,7 @@ class Acorns
     /** Days in a row (ending today or yesterday) with reading logged. */
     public static function streak(User $user): int
     {
-        $days = ReadingSession::where('user_id', $user->id)
-            ->where('read_on', '>=', today()->subDays(400))
-            ->distinct()
-            ->orderByDesc('read_on')
-            ->pluck('read_on')
-            ->map(fn ($day) => \Illuminate\Support\Carbon::parse($day)->toDateString())
-            ->unique()
-            ->values();
-
-        $streak = 0;
-        $cursor = today();
-        if ($days->first() !== $cursor->toDateString()) {
-            $cursor = $cursor->subDay();
-        }
-        foreach ($days as $day) {
-            if ($day !== $cursor->toDateString()) {
-                break;
-            }
-            $streak++;
-            $cursor = $cursor->subDay();
-        }
-
-        return $streak;
+        return Streak::current($user);
     }
 
     /* ---------------- the shop ---------------- */

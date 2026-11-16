@@ -22,6 +22,15 @@ class ShopController extends Controller
         ]);
     }
 
+    public function freeze(Request $request): RedirectResponse
+    {
+        $error = \App\Support\Streak::buyFreeze($request->user());
+
+        return $error
+            ? back()->withErrors(['shop' => $error])
+            : back()->with('status', '🧊 Streak freeze ready! It will cover a day you miss.');
+    }
+
     public function buy(Request $request, string $item): RedirectResponse
     {
         $error = Acorns::buy($request->user(), $item);

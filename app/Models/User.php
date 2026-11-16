@@ -58,6 +58,8 @@ class User extends Authenticatable
             'tree_shelf_names' => 'array',
             'onboarding_completed_at' => 'datetime',
             'is_public' => 'boolean',
+            'streak_reminder' => 'boolean',
+            'last_reminded_on' => 'date',
         ];
     }
 
@@ -116,33 +118,10 @@ class User extends Authenticatable
         return $this->belongsToMany(BuddyRead::class)->withPivot('joined_at')->withTimestamps();
     }
 
-    /** Days in a row (ending today or yesterday) with any reading logged. */
+    /** Days in a row (ending today or yesterday) with reading logged; streak freezes count. */
     public function readingStreak(): int
     {
-        $days = $this->readingSessions()
-            ->where('read_on', '>=', now()->subDays(400)->toDateString())
-            ->distinct()
-            ->orderByDesc('read_on')
-            ->pluck('read_on')
-            ->map(fn ($day) => \Illuminate\Support\Carbon::parse($day)->toDateString())
-            ->unique()
-            ->values();
-
-        $expected = now()->startOfDay();
-        if ($days->first() !== $expected->toDateString()) {
-            $expected = $expected->subDay(); // a streak survives until the end of today
-        }
-
-        $streak = 0;
-        foreach ($days as $day) {
-            if ($day !== $expected->toDateString()) {
-                break;
-            }
-            $streak++;
-            $expected = $expected->subDay();
-        }
-
-        return $streak;
+        return \App\Support\Streak::current($this);
     }
 
     public function quoteCards(): HasMany

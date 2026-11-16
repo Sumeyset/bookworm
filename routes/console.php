@@ -12,3 +12,8 @@ Artisan::command('inspire', function () {
 //   * * * * * cd /path/to/bookworm && php artisan schedule:run >> /dev/null 2>&1
 Schedule::command('backup:database')->dailyAt('03:10');
 Schedule::command('covers:warm --limit=500')->dailyAt('04:20');
+
+// Reading streaks: freezes cover yesterday just after midnight; reminders go out hourly
+// (each reader gets theirs at the hour they picked, in their own time zone).
+Schedule::call(fn () => \App\Support\Streak::applyFreezes())->name('streaks:freezes')->dailyAt('00:05');
+Schedule::call(fn () => \App\Support\Streak::sendReminders())->name('streaks:reminders')->hourlyAt(2);
