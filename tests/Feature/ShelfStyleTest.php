@@ -96,7 +96,7 @@ test('every shop decoration shows on the photo shelves', function () {
             $me->decorations()->create(['item' => $item, 'enabled' => true]);
         }
         $page = $this->actingAs($me)->get(route('users.show', $me->username))->assertOk();
-        foreach (['decor-lights', 'tree-ornament', 'tree-lantern', 'tree-creature--nest', 'tree-creature--owl', 'tree-creature--swing', 'tree-creature--squirrel', 'tree-butterfly', 'tree-firefly', 'tree-fall'] as $piece) {
+        foreach (['decor-lights', 'tree-ornament', 'tree-lantern', 'tree-creature--nest', 'tree-creature--owl', 'tree-creature--swing', 'tree-creature--squirrel', 'tree-butterfly', 'tree-firefly', 'tree-fall', 'tree-object--plant', 'tree-object--candle', 'tree-object--bookends', 'tree-object--cat'] as $piece) {
             $page->assertSee($piece, false);
         }
     }

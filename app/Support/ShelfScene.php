@@ -44,6 +44,7 @@ class ShelfScene
                 'owl' => [1146, 132],
                 'swing' => [920, 862],
                 'squirrel' => [1070, 400],
+                'plant' => [140, 1012], 'candle' => [960, 398], 'bookends' => [895, 398], 'cat' => [1120, 1004],
                 'butterflies' => [[200, 520], [960, 560], [330, 200], [1000, 300]],
             ],
             'slots' => [
@@ -92,6 +93,7 @@ class ShelfScene
                 'owl' => [1185, 827],
                 'swing' => [1185, 280],
                 'squirrel' => [1765, 640],
+                'plant' => [615, 827], 'candle' => [615, 271], 'bookends' => [1185, 554], 'cat' => [1185, 1082],
                 'butterflies' => [[300, 330], [1300, 610], [900, 880], [1600, 330]],
             ],
             'book' => 146,          // cover width (px)
@@ -149,6 +151,7 @@ class ShelfScene
                 'owl' => [880, 930],
                 'swing' => [1000, 112],
                 'squirrel' => [560, 600],
+                'plant' => [1428, 932], 'candle' => [585, 932], 'bookends' => [470, 452], 'cat' => [1020, 934],
                 'butterflies' => [[1100, 320], [860, 640], [1640, 330], [360, 560]],
             ],
             'slots' => [
@@ -333,6 +336,10 @@ class ShelfScene
             'owl' => $point($d['owl']),
             'swing' => $point($d['swing']),
             'squirrel' => $point($d['squirrel']),
+            'plant' => $point($d['plant']),
+            'candle' => $point($d['candle']),
+            'bookends' => $point($d['bookends']),
+            'cat' => $point($d['cat']),
             'butterflies' => array_map($point, $d['butterflies']),
             'window' => null,   // the window nook has a real window
         ] : null;

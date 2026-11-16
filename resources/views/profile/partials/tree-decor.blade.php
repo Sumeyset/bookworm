@@ -26,6 +26,10 @@
             'owl' => $at(Tree::OWL),
             'swing' => $at(Tree::SWING),
             'squirrel' => $at(Tree::SQUIRREL),
+            'plant' => $at(Tree::OBJECTS['plant']),
+            'candle' => $at(Tree::OBJECTS['candle']),
+            'bookends' => $at(Tree::OBJECTS['bookends']),
+            'cat' => $at(Tree::OBJECTS['cat']),
             'butterflies' => array_map($at, Tree::BUTTERFLIES),
             'window' => 'left: ' . $winTop['left'] . '%; top: ' . $winTop['top'] . '%; width: ' . round(($wx2 - $wx1) / Tree::WIDTH * 100, 3) . '%; height: ' . round($winBottom['top'] - $winTop['top'], 3) . '%;',
         ];
@@ -129,6 +133,12 @@
         {{-- a red squirrel holding an acorn --}}
         @include('decor.parts.squirrel', ['attrs' => 'class="tree-creature tree-creature--squirrel" style="' . $style($spots['squirrel'], 'squirrel') . '"' . $piece('squirrel')])
     @endif
+
+    @foreach (['plant', 'candle', 'bookends', 'cat'] as $object)
+        @if ($on($object) && isset($spots[$object]))
+            @include('decor.parts.' . $object, ['attrs' => 'class="tree-object tree-object--' . $object . '" style="' . $style($spots[$object], $object) . '"' . $piece($object)])
+        @endif
+    @endforeach
 
     @if ($on('owl'))
         {{-- a brown owl; it blinks --}}

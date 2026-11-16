@@ -1515,3 +1515,19 @@ svg.tree-lantern {
 /* a soft shade where the two curtains meet, and gentler folds when drawn */
 .photo-shelf.is-curtains-closed .photo-curtains__panel--left .photo-curtains__fabric { box-shadow: inset calc(var(--u) * -10) 0 calc(var(--u) * 12) rgb(80 30 30 / 18%), 0 calc(var(--u) * 8) calc(var(--u) * 14) rgb(40 15 10 / 30%); }
 .photo-shelf.is-curtains-closed .photo-curtains__panel--right .photo-curtains__fabric { box-shadow: inset calc(var(--u) * 10) 0 calc(var(--u) * 12) rgb(80 30 30 / 18%), 0 calc(var(--u) * 8) calc(var(--u) * 14) rgb(40 15 10 / 30%); }
+
+/* ---- Shelf objects (Tree shop) ---- */
+.tree-object { position: absolute; transform: translate(-50%, -100%); filter: drop-shadow(0 calc(var(--u) * 3) calc(var(--u) * 3) rgb(40 20 10 / 30%)); }
+.tree-object--plant { width: calc(var(--u) * 64); }
+.tree-object--candle { width: calc(var(--u) * 30); }
+.tree-object--bookends { width: calc(var(--u) * 78); }
+.tree-object--cat { width: calc(var(--u) * 100); }
+.decor-candle__flame { transform-box: fill-box; transform-origin: 50% 100%; animation: candle-flicker 1.6s ease-in-out infinite; }
+.decor-candle__glow { animation: candle-glow 2.2s ease-in-out infinite; }
+@keyframes candle-flicker { 0%, 100% { transform: scale(1) rotate(0); } 30% { transform: scale(.94, 1.06) rotate(-3deg); } 60% { transform: scale(1.04, .96) rotate(2deg); } }
+@keyframes candle-glow { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+.decor-cat__tail { transform-box: view-box; transform-origin: 80px 50px; animation: cat-tail 5s ease-in-out infinite; }
+@keyframes cat-tail { 0%, 80%, 100% { transform: rotate(0); } 86% { transform: rotate(-10deg); } 92% { transform: rotate(4deg); } }
+.decor-cat__zz { animation: cat-zz 3s ease-in-out infinite; }
+@keyframes cat-zz { 0%, 100% { opacity: .2; transform: translateY(2px); } 50% { opacity: .9; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .decor-candle__flame, .decor-candle__glow, .decor-cat__tail, .decor-cat__zz { animation: none; } }

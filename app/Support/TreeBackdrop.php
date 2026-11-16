@@ -71,6 +71,9 @@ class TreeBackdrop
     public const WINDOW = [2, 34, 70, 742];
 
     /** Things standing on the floor by the roots (bottom-centre points). */
+    /** Shelf objects from the shop: plant, candle, bookends, cat. */
+    public const OBJECTS = ['plant' => [330, 932], 'candle' => [1188, 667], 'bookends' => [455, 302], 'cat' => [1330, 934]];
+
     public const FLOOR_LEFT = [618, 930];
 
     public const FLOOR_RIGHT = [1120, 930];

@@ -87,6 +87,16 @@
             <path d="M0 92c40-8 120-8 160 0v8H0z" fill="#0E1228"/>
             @break
 
+        @case('plant')
+        @case('candle')
+        @case('bookends')
+        @case('cat')
+            <rect x="8" y="80" width="144" height="10" rx="2.5" fill="#9C6B3F" stroke="#3E1A1C" stroke-width="1.4"/>
+            <rect x="10" y="81" width="140" height="3" rx="1.5" fill="#C99566"/>
+            @php($box = ['plant' => [52, 0, 56, 81], 'candle' => [64, 14, 32, 67], 'bookends' => [36, 22, 88, 60], 'cat' => [26, 24, 108, 60]][$item])
+            @include('decor.parts.' . $item, ['attrs' => $at(...$box)])
+            @break
+
         @case('autumn')
             @include('decor.parts.pumpkin', ['attrs' => $at(22, 34, 72, 60)])
             @include('decor.parts.pumpkin', ['attrs' => $at(88, 54, 44, 37), 'tone' => 'gold'])
