@@ -124,7 +124,7 @@
                     <details class="group relative">
                         <summary class="focus-ring flex cursor-pointer list-none items-center gap-1.5 rounded-full p-0.5 pr-1.5 text-sm font-medium text-[#fff8ef] transition hover:bg-white/10 [&::-webkit-details-marker]:hidden">
                             <x-avatar :src="Auth::user()->profile_photo_url" :name="Auth::user()->name" size="sm" tone="light" />
-                            <svg class="h-4 w-4 text-gold transition group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+                            <svg class="hidden h-4 w-4 text-gold transition group-open:rotate-180 sm:block" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
                         </summary>
                         <div class="absolute right-0 z-[100] mt-3 w-72 origin-top-right overflow-hidden rounded-3xl border border-warmborder bg-paper p-2 text-ink shadow-[0_24px_60px_-20px_rgba(26,15,18,0.55)] dark:border-[#4B3035] dark:bg-raised dark:text-[#F4E9E2]">
                             <div class="relative overflow-hidden rounded-2xl bg-wine-header px-4 py-4 text-[#FFF8EF]">
@@ -151,7 +151,7 @@
                                 ['Reading preferences', route('onboarding.show')],
                                 ['Profile settings', route('profile.edit')],
                                 ...(Auth::user()->is_private ? [['🔒 Follow requests', route('follow-requests.index')]] : []),
-                                ...(Auth::user()->is_admin ? [['🛡️ Reports (admin)', route('admin.reports')]] : []),
+                                ...(Auth::user()->is_admin ? [['🛡️ Admin dashboard', route('admin.index')], ['🛡️ Reports (admin)', route('admin.reports')]] : []),
                             ] as [$label, $url])
                                 <a href="{{ $url }}" class="focus-ring group/item mt-1 flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-walnut transition hover:bg-parchment hover:text-burgundy dark:text-[#e3d3ca] dark:hover:bg-[#382329] dark:hover:text-[#F4E9E2]">{{ $label }} <span aria-hidden="true" class="text-tan transition group-hover/item:translate-x-0.5">&rarr;</span></a>
                             @endforeach

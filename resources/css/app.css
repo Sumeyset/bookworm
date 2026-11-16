@@ -537,3 +537,14 @@ html,
 body {
     overflow-x: clip;
 }
+
+/* Phones: a compact logo so the header icons and avatar always fit. */
+@media (max-width: 479px) {
+    .bw-header__logo { gap: .5rem; }
+    .bw-header__logo .bw-logo__mark { width: 2.5rem; height: 2.5rem; }
+    .bw-header__logo .font-serif { font-size: 1.3rem; }
+    .bw-header__logo .tracking-\[0\.3em\] { display: none; }
+}
+@media (max-width: 359px) {
+    .bw-header__logo .font-serif { display: none; }
+}

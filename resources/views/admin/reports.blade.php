@@ -6,6 +6,7 @@
 
     <div class="page-section space-y-6">
         <nav class="flex flex-wrap gap-2" aria-label="Report status">
+            <a href="{{ route('admin.index') }}" class="bw-chip">← Dashboard</a>
             @foreach (['open' => 'Open', 'actioned' => 'Actioned', 'dismissed' => 'Dismissed'] as $key => $label)
                 <a href="{{ route('admin.reports', ['status' => $key]) }}" class="bw-chip {{ $status === $key ? '!border-burgundy !bg-burgundy !text-[#FFF8EF]' : '' }}">{{ $label }} · {{ $counts[$key] ?? 0 }}</a>
             @endforeach

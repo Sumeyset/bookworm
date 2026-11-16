@@ -62,6 +62,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/users/{user:username}/block', [SafetyController::class, 'block'])->name('users.block');
     Route::delete('/users/{user:username}/block', [SafetyController::class, 'unblock'])->name('users.unblock');
     Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:20,1')->name('reports.store');
+    Route::middleware(\App\Http\Middleware\EnsureAdmin::class)->group(function () {
+        Route::get('/admin', [\App\Http\Controllers\AdminController::class, 'index'])->name('admin.index');
+        Route::post('/admin/users/{user}/suspend', [\App\Http\Controllers\AdminController::class, 'suspend'])->name('admin.users.suspend');
+    });
     Route::get('/admin/reports', [ReportController::class, 'index'])->name('admin.reports');
     Route::post('/admin/reports/{report}', [ReportController::class, 'resolve'])->name('admin.reports.resolve');
     Route::patch('/settings/reminders', [SettingsController::class, 'reminders'])->name('settings.reminders');
