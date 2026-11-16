@@ -17,6 +17,7 @@ class PostController extends Controller
 {
     public function show(Request $request, Post $post): View
     {
+        abort_unless($post->user?->visibleTo($request->user()) ?? false, 404);
         $post = Post::query()->whereKey($post->id)->with(['user', 'book', 'photos'])->withReactions($request->user())->firstOrFail();
 
         return view('feed.show', ['item' => $post]);

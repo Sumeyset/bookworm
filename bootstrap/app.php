@@ -11,7 +11,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Suspended accounts are signed out on their next page.
+        $middleware->web(append: [\App\Http\Middleware\EnsureNotSuspended::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

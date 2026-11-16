@@ -304,3 +304,24 @@
 .club-section__body { border-top: 1px dashed rgb(184 137 59 / 30%); padding: 1rem 1.1rem 1.2rem; }
 .club-section__lock { border-radius: 1rem; background: rgb(243 230 212 / 60%); padding: 1rem; text-align: center; }
 .dark .club-section__lock { background: rgb(255 255 255 / 5%); }
+
+/* ---- Reports ---- */
+.report-dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    width: min(28rem, calc(100vw - 2rem));
+    border: 1px solid rgb(184 137 59 / 30%);
+    border-radius: 1.5rem;
+    background: #fffdf9;
+    padding: 1.5rem;
+    color: #2a1a1d;
+    box-shadow: 0 40px 80px -30px rgb(40 10 20 / 60%);
+}
+.dark .report-dialog { border-color: #4b3035; background: #2a1d20; color: #f4e9e2; }
+.report-dialog::backdrop { background: rgb(26 15 18 / 55%); backdrop-filter: blur(2px); }
+.report-dialog__reason { display: flex; align-items: center; gap: .65rem; border-radius: .9rem; padding: .5rem .75rem; cursor: pointer; }
+.report-dialog__reason:hover { background: rgb(243 230 212 / 60%); }
+.dark .report-dialog__reason:hover { background: rgb(255 255 255 / 5%); }

@@ -42,7 +42,7 @@ class BookwormNotification extends Notification
     /** Send unless the recipient is the one who did the thing. */
     public static function send(?User $to, string $kind, string $message, string $url, ?User $actor = null): void
     {
-        if (! $to || ($actor && $to->is($actor))) {
+        if (! $to || ($actor && $to->is($actor)) || ($actor && $to->isBlockedWith($actor))) {
             return;
         }
 

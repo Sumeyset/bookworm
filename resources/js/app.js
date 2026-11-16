@@ -827,6 +827,27 @@ document.addEventListener('submit', (event) => {
     window.setTimeout(restore, 250);
 })();
 
+/* ---------------- reporting: any [data-report="type:id"] button ---------------- */
+
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-report]');
+    const dialog = document.querySelector('[data-report-dialog]');
+    if (!button || !dialog) return;
+    event.preventDefault();
+    const [type, id] = button.dataset.report.split(':');
+    dialog.querySelector('[data-report-type]').value = type;
+    dialog.querySelector('[data-report-id]').value = id;
+    const names = { post: 'this post', comment: 'this reply', review: 'this review', message: 'this message', club_post: 'this message', user: 'this reader' };
+    dialog.querySelector('[data-report-what]').textContent = button.dataset.reportName || names[type] || 'this';
+    dialog.querySelector('[data-report-form]').reset();
+    dialog.querySelector('[data-report-type]').value = type;
+    dialog.querySelector('[data-report-id]').value = id;
+    dialog.showModal();
+});
+document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-report-cancel]')) event.target.closest('dialog')?.close();
+});
+
 /* ---------------- installable app: service worker ---------------- */
 
 if ('serviceWorker' in navigator && window.isSecureContext) {

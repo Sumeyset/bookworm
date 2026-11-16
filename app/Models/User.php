@@ -59,6 +59,10 @@ class User extends Authenticatable
             'onboarding_completed_at' => 'datetime',
             'is_public' => 'boolean',
             'streak_reminder' => 'boolean',
+            'is_private' => 'boolean',
+            'hide_activity' => 'boolean',
+            'is_admin' => 'boolean',
+            'suspended_at' => 'datetime',
             'last_reminded_on' => 'date',
         ];
     }
@@ -143,6 +147,8 @@ class User extends Authenticatable
 
         return $query
             ->whereKeyNot($viewer->id)
+            ->whereNotIn('users.id', $viewer->blockedWithIds())
+            ->whereNull('suspended_at')
             ->where(fn ($users) => $users
                 ->whereRaw("LOWER(username) LIKE ? ESCAPE '!'", ['%' . $like . '%'])
                 ->orWhereRaw("LOWER(name) LIKE ? ESCAPE '!'", ['%' . $like . '%']))
@@ -218,6 +224,64 @@ class User extends Authenticatable
             'follower_id',
             'followed_id',
         )->withTimestamps();
+    }
+
+    /* ---------------- privacy and safety ---------------- */
+
+    /** Readers this reader blocked. */
+    public function blockedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_blocks', 'blocker_id', 'blocked_id')->withTimestamps();
+    }
+
+    /** Follow requests waiting for this (private) reader to approve. */
+    public function followRequests(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'follow_requests', 'target_id', 'requester_id')->withTimestamps();
+    }
+
+    public function sentFollowRequests(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'follow_requests', 'requester_id', 'target_id')->withTimestamps();
+    }
+
+    private ?\Illuminate\Support\Collection $blockedWithCache = null;
+
+    /** Everyone this reader blocked or was blocked by: they don't see each other. */
+    public function blockedWithIds(): \Illuminate\Support\Collection
+    {
+        return $this->blockedWithCache ??= \Illuminate\Support\Facades\DB::table('user_blocks')
+            ->where('blocker_id', $this->id)->pluck('blocked_id')
+            ->merge(\Illuminate\Support\Facades\DB::table('user_blocks')->where('blocked_id', $this->id)->pluck('blocker_id'))
+            ->unique()->values();
+    }
+
+    public function isBlockedWith(?User $other): bool
+    {
+        return $other !== null && $other->id !== $this->id && $this->blockedWithIds()->contains($other->id);
+    }
+
+    public function forgetBlockCache(): void
+    {
+        $this->blockedWithCache = null;
+    }
+
+    public function isFollowing(User $other): bool
+    {
+        return $this->following()->where('users.id', $other->id)->exists();
+    }
+
+    /** Can $viewer see this reader's posts, shelf and activity? */
+    public function visibleTo(?User $viewer): bool
+    {
+        if ($viewer && $viewer->id === $this->id) {
+            return true;
+        }
+        if ($viewer && $this->isBlockedWith($viewer)) {
+            return false;
+        }
+
+        return ! $this->is_private || ($viewer && $viewer->isFollowing($this));
     }
 
     public function getProfilePhotoUrlAttribute(): ?string

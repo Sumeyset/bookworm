@@ -41,6 +41,9 @@ class MessageController extends Controller
     public function start(Request $request, User $user): RedirectResponse
     {
         abort_if($user->is($request->user()), 404);
+        if ($request->user()->isBlockedWith($user)) {
+            return back()->withErrors(['message' => 'You can’t message this reader.']);
+        }
 
         return to_route('messages.show', Conversation::between($request->user(), $user));
     }
@@ -80,6 +83,7 @@ class MessageController extends Controller
         $user = $request->user();
         $conversation->load('users');
         abort_unless($conversation->membership($user), 404);
+        abort_if($conversation->users->contains(fn (User $member) => $user->isBlockedWith($member)), 403, 'You can’t message this reader.');
 
         $validated = $request->validate([
             'body' => ['nullable', 'string', 'max:2000'],

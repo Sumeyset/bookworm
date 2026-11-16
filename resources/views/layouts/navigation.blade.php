@@ -148,6 +148,8 @@
                                 ['Import from Goodreads', route('import.show')],
                                 ['Reading preferences', route('onboarding.show')],
                                 ['Profile settings', route('profile.edit')],
+                                ...(Auth::user()->is_private ? [['🔒 Follow requests', route('follow-requests.index')]] : []),
+                                ...(Auth::user()->is_admin ? [['🛡️ Reports (admin)', route('admin.reports')]] : []),
                             ] as [$label, $url])
                                 <a href="{{ $url }}" class="focus-ring group/item mt-1 flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-walnut transition hover:bg-parchment hover:text-burgundy dark:text-[#e3d3ca] dark:hover:bg-[#382329] dark:hover:text-[#F4E9E2]">{{ $label }} <span aria-hidden="true" class="text-tan transition group-hover/item:translate-x-0.5">&rarr;</span></a>
                             @endforeach

@@ -16,7 +16,7 @@ class ShareController extends Controller
 {
     public function tree(Request $request, User $user): View
     {
-        abort_unless($user->is_public || $request->user()?->is($user), 404);
+        abort_unless(($user->is_public && ! $user->is_private) || $request->user()?->is($user), 404);
 
         $items = $user->shelfItems()
             ->with(['book.reviews' => fn ($reviews) => $reviews->where('user_id', $user->id)])

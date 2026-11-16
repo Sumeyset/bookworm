@@ -51,7 +51,7 @@ class FriendActivity
 
     private static function tell(User $reader, Book $book, string $kind, string $message, ?callable $skip = null): void
     {
-        if (self::$quiet) {
+        if (self::$quiet || $reader->hide_activity) {
             return;
         }
 

@@ -44,6 +44,18 @@
                                 <span class="block truncate text-xs text-tan">{{ '@' . $other->username }}</span>
                             </span>
                         </a>
+                        <div class="relative" x-data="{ open: false }">
+                            <button type="button" class="ig-icon !h-10 !w-10" @click="open = !open" @click.outside="open = false" :aria-expanded="open" aria-label="Chat options">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.origin.top.right class="absolute right-0 z-30 mt-1 w-52 overflow-hidden rounded-2xl border border-warmborder bg-paper py-1 text-sm shadow-xl dark:border-[#4B3035] dark:bg-raised">
+                                <button type="button" data-report="user:{{ $other->id }}" data-report-name="{{ '@' . $other->username }}" @click="open = false" class="block w-full px-4 py-2.5 text-left hover:bg-parchment dark:hover:bg-white/5">Report…</button>
+                                <form method="POST" action="{{ route('users.block', $other->username) }}" onsubmit="return confirm('Block {{ '@' . $other->username }}? They won’t be able to message you, see your profile or follow you.')">
+                                    @csrf
+                                    <button class="block w-full px-4 py-2.5 text-left font-semibold text-red-700 hover:bg-parchment dark:text-red-300 dark:hover:bg-white/5">Block</button>
+                                </form>
+                            </div>
+                        </div>
                     </header>
 
                     <div class="dm-chat__scroll" data-dm-scroll>

@@ -38,6 +38,10 @@
 
             <x-site-footer class="mb-24 md:mb-0" />
 
+            @auth
+                @include('layouts.partials.report-dialog')
+            @endauth
+
             @php
                 $statusMessages = [
                     'profile-updated' => 'Your profile has been saved.',

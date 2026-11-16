@@ -61,7 +61,19 @@ class UserController extends Controller
 
     public function show(Request $request, User $user): View
     {
+        $viewer = $request->user();
+        abort_if($viewer->isBlockedWith($user) || ($user->suspended_at && ! $viewer->is_admin && $viewer->isNot($user)), 404);
         $user->loadCount(['followers', 'following', 'reviews', 'posts']);
+
+        // Private accounts: only their followers see past the header.
+        if (! $user->visibleTo($viewer)) {
+            return view('users.locked', [
+                'profile' => $user,
+                'isOwnProfile' => false,
+                'isFollowing' => false,
+                'requested' => $viewer->sentFollowRequests()->where('users.id', $user->id)->exists(),
+            ]);
+        }
 
         // Older accounts rated books before shelves existed: give each of
         // those books a place on the tree (once) so nothing is missing.
@@ -226,6 +238,7 @@ class UserController extends Controller
             'shelfStatusCounts' => $shelfStatusCounts->put('all', $shelfStatusCounts->sum()),
             'isOwnProfile' => $isOwnProfile,
             'isFollowing' => $isFollowing,
+            'requested' => false,
             'treeShelves' => $treeShelves,
             'treeBookCount' => $treeItems->count(),
             'readingStats' => [

@@ -38,6 +38,9 @@
                     <a href="{{ $permalink }}" class="block px-4 py-2.5 hover:bg-parchment dark:hover:bg-white/5">Go to post</a>
                 @endunless
                 <button type="button" data-share-url="{{ $permalink }}" data-share-title="{{ $item->book?->title ?? 'Bookworm' }}" @click="menu = false" class="block w-full px-4 py-2.5 text-left hover:bg-parchment dark:hover:bg-white/5">Copy link</button>
+                @if ($item->user_id !== auth()->id())
+                    <button type="button" data-report="{{ $isReview ? 'review' : 'post' }}:{{ $item->id }}" @click="menu = false" class="block w-full px-4 py-2.5 text-left hover:bg-parchment dark:hover:bg-white/5">Report…</button>
+                @endif
                 @if (! $isReview && $item->user_id === auth()->id())
                     <form method="POST" action="{{ route('posts.destroy', $item) }}" onsubmit="return confirm('Delete this post?')">
                         @csrf @method('DELETE')
@@ -160,6 +163,8 @@
                                         @csrf @method('DELETE')
                                         <button class="ml-1 text-tan hover:text-burgundy" aria-label="Delete reply">Delete</button>
                                     </form>
+                                @else
+                                    <button type="button" data-report="comment:{{ $comment->id }}" class="ml-1 text-tan opacity-0 transition hover:text-burgundy group-hover:opacity-100 focus:opacity-100" aria-label="Report reply">Report</button>
                                 @endif
                             </div>
                             <p class="mt-0.5 whitespace-pre-line break-words text-sm leading-6 text-ink dark:text-[#F4E9E2]">{{ $comment->body }}</p>

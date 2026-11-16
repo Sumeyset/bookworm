@@ -120,6 +120,9 @@
                                                             @if ($mine || $isOwner)
                                                                 <form method="POST" action="{{ route('clubs.posts.destroy', [$club, $post]) }}" class="inline" onsubmit="return confirm('Remove this message?')">@csrf @method('DELETE')<button class="ml-1 hover:text-burgundy hover:underline">remove</button></form>
                                                             @endif
+                                                            @unless ($mine)
+                                                                <button type="button" data-report="club_post:{{ $post->id }}" class="ml-1 hover:text-burgundy hover:underline">report</button>
+                                                            @endunless
                                                         </p>
                                                         <div class="rounded-2xl px-4 py-2.5 shadow-sm {{ $mine ? 'rounded-tr-sm bg-burgundy text-[#FFF8EF] dark:bg-burgundy-dark' : 'rounded-tl-sm bg-paper text-ink dark:bg-raised dark:text-[#F4E9E2]' }}">
                                                             <p class="whitespace-pre-line break-words text-[15px] leading-6">{{ $post->body }}</p>

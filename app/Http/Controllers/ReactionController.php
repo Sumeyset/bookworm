@@ -19,6 +19,7 @@ class ReactionController extends Controller
     {
         $item = $this->resolve($type, $id);
         $user = $request->user();
+        abort_unless($item->user?->visibleTo($user) ?? true, 404);
 
         $existing = $item->likes()->where('user_id', $user->id)->first();
         if ($existing) {
@@ -42,6 +43,7 @@ class ReactionController extends Controller
         $item = $this->resolve($type, $id);
         $validated = $request->validate(['body' => ['required', 'string', 'max:1000']]);
         $user = $request->user();
+        abort_unless($item->user?->visibleTo($user) ?? true, 404);
 
         $comment = $item->comments()->create(['user_id' => $user->id, 'body' => trim($validated['body'])]);
         BookwormNotification::send($item->user, 'comment', $user->name . ' replied to your ' . $this->noun($item) . ': “' . str($comment->body)->limit(60) . '”', $this->url($item), $user);

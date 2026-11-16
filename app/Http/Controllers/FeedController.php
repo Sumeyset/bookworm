@@ -27,8 +27,11 @@ class FeedController extends Controller
 
         // Only posts and shared quotes. Ratings, reviews and reading progress
         // reach followers as notifications instead (see App\Support\FriendActivity).
+        $followingIds = $user->following()->pluck('users.id')->push($user->id);
         $posts = Post::query()
             ->when($authorIds, fn ($q) => $q->whereIn('user_id', $authorIds))
+            ->whereNotIn('user_id', $user->blockedWithIds())
+            ->whereHas('user', fn ($authors) => $authors->whereNull('suspended_at')->where(fn ($a) => $a->where('is_private', false)->orWhereIn('users.id', $followingIds)))
             ->when($before, fn ($q) => $q->where('created_at', '<', $before))
             ->latest()
             ->latest('id')

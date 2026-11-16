@@ -12,7 +12,7 @@ class YearInReadingController extends Controller
     public function show(Request $request, User $user, ?int $year = null): View
     {
         // Members can see each other's recap; anyone can see it if the reader shared it.
-        abort_unless($request->user() || $user->is_public, 404);
+        abort_unless($request->user() ? $user->visibleTo($request->user()) : ($user->is_public && ! $user->is_private), 404);
 
         $year = $year && $year >= 2000 && $year <= now()->year ? $year : now()->year;
 

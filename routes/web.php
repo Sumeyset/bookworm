@@ -32,6 +32,8 @@ use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\BookClubController;
 use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\SafetyController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/', WelcomeController::class)->name('home');
 Route::view('/offline', 'offline')->name('offline');
@@ -47,6 +49,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/push/subscriptions', [PushSubscriptionController::class, 'store'])->middleware('throttle:20,1')->name('push.subscribe');
     Route::delete('/push/subscriptions', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+    Route::patch('/settings/privacy', [SafetyController::class, 'privacy'])->name('settings.privacy');
+    Route::get('/follow-requests', [SafetyController::class, 'requests'])->name('follow-requests.index');
+    Route::post('/follow-requests/{user:username}', [SafetyController::class, 'approve'])->name('follow-requests.approve');
+    Route::delete('/follow-requests/{user:username}', [SafetyController::class, 'decline'])->name('follow-requests.decline');
+    Route::post('/users/{user:username}/block', [SafetyController::class, 'block'])->name('users.block');
+    Route::delete('/users/{user:username}/block', [SafetyController::class, 'unblock'])->name('users.unblock');
+    Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:20,1')->name('reports.store');
+    Route::get('/admin/reports', [ReportController::class, 'index'])->name('admin.reports');
+    Route::post('/admin/reports/{report}', [ReportController::class, 'resolve'])->name('admin.reports.resolve');
     Route::patch('/settings/reminders', [SettingsController::class, 'reminders'])->name('settings.reminders');
     Route::get('/books', [BookController::class, 'index'])->middleware('throttle:search')->name('books.index');
     Route::get('/library', [LibraryController::class, 'index'])->name('library.index');

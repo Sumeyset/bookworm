@@ -24,10 +24,12 @@ trait HasReactions
     /** Eager-load what a feed card needs: counts, whether $viewer liked it, and the comments. */
     public function scopeWithReactions(Builder $query, User $viewer): Builder
     {
+        $hidden = $viewer->blockedWithIds();
+
         return $query
-            ->withCount(['likes', 'comments'])
+            ->withCount(['likes', 'comments' => fn ($comments) => $comments->whereNotIn('user_id', $hidden)])
             ->withExists(['likes as liked_by_viewer' => fn ($likes) => $likes->where('user_id', $viewer->id)])
-            ->with(['comments.user']);
+            ->with(['comments' => fn ($comments) => $comments->whereNotIn('user_id', $hidden)->with('user')]);
     }
 
     public function reactionKey(): string
