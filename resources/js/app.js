@@ -747,11 +747,11 @@ Alpine.data('pdfUploader', ({ maxFiles = 5, maxMb = 20 } = {}) => ({
         this.errors = [];
         [...list].forEach((file) => {
             if (this.files.length >= this.maxFiles) {
-                this.errors = [`You can upload up to ${this.maxFiles} PDFs at once.`];
+                this.errors = [`You can upload up to ${this.maxFiles} files at once.`];
                 return;
             }
-            const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
-            const error = !isPdf ? 'Not a PDF — this one will be skipped.'
+            const isPdf = file.type === 'application/pdf' || file.type === 'application/epub+zip' || /\.(pdf|epub)$/i.test(file.name);
+            const error = !isPdf ? 'Not a PDF or EPUB — this one will be skipped.'
                 : file.size > maxMb * 1048576 ? `Larger than ${maxMb} MB — this one will be skipped.`
                 : null;
             this.files.push({ id: ++pdfIds, file, error });

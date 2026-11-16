@@ -41,7 +41,7 @@ test('a user can upload and download multiple private PDFs for a book', function
 
     $this->get(route('books.show', $book))
         ->assertOk()
-        ->assertSee('Your PDFs for this book')
+        ->assertSee('Your book files')
         ->assertSee('notes.pdf')
         ->assertSee('reading-list.pdf');
 
@@ -233,7 +233,7 @@ test('the PDF card can upload with progress (JSON) and lands back on the book', 
     $this->get(route('books.show', $book))
         ->assertOk()
         ->assertSee('my-copy.pdf')
-        ->assertSee('Your PDF was uploaded privately.');
+        ->assertSee('Your book file was uploaded privately.');
 
     $this->post(route('books.pdfs.store', $book), ['pdfs' => [UploadedFile::fake()->create('photo.jpg', 10, 'image/jpeg')]], ['Accept' => 'application/json'])
         ->assertUnprocessable()
@@ -250,4 +250,20 @@ test('the reader knows how long you were away, for the "Where was I?" recap', fu
 
     $this->actingAs($user)->get(route('books.pdfs.reader', [$book, $pdf]))
         ->assertOk()->assertSee('data-days-away="9"', false)->assertSee('data-welcome-back', false);
+});
+
+test('an EPUB can be uploaded and opens in the EPUB reader', function () {
+    $user = User::factory()->create();
+    $book = Book::create(['ol_id' => 'OL-EPUB', 'title' => 'Epub Book']);
+    $file = UploadedFile::fake()->createWithContent('story.epub', "PK\x03\x04mimetypeapplication/epub+zip");
+
+    $this->actingAs($user)->post(route('books.pdfs.store', $book), ['pdfs' => [$file]])->assertRedirect();
+    $epub = BookPdf::firstOrFail();
+    expect($epub->isEpub())->toBeTrue()->and($epub->mime())->toBe('application/epub+zip');
+
+    $this->actingAs($user)->get(route('books.pdfs.reader', [$book, $epub]))->assertOk()->assertSee('data-epub-reader', false);
+    $this->actingAs($user)->get(route('books.pdfs.file', [$book, $epub]))->assertOk()->assertHeader('Content-Type', 'application/epub+zip');
+
+    // Other files are still refused.
+    $this->actingAs($user)->post(route('books.pdfs.store', $book), ['pdfs' => [UploadedFile::fake()->create('notes.docx', 10)]])->assertSessionHasErrors();
 });

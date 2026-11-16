@@ -16,6 +16,17 @@ class BookPdf extends Model
         'original_name',
     ];
 
+    /** EPUB books open in the EPUB reader; everything else is a PDF. */
+    public function isEpub(): bool
+    {
+        return str_ends_with(strtolower($this->path), '.epub') || str_ends_with(strtolower($this->original_name), '.epub');
+    }
+
+    public function mime(): string
+    {
+        return $this->isEpub() ? 'application/epub+zip' : 'application/pdf';
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

@@ -188,7 +188,7 @@
                 <div class="p-5 pb-4">
                     <div class="flex items-start justify-between gap-3">
                         <div>
-                            <h2 id="private-pdfs-heading" class="font-serif text-2xl font-semibold text-ink dark:text-[#f4e9e2]">Your PDFs for this book</h2>
+                            <h2 id="private-pdfs-heading" class="font-serif text-2xl font-semibold text-ink dark:text-[#f4e9e2]">Your book files</h2>
                             <p class="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-tan">
                                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
                                 Private — only you can see these
@@ -203,9 +203,9 @@
                         <ul class="mt-4 space-y-2" aria-label="Your private PDF files">
                             @foreach ($myPdfs as $pdf)
                                 <li class="group flex items-center gap-3 rounded-2xl border border-warmborder bg-paper p-2.5 transition hover:border-burgundy/30 dark:border-[#4B3035] dark:bg-white/[0.03]" x-data="{ menu: false }">
-                                    <a href="{{ route('books.pdfs.reader', [$book, $pdf]) }}" class="flex h-12 w-10 shrink-0 flex-col items-center justify-center rounded-lg bg-gradient-to-b from-[#b4232c] to-[#7d1820] text-[9px] font-bold tracking-wide text-white shadow-sm" aria-hidden="true" tabindex="-1">
+                                    <a href="{{ route('books.pdfs.reader', [$book, $pdf]) }}" class="flex h-12 w-10 shrink-0 flex-col items-center justify-center rounded-lg bg-gradient-to-b {{ $pdf->isEpub() ? 'from-[#3f7d5b] to-[#245a41]' : 'from-[#b4232c] to-[#7d1820]' }} text-[9px] font-bold tracking-wide text-white shadow-sm" aria-hidden="true" tabindex="-1">
                                         <svg class="mb-0.5 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
-                                        PDF
+                                        {{ $pdf->isEpub() ? 'EPUB' : 'PDF' }}
                                     </a>
                                     <div class="min-w-0 flex-1">
                                         <a href="{{ route('books.pdfs.reader', [$book, $pdf]) }}" class="block truncate text-sm font-semibold text-ink hover:text-burgundy dark:text-[#f4e9e2] dark:hover:text-[#E9A2AE]" title="{{ $pdf->original_name }}">{{ $pdf->original_name }}</a>
@@ -238,7 +238,7 @@
                       class="border-t border-warmborder bg-parchment/35 p-5 dark:border-[#4B3035] dark:bg-white/[0.02]"
                       x-data="pdfUploader({ maxFiles: 5, maxMb: 20 })" @submit.prevent="upload($el)" data-scroll-top>
                     @csrf
-                    <input id="book-pdfs" x-ref="input" name="pdfs[]" type="file" accept="application/pdf,.pdf" multiple class="sr-only"
+                    <input id="book-pdfs" x-ref="input" name="pdfs[]" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" multiple class="sr-only"
                            aria-describedby="book-pdf-help book-pdf-errors" @change="add($event.target.files); $event.target.value = ''">
 
                     <label for="book-pdfs" x-show="!files.length" class="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-[#d9c6b6] bg-paper/70 px-4 py-6 text-center transition hover:border-burgundy/50 dark:border-[#594749] dark:bg-white/[0.03]"
@@ -247,7 +247,7 @@
                         <span class="flex h-12 w-12 items-center justify-center rounded-full bg-parchment text-burgundy dark:bg-white/10 dark:text-[#E9A2AE]" aria-hidden="true">
                             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
                         </span>
-                        <span class="text-sm font-semibold text-ink dark:text-[#f4e9e2]">{{ $myPdfs->isEmpty() ? 'Add the PDF of this book' : 'Add another PDF' }}</span>
+                        <span class="text-sm font-semibold text-ink dark:text-[#f4e9e2]">{{ $myPdfs->isEmpty() ? 'Add a PDF or EPUB of this book' : 'Add another file' }}</span>
                         <span class="text-xs text-tan">Drop it here or <span class="font-semibold text-burgundy underline dark:text-[#E9A2AE]">browse</span></span>
                     </label>
                     <p id="book-pdf-help" class="mt-2 text-center text-xs text-tan" x-show="!files.length">Up to 5 files at once, 20 MB each.</p>
@@ -256,7 +256,7 @@
                     <ul x-show="files.length" x-cloak class="space-y-2">
                         <template x-for="(entry, index) in files" :key="entry.id">
                             <li class="flex items-center gap-3 rounded-xl bg-paper px-3 py-2 dark:bg-white/5" :class="entry.error && 'ring-1 ring-red-300 dark:ring-red-800'">
-                                <span class="flex h-8 w-7 shrink-0 items-center justify-center rounded bg-[#b4232c] text-[8px] font-bold text-white" aria-hidden="true">PDF</span>
+                                <span class="flex h-8 w-7 shrink-0 items-center justify-center rounded text-[7px] font-bold text-white" :class="/\.epub$/i.test(entry.file.name) ? 'bg-[#3f7d5b]' : 'bg-[#b4232c]'" aria-hidden="true" x-text="/\.epub$/i.test(entry.file.name) ? 'EPUB' : 'PDF'">PDF</span>
                                 <span class="min-w-0 flex-1">
                                     <span class="block truncate text-sm font-semibold text-ink dark:text-[#f4e9e2]" x-text="entry.file.name"></span>
                                     <span class="block text-xs" :class="entry.error ? 'text-red-600 dark:text-red-400' : 'text-tan'" x-text="entry.error || size(entry.file.size)"></span>

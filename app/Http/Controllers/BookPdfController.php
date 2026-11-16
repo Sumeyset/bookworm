@@ -19,14 +19,17 @@ class BookPdfController extends Controller
     {
         $validated = $request->validate([
             'pdfs' => ['required', 'array', 'min:1', 'max:5'],
-            'pdfs.*' => ['required', 'file', 'mimes:pdf', 'max:20480'],
+            'pdfs.*' => ['required', 'file', 'extensions:pdf,epub', 'mimetypes:application/pdf,application/epub+zip,application/zip,application/octet-stream', 'max:20480'],
         ], [
+            'pdfs.*.extensions' => 'You can upload PDF or EPUB files.',
+            'pdfs.*.mimetypes' => 'That file doesn’t look like a PDF or EPUB.',
             'pdfs.*.uploaded' => 'The PDF could not be uploaded. Check that it is no larger than 20 MB and that your PHP upload limits allow the request, then try again.',
             'pdfs.*.max' => 'Each PDF must be 20 MB or smaller.',
         ]);
 
         foreach ($validated['pdfs'] as $pdf) {
-            $path = $pdf->store('book-pdfs/' . $request->user()->id . '/' . $book->id, 'local');
+            $extension = strtolower($pdf->getClientOriginalExtension()) === 'epub' ? 'epub' : 'pdf';
+            $path = $pdf->storeAs('book-pdfs/' . $request->user()->id . '/' . $book->id, \Illuminate\Support\Str::random(40) . '.' . $extension, 'local');
 
             if ($path === false) {
                 throw new RuntimeException('Failed to store the uploaded book PDF.');
@@ -42,7 +45,7 @@ class BookPdfController extends Controller
             ]);
         }
 
-        $message = count($validated['pdfs']) === 1 ? 'Your PDF was uploaded privately.' : 'Your PDF files were uploaded privately.';
+        $message = count($validated['pdfs']) === 1 ? 'Your book file was uploaded privately.' : 'Your book files were uploaded privately.';
 
         if ($request->expectsJson()) {
             session()->flash('status', $message);
@@ -59,7 +62,7 @@ class BookPdfController extends Controller
         abort_unless(Storage::disk('local')->exists($bookPdf->path), 404);
 
         return Storage::disk('local')->download($bookPdf->path, $bookPdf->original_name, [
-            'Content-Type' => 'application/pdf',
+            'Content-Type' => $bookPdf->mime(),
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }
@@ -73,7 +76,7 @@ class BookPdfController extends Controller
         $lastRead = \App\Models\ReadingSession::where('user_id', $request->user()->id)->where('book_id', $book->id)->max('read_on');
         $daysAway = $lastRead ? (int) \Illuminate\Support\Carbon::parse($lastRead)->diffInDays(today()) : 0;
 
-        return view('books.pdfs.reader', [
+        return view($bookPdf->isEpub() ? 'books.pdfs.epub' : 'books.pdfs.reader', [
             'daysAway' => $daysAway,
             'book' => $book,
             'bookPdf' => $bookPdf,
@@ -92,8 +95,8 @@ class BookPdfController extends Controller
         abort_unless(Storage::disk('local')->exists($bookPdf->path), 404);
 
         return response()->file(Storage::disk('local')->path($bookPdf->path), [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="book.pdf"',
+            'Content-Type' => $bookPdf->mime(),
+            'Content-Disposition' => 'inline; filename="book.' . ($bookPdf->isEpub() ? 'epub' : 'pdf') . '"',
             'Cache-Control' => 'private, no-store',
             'X-Content-Type-Options' => 'nosniff',
         ]);
