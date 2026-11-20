@@ -12,16 +12,15 @@ it('shows the welcome page to signed-out visitors without requesting a quote', f
         ->assertOk()
         ->assertSee('Bookworm')
         ->assertSee('For the love of stories')
-        ->assertSee('Find your next favorite book,')
-        ->assertSee('and share the stories you love.')
-        ->assertSee('LANTERN')
-        ->assertDontSee('PRIDE AND')
-        ->assertSee('THE')
-        ->assertSee('PAPER')
+        ->assertSee('beautifully shelved.')
+        ->assertSee('The Lantern Orchard')
+        ->assertSee('Try the window')
+        ->assertSee('Window nook')
+        ->assertDontSee('Pride and Prejudice')
+        ->assertDontSee('Hobbit')
         ->assertSee('Log in')
         ->assertSee('Join Bookworm')
-        ->assertSee('Join to explore books')
-        ->assertSee('rounded-[2rem]');
+        ->assertSee('Start your shelf');
 
     Http::assertNothingSent();
 });

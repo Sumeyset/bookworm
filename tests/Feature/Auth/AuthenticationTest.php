@@ -49,7 +49,7 @@ test('users can logout', function () {
     $this->get('/')
         ->assertOk()
         ->assertSee('Bookworm')
-        ->assertSee('Find your next favorite book, and share the stories you love.')
+        ->assertSee('beautifully shelved.')
         ->assertSee('Join Bookworm')
         ->assertDontSee('A little thought for today');
 });
