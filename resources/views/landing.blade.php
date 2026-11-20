@@ -23,7 +23,7 @@
             <section class="relative">
                 <div class="pointer-events-none absolute -right-32 top-10 h-96 w-96 rounded-full bg-burgundy/10 blur-3xl dark:bg-burgundy-dark/20" aria-hidden="true"></div>
                 <div class="pointer-events-none absolute -left-24 bottom-0 h-80 w-80 rounded-full bg-[#7FA35B]/15 blur-3xl" aria-hidden="true"></div>
-                <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:px-12 lg:py-28">
+                <div class="relative mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] items-center gap-14 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:px-12 lg:py-28">
                     <div>
                         <p class="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-paper/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-tan dark:bg-white/5 dark:text-[#c7a491]">
                             <span class="h-1.5 w-1.5 rounded-full bg-[#7FA35B]"></span> A living library for readers
@@ -40,23 +40,23 @@
                     </div>
 
                     <div class="relative mx-auto w-full max-w-lg" aria-label="A small arrangement of favorite books">
-                        <div class="relative overflow-hidden rounded-[2rem] border border-gold/30 bg-gradient-to-b from-[#fbf3e6] to-[#efdfc8] px-6 pb-0 pt-10 shadow-[0_40px_80px_-40px_rgba(70,35,20,0.6)] dark:from-[#211217] dark:to-[#2d171c]">
+                        <div class="relative overflow-hidden rounded-[2rem] border border-gold/30 bg-gradient-to-b from-[#fbf3e6] to-[#efdfc8] px-4 pb-0 pt-10 sm:px-6 shadow-[0_40px_80px_-40px_rgba(70,35,20,0.6)] dark:from-[#211217] dark:to-[#2d171c]">
                             <span class="absolute right-8 top-6 h-14 w-14 rounded-full bg-[radial-gradient(circle_at_40%_40%,#fff6dc,#f2c97a_60%,transparent_72%)]" aria-hidden="true"></span>
-                            <div class="flex items-end justify-center gap-3">
-                                <article class="bookworm-cover-drift flex h-48 w-32 flex-col justify-between rounded-r-md border-l-4 border-[#E6D9D0]/70 bg-gradient-to-br from-burgundy via-[#8B2A3D] to-burgundy-deep p-3 text-center text-[#FFF8EF] shadow-xl sm:h-56 sm:w-36">
-                                    <span class="font-serif text-[10px] uppercase tracking-[0.18em] text-[#E8CFA6]">Jane Austen</span>
-                                    <span class="font-serif text-xl leading-tight">PRIDE AND<br>PREJUDICE</span>
-                                    <span class="text-[9px] uppercase tracking-[0.2em] text-[#E8CFA6]">A classic, still</span>
+                            <div class="flex items-end justify-center gap-2 sm:gap-3">
+                                <article class="bookworm-cover-drift flex h-40 w-24 flex-col justify-between rounded-r-md border-l-4 border-[#E6D9D0]/70 bg-gradient-to-br from-burgundy via-[#8B2A3D] to-burgundy-deep p-2 text-center text-[#FFF8EF] shadow-xl sm:h-56 sm:w-36 sm:p-3">
+                                    <span class="font-serif text-[10px] uppercase tracking-[0.18em] text-[#E8CFA6]">A cosy mystery</span>
+                                    <span class="font-serif text-base leading-tight sm:text-xl">THE<br>LANTERN<br>ORCHARD</span>
+                                    <span class="text-[9px] uppercase tracking-[0.2em] text-[#E8CFA6]">Read by candlelight</span>
                                 </article>
-                                <article class="bookworm-cover-drift bookworm-cover-drift-slow flex h-56 w-36 flex-col justify-between rounded-r-md border-l-4 border-[#E6D9D0]/70 bg-gradient-to-br from-[#4e6b39] via-[#6f9450] to-[#2f4426] p-3 text-center text-[#FFF8EF] shadow-xl sm:h-64 sm:w-40">
-                                    <span class="font-serif text-[10px] uppercase tracking-[0.18em] text-[#EAF2D8]">J. R. R. Tolkien</span>
-                                    <span class="font-serif text-2xl leading-tight">THE<br>HOBBIT</span>
-                                    <span class="text-[9px] uppercase tracking-[0.2em] text-[#EAF2D8]">There and back again</span>
+                                <article class="bookworm-cover-drift bookworm-cover-drift-slow flex h-48 w-[6.5rem] flex-col justify-between rounded-r-md border-l-4 border-[#E6D9D0]/70 bg-gradient-to-br from-[#4e6b39] via-[#6f9450] to-[#2f4426] p-2 text-center text-[#FFF8EF] shadow-xl sm:h-64 sm:w-40 sm:p-3">
+                                    <span class="font-serif text-[10px] uppercase tracking-[0.18em] text-[#EAF2D8]">An adventure</span>
+                                    <span class="font-serif text-xl leading-tight sm:text-2xl">MOSS<br>&amp;<br>STARS</span>
+                                    <span class="text-[9px] uppercase tracking-[0.2em] text-[#EAF2D8]">Into the green woods</span>
                                 </article>
-                                <article class="bookworm-cover-drift bookworm-cover-drift-slower flex h-44 w-28 flex-col justify-between rounded-r-md border-l-4 border-[#E6D9D0]/70 bg-gradient-to-br from-[#54382A] via-[#72513A] to-[#3B2418] p-3 text-center text-[#FFF8EF] shadow-xl sm:h-52 sm:w-32">
-                                    <span class="font-serif text-[10px] uppercase tracking-[0.16em] text-[#E8CFA6]">L. M. Alcott</span>
-                                    <span class="font-serif text-lg leading-tight">LITTLE<br>WOMEN</span>
-                                    <span class="text-[9px] uppercase tracking-[0.2em] text-[#E8CFA6]">Since 1868</span>
+                                <article class="bookworm-cover-drift bookworm-cover-drift-slower flex h-36 w-[5.5rem] flex-col justify-between rounded-r-md border-l-4 border-[#E6D9D0]/70 bg-gradient-to-br from-[#54382A] via-[#72513A] to-[#3B2418] p-2 text-center text-[#FFF8EF] shadow-xl sm:h-52 sm:w-32 sm:p-3">
+                                    <span class="font-serif text-[10px] uppercase tracking-[0.16em] text-[#E8CFA6]">Short stories</span>
+                                    <span class="font-serif text-base leading-tight sm:text-lg">THE<br>PAPER<br>FOX</span>
+                                    <span class="text-[9px] uppercase tracking-[0.2em] text-[#E8CFA6]">For rainy days</span>
                                 </article>
                             </div>
                             <div class="mx-auto h-3 w-full rounded-sm bg-gradient-to-b from-[#a77650] via-[#7a4f33] to-[#4e301f] shadow-lg"></div>
